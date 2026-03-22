@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="stillbigjosh — Offensive Security Practitioner, Penetration Tester, Founder of Hercules Suite">
+  <title>stillbigjosh</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0a;
+      --bg-alt:    #0d0d0d;
+      --green:     #00ff41;
+      --green-dim: #1a3a1a;
+      --text:      #cccccc;
+      --text-muted:#888888;
+      --text-dim:  #555555;
+      --border:    #111111;
+      --font:      'Courier New', Courier, monospace;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body { min-height: 100vh; }
+
+    a {
+      color: var(--green);
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+
+    /* ── Section wrapper ──────────────────────────────────────────── */
+    .section {
+      padding: 48px 32px;
+      border-bottom: 1px solid var(--border);
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .section-label {
+      color: var(--text-dim);
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    /* ── Panel card ───────────────────────────────────────────────── */
+    .panel {
+      border: 1px solid var(--green-dim);
+      padding: 14px 16px;
+    }
+
+    /* ── Grids ────────────────────────────────────────────────────── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ── Tags ─────────────────────────────────────────────────────── */
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      border: 1px solid var(--green-dim);
+      color: var(--green);
+      padding: 3px 10px;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Buttons ──────────────────────────────────────────────────── */
+    .btn-primary {
+      background: var(--green);
+      color: #000;
+      padding: 8px 20px;
+      font-size: 10px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      font-family: var(--font);
+      border: none;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .btn-outline {
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 8px 20px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      display: inline-block;
+      font-family: var(--font);
+    }
+    .btn-primary:hover { opacity: 0.85; text-decoration: none; }
+    .btn-outline:hover { background: var(--green); color: #000; text-decoration: none; }
+
+    /* ── Navigation ───────────────────────────────────────────────── */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--green-dim);
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      color: var(--green);
+      font-weight: bold;
+      letter-spacing: 3px;
+      font-size: 14px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-dim);
+      font-size: 10px;
+      letter-spacing: 1px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    /* ── Hero ─────────────────────────────────────────────────────── */
+    .hero {
+      padding: 56px 32px 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .hero-prompt {
+      color: var(--text-dim);
+      font-size: 11px;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      min-height: 18px;
+    }
+
+    .hero-name {
+      color: #ffffff;
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .hero-subtitle {
+      color: var(--green);
+      font-size: 11px;
+      letter-spacing: 3px;
+      margin: 10px 0 14px;
+    }
+
+    .hero-tagline {
+      color: var(--text-dim);
+      font-size: 12px;
+      line-height: 1.8;
+      max-width: 480px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .hero-photo {
+      width: 160px;
+      height: 160px;
+      border: 2px solid var(--green);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .hero-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 36px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .stat-panel {
+      border: 1px solid var(--green-dim);
+      padding: 14px;
+    }
+
+    .stat-label {
+      color: var(--text-dim);
+      font-size: 8px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      color: var(--green);
+      font-size: 22px;
+      font-weight: bold;
+      margin: 4px 0 2px;
+      line-height: 1;
+    }
+
+    .stat-desc {
+      color: var(--text-muted);
+      font-size: 9px;
+    }
+
+    .stat-value.status {
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    /* ── About ────────────────────────────────────────────────────── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .about-bio {
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.9;
+    }
+
+    .skills-label {
+      color: var(--text-dim);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* ── Projects ─────────────────────────────────────────────────── */
+    .project-card {
+      border: 1px solid var(--green-dim);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 0.2s;
+    }
+
+    .project-card:hover { border-color: var(--green); }
+
+    .project-name {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .project-type {
+      color: var(--text-dim);
+      font-size: 9px;
+      letter-spacing: 1px;
+    }
+
+    .project-desc {
+      color: var(--text-muted);
+      font-size: 10px;
+      line-height: 1.7;
+      flex: 1;
+    }
+
+    .project-link {
+      color: var(--green);
+      font-size: 10px;
+      margin-top: 6px;
+    }
+
+    /* ── Recognition ──────────────────────────────────────────────── */
+    .recognition-item {
+      border: 1px solid var(--green-dim);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .recognition-icon {
+      color: var(--green);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .recognition-name {
+      color: var(--text);
+      font-size: 11px;
+    }
+
+    .recognition-desc {
+      color: var(--text-dim);
+      font-size: 9px;
+      margin-top: 2px;
+    }
+
+    /* ── Press ────────────────────────────────────────────────────── */
+    .press-item {
+      border: 1px solid var(--green-dim);
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.2s;
+    }
+
+    .press-item:hover { border-color: var(--green); }
+
+    .press-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .press-title {
+      color: var(--text);
+      font-size: 11px;
+    }
+
+    .press-action {
+      color: var(--green);
+      font-size: 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Blog ─────────────────────────────────────────────────────── */
+    .blog-panel {
+      border: 1px solid var(--green-dim);
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .blog-title {
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .blog-desc {
+      color: var(--text-dim);
+      font-size: 10px;
+      margin-top: 4px;
+    }
+
+    /* ── Contact ──────────────────────────────────────────────────── */
+    .contact-label {
+      color: var(--text-dim);
+      font-size: 8px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .contact-value {
+      color: var(--green);
+      font-size: 11px;
+      margin-top: 6px;
+      display: block;
+    }
+
+    .contact-social {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .contact-social a {
+      color: var(--green);
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────────── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 32px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 10px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .nav { padding: 12px 16px; }
+      .nav-links { gap: 12px; }
+      .nav-links a { font-size: 9px; }
+      .section { padding: 32px 16px; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .hero-inner { grid-template-columns: 1fr !important; }
+      .hero-photo { display: none; }
+      .stat-grid { grid-template-columns: 1fr 1fr !important; }
+      .about-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ─────────────────────────────────────────────── -->
+  <nav class="nav">
+    <span class="nav-logo">STILLBIGJOSH</span>
+    <ul class="nav-links">
+      <li><a href="#about">about</a></li>
+      <li><a href="#projects">projects</a></li>
+      <li><a href="#recognition">recognition</a></li>
+      <li><a href="#press">press</a></li>
+      <li><a href="#blog">blog</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── Hero ───────────────────────────────────────────────────── -->
+  <section class="hero" id="hero">
+    <div class="hero-inner">
+      <div>
+        <p class="hero-prompt" id="hero-prompt"></p>
+        <h1 class="hero-name">stillbigjosh</h1>
+        <p class="hero-subtitle">OFFENSIVE SECURITY &middot; FOUNDER &middot; RESEARCHER</p>
+        <p class="hero-tagline">
+          8 years in penetration testing, red team operations &amp; adversary emulation.<br>
+          Founder of Hercules Suite &amp; Sentinel Global Link.
+        </p>
+        <div class="hero-cta">
+          <a href="#projects" class="btn-primary">VIEW PROJECTS</a>
+          <a href="#contact" class="btn-outline">CONTACT</a>
+        </div>
+      </div>
+      <div class="hero-photo">
+        <img src="image/IMG_7853.jpg" alt="stillbigjosh — offensive security practitioner">
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-panel">
+        <div class="stat-label">Experience</div>
+        <div class="stat-value">8 YRS</div>
+        <div class="stat-desc">Offensive Security</div>
+      </div>
+      <div class="stat-panel">
+        <div class="stat-label">Projects</div>
+        <div class="stat-value">3+</div>
+        <div class="stat-desc">Active Tools &amp; Platforms</div>
+      </div>
+      <div class="stat-panel">
+        <div class="stat-label">Status</div>
+        <div class="stat-value status">&#9679; AVAILABLE</div>
+        <div class="stat-desc">For Engagements</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── About ──────────────────────────────────────────────────── -->
+  <section class="section" id="about">
+    <p class="section-label">## About</p>
+    <div class="about-grid">
+      <p class="about-bio">
+        Offensive security practitioner with 8 years in penetration testing, red team
+        operations, and adversary emulation. Previously worked with Flutterwave.
+        Founder of Hercules Suite, Africa's first native BEC simulation platform and
+        Sentinel Global Link, an adversary simulation consultancy. Creator of Neo C2,
+        an open-source C2 framework.
+      </p>
+      <div>
+        <p class="skills-label">Skills</p>
+        <div class="tags">
+          <span class="tag">Penetration Testing</span>
+          <span class="tag">Red Team Ops</span>
+          <span class="tag">Adversary Emulation</span>
+          <span class="tag">BEC Simulation</span>
+          <span class="tag">C2 Development</span>
+          <span class="tag">Bug Bounty</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Projects ───────────────────────────────────────────────── -->
+  <section class="section" id="projects">
+    <p class="section-label">## Projects</p>
+    <div class="grid-2">
+
+      <div class="project-card">
+        <p class="project-name">Hercules Suite</p>
+        <p class="project-type">Enterprise BEC Simulation Platform</p>
+        <p class="project-desc">Africa's first native Business Email Compromise simulation platform for enterprise security teams.</p>
+        <a href="https://herculessuite.io" target="_blank" rel="noopener" class="project-link">&rarr; herculessuite.io</a>
+      </div>
+
+      <div class="project-card">
+        <p class="project-name">Neo C2</p>
+        <p class="project-type">Open-Source C2 Framework</p>
+        <p class="project-desc">Command and control framework for red team operations and adversary simulation.</p>
+        <a href="https://github.com/stillbigjosh/Neo" target="_blank" rel="noopener" class="project-link">&rarr; github.com/stillbigjosh/Neo</a>
+      </div>
+
+      <div class="project-card">
+        <p class="project-name">Sentinel Global Link</p>
+        <p class="project-type">Adversary Simulation Consultancy</p>
+        <p class="project-desc">Consultancy specialising in adversary simulation and offensive security operations.</p>
+        <a href="https://sentinellink.org" target="_blank" rel="noopener" class="project-link">&rarr; sentinellink.org</a>
+      </div>
+
+      <div class="project-card">
+        <p class="project-name">Medium</p>
+        <p class="project-type">Security Research &amp; Writing</p>
+        <p class="project-desc">Articles on offensive security, tools, techniques, and research findings.</p>
+        <a href="https://stillbigjosh.medium.com" target="_blank" rel="noopener" class="project-link">&rarr; stillbigjosh.medium.com</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Recognition ────────────────────────────────────────────── -->
+  <section class="section" id="recognition">
+    <p class="section-label">## Recognition / Hall of Fame</p>
+    <div class="grid-2">
+
+      <div class="recognition-item">
+        <span class="recognition-icon">&#9632;</span>
+        <div>
+          <p class="recognition-name">UK Government GC3</p>
+          <p class="recognition-desc">Vulnerability Reporting Program</p>
+        </div>
+      </div>
+
+      <div class="recognition-item">
+        <span class="recognition-icon">&#9632;</span>
+        <div>
+          <p class="recognition-name">HackerOne</p>
+          <p class="recognition-desc">Bug Bounty Researcher</p>
+        </div>
+      </div>
+
+      <div class="recognition-item">
+        <span class="recognition-icon">&#9632;</span>
+        <div>
+          <p class="recognition-name">Open Bug Bounty</p>
+          <p class="recognition-desc">Researcher as 0xSkywalker</p>
+        </div>
+      </div>
+
+      <div class="recognition-item">
+        <span class="recognition-icon">&#9632;</span>
+        <div>
+          <p class="recognition-name">Hack The Box</p>
+          <p class="recognition-desc">Active Researcher</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Press ──────────────────────────────────────────────────── -->
+  <section class="section" id="press">
+    <p class="section-label">## Press / Media</p>
+    <div class="press-list">
+
+      <div class="press-item">
+        <span class="press-title">Bitcoin Future at Risk</span>
+        <a href="https://coinstats.app/news/72d4c7955fe79ab8922c9affa859ca8536bd545f86e760a5b1b8f5eb8a728860_Bitcoin-Future-at-Risk-Experts-Discuss-the-Biggest-Threats-Over-the-Next-510-Years/" target="_blank" rel="noopener" class="press-action">&rarr; READ</a>
+      </div>
+
+      <div class="press-item">
+        <span class="press-title">Google VP Boycotts Black Hat 2020</span>
+        <a href="https://hackread.com/google-vp-boycotts-black-hat-2020-over-name/" target="_blank" rel="noopener" class="press-action">&rarr; READ</a>
+      </div>
+
+      <div class="press-item">
+        <span class="press-title">#EndSARS Stream on Twitch</span>
+        <a href="https://www.twitch.tv/videos/776695446?tt_content=vod&tt_medium=mobile_web_share" target="_blank" rel="noopener" class="press-action">&rarr; WATCH</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Blog ───────────────────────────────────────────────────── -->
+  <section class="section" id="blog">
+    <p class="section-label">## Blog / Writing</p>
+    <div class="blog-panel">
+      <div>
+        <p class="blog-title">Read on Medium</p>
+        <p class="blog-desc">stillbigjosh.medium.com &mdash; security research, tools &amp; insights</p>
+      </div>
+      <a href="https://stillbigjosh.medium.com" target="_blank" rel="noopener" class="btn-outline">&rarr; VISIT</a>
+    </div>
+  </section>
+
+  <!-- ── Contact ────────────────────────────────────────────────── -->
+  <section class="section" id="contact">
+    <p class="section-label">## Contact</p>
+    <div class="grid-2">
+
+      <div class="panel">
+        <p class="contact-label">Email</p>
+        <a href="mailto:contact@stillbigjosh.com" class="contact-value">contact@stillbigjosh.com</a>
+      </div>
+
+      <div class="panel">
+        <p class="contact-label">Social</p>
+        <div class="contact-social">
+          <a href="https://x.com/stillbigjosh" target="_blank" rel="noopener">X</a>
+          <a href="https://github.com/stillbigjosh" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://instagram.com/stillbigjosh" target="_blank" rel="noopener">Instagram</a>
+          <a href="https://soundcloud.com/alojoecee" target="_blank" rel="noopener">SoundCloud</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────────────── -->
+  <footer class="footer">
+    stillbigjosh &copy; 2026 &middot; built with purpose
+  </footer>
+
+  <script>
+    // ── Typewriter effect on hero prompt ──────────────────────────
+    (function () {
+      const el = document.getElementById('hero-prompt');
+      const text = 'root@stillbigjosh:~$ ./whoami';
+      let i = 0;
+
+      function type() {
+        if (i <= text.length) {
+          el.textContent = text.slice(0, i) + (i < text.length ? '\u258c' : '');
+          i++;
+          setTimeout(type, i === text.length ? 0 : 60);
+        }
+      }
+
+      setTimeout(type, 400);
+    })();
+
+    // ── Active nav link via IntersectionObserver ──────────────────
+    (function () {
+      const sections = document.querySelectorAll('section[id]');
+      const navLinks = document.querySelectorAll('.nav-links a');
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((link) => {
+                link.classList.toggle(
+                  'active',
+                  link.getAttribute('href') === '#' + entry.target.id
+                );
+              });
+            }
+          });
+        },
+        { rootMargin: '-40% 0px -55% 0px' }
+      );
+
+      sections.forEach((s) => observer.observe(s));
+    })();
+  </script>
+
+</body>
+</html>
