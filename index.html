@@ -310,6 +310,16 @@
       padding: 14px 16px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .recognition-item:hover { border-color: var(--green); }
+
+    .recognition-left {
+      display: flex;
+      align-items: center;
       gap: 14px;
     }
 
@@ -328,6 +338,13 @@
       color: var(--text-dim);
       font-size: 9px;
       margin-top: 2px;
+    }
+
+    .recognition-link {
+      color: var(--green);
+      font-size: 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* ── Press ────────────────────────────────────────────────────── */
@@ -556,35 +573,46 @@
     <div class="grid-2">
 
       <div class="recognition-item">
-        <span class="recognition-icon">&#9632;</span>
-        <div>
-          <p class="recognition-name">UK Government GC3</p>
-          <p class="recognition-desc">Vulnerability Reporting Program</p>
+        <div class="recognition-left">
+          <span class="recognition-icon">&#9632;</span>
+          <div>
+            <p class="recognition-name">UK Government GC3</p>
+            <p class="recognition-desc">Vulnerability Reporting Program</p>
+          </div>
         </div>
       </div>
 
       <div class="recognition-item">
-        <span class="recognition-icon">&#9632;</span>
-        <div>
-          <p class="recognition-name">HackerOne</p>
-          <p class="recognition-desc">Bug Bounty Researcher</p>
+        <div class="recognition-left">
+          <span class="recognition-icon">&#9632;</span>
+          <div>
+            <p class="recognition-name">HackerOne</p>
+            <p class="recognition-desc">Bug Bounty Researcher</p>
+          </div>
         </div>
+        <a href="https://hackerone.com/stillbigjosh" target="_blank" rel="noopener" class="recognition-link">&rarr; VIEW</a>
       </div>
 
       <div class="recognition-item">
-        <span class="recognition-icon">&#9632;</span>
-        <div>
-          <p class="recognition-name">Open Bug Bounty</p>
-          <p class="recognition-desc">Researcher as 0xSkywalker</p>
+        <div class="recognition-left">
+          <span class="recognition-icon">&#9632;</span>
+          <div>
+            <p class="recognition-name">Open Bug Bounty</p>
+            <p class="recognition-desc">Researcher as 0xSkywalker</p>
+          </div>
         </div>
+        <a href="https://www.openbugbounty.org/researchers/0xSkywalker/" target="_blank" rel="noopener" class="recognition-link">&rarr; VIEW</a>
       </div>
 
       <div class="recognition-item">
-        <span class="recognition-icon">&#9632;</span>
-        <div>
-          <p class="recognition-name">Hack The Box</p>
-          <p class="recognition-desc">Active Researcher</p>
+        <div class="recognition-left">
+          <span class="recognition-icon">&#9632;</span>
+          <div>
+            <p class="recognition-name">Hack The Box</p>
+            <p class="recognition-desc">Active Researcher</p>
+          </div>
         </div>
+        <a href="https://app.hackthebox.com/profile/84052" target="_blank" rel="noopener" class="recognition-link">&rarr; VIEW</a>
       </div>
 
     </div>
