@@ -436,7 +436,7 @@
     <hr class="divider">
 
     <figure>
-      <img src="https://cdn-images-1.medium.com/v2/resize:fit:800/1*Y37MuHlfsN5ifEor-WWmlA.png" alt="Default GOAD-Light schema diagram">
+      <img src="https://cdn-images-1.medium.com/max/800/1*0tFpDdXVGPZGwZYSoPzYrw.png" alt="Default GOAD-Light schema diagram">
       <figcaption>The default GOAD-Light schema</figcaption>
     </figure>
 
@@ -1029,6 +1029,15 @@ ludus --user $GOAD_USER range logs -f</code></pre>
     <pre><code>ludus --user $GOAD_USER snapshots create baseline -d "Clean GOAD-Light + Elastic baseline"
 ludus --user $GOAD_USER snapshots list</code></pre>
 
+    <h4>Things to Note</h4>
+    <p><strong>Always use <code>--limit</code> when deploying.</strong> Any time you tweak the range config and deploy, exclude the elastic-server unless you specifically need to reconfigure it:</p>
+    <pre><code>ludus --user $GOAD_USER range deploy -t user-defined-roles \
+  --limit "$GOAD_USER-GOAD-DC01,$GOAD_USER-GOAD-DC02,$GOAD_USER-GOAD-SRV02"</code></pre>
+
+    <p>When you shut down/restart the range in the future, don't run <code>range deploy</code>. Just power on:</p>
+    <pre><code>ludus --user $GOAD_USER power on -n all</code></pre>
+    <p>That boots existing VMs without triggering Ansible. The state you snapshotted persists.</p>
+
     <hr class="divider">
 
     <h2 id="phase-7"><span class="h-tag">##</span>Phase 7: Snapshots and Testing Mode</h2>
@@ -1166,13 +1175,38 @@ impacket-GetUserSPNs -request \
     <p>Because the source IP of every attack is the home PC's WireGuard address (<code>198.51.100.X</code>, not a <code>10.&lt;rangenum&gt;.10.X</code> inside-range address), all detections in Kibana will show <code>source.ip</code> values from that WireGuard subnet. This is worth calling out: it makes attacker attribution trivial in the lab but also reflects a real-world VPN pivot scenario.</p>
 
     <h4>In Kibana</h4>
-    <p>Open Security &rarr; Alerts. Enable the prebuilt detection rules if not already active (Rules &rarr; "Load Elastic prebuilt rules and timeline templates" the first time). Rules that should fire on the above activity:</p>
-    <ul>
-      <li><code>Kerberoasting via Rubeus / Impacket</code> (or similar TA0006 discovery rules)</li>
-      <li><code>Unusual SPN Query</code></li>
-    </ul>
+    <p>It's important to set up alerts before proceeding further, and also enable detection rules at the start of the exercise. To do this, use the global search for "prebuilt detection rules" if not already active:</p>
+    <ol>
+      <li>Click the Search bar at the very top center of the Kibana screen (or press <code>Ctrl + /</code> on Windows or <code>Cmd + /</code> on Mac).</li>
+      <li>Type <code>Detection rules (SIEM)</code>.</li>
+      <li>Select pre-built security detection rules.</li>
+    </ol>
 
-    <p>If nothing fires immediately, check Discover with a broad <code>event.dataset:*windows*</code> query and confirm events are actually landing. If they are but no alerts fire, the prebuilt rules may not be enabled; enable them under Security &rarr; Rules.</p>
+    <figure>
+      <img src="https://cdn-images-1.medium.com/max/800/1*add-detection-rules-placeholder.png" alt="Add detection rules screen in Kibana">
+      <figcaption>Add detection rules</figcaption>
+    </figure>
+
+    <ol start="4">
+      <li>Add to the existing agent policy as shown above.</li>
+      <li>Save and continue.</li>
+    </ol>
+
+    <p>If nothing fires immediately, check Discover with a broad <code>event.dataset:*windows*</code> query and confirm events are actually landing. If they are but no alerts fire, the prebuilt rules may not be enabled; enable them under Security &rarr; Rules &rarr; Detection rules (SIEM) &rarr; Add Elastic Rules &rarr; Install all.</p>
+
+    <figure>
+      <img src="https://cdn-images-1.medium.com/max/800/1*install-elastic-rules-placeholder.png" alt="Install Elastic Rules button">
+      <figcaption>Install Elastic Rules</figcaption>
+    </figure>
+
+    <p>You should now return to the Detection rules (SIEM) page and enable the rule(s) relevant to what you are trying to achieve.</p>
+
+    <figure>
+      <img src="https://cdn-images-1.medium.com/max/800/1*enable-elastic-rule-placeholder.png" alt="Enabling an Elastic detection rule">
+      <figcaption>Enable an Elastic Rule</figcaption>
+    </figure>
+
+    <p>As you can see, the ruleset is quite large. Search the MITRE ATT&amp;CK ID of a technique (e.g. <code>T1558.003</code> for Kerberoasting) to locate its rule.</p>
 
     <p><strong>Iteration pattern for the rest of your learning:</strong> try an attack technique, note whether it fires, note the MITRE ATT&amp;CK ID, revert to the clean baseline (<code>ludus snapshots rollback</code>), tweak, retry.</p>
 
@@ -1280,6 +1314,39 @@ systemctl restart ludus ludus-admin</code></pre>
     <pre><code>ludus --user $GOAD_USER range status</code></pre>
     <p>Or check the logs for what actually errored:</p>
     <pre><code>ludus --user $GOAD_USER range errors</code></pre>
+
+    <h4>Ludus deploy: elastic-server "Passphrase has been reset" error after deployment</h4>
+    <p>SSH into the Elastic VM:</p>
+    <pre><code>ssh debian@10.1.20.2
+sudo docker ps -a</code></pre>
+    <p>Look at container states:</p>
+    <ul>
+      <li><code>ecp-elasticsearch</code> &rarr; likely Running</li>
+      <li><code>ecp-kibana</code> &rarr; may or may not be Running (this is what we need to check)</li>
+      <li><code>ecp-fleet-server</code> &rarr; likely Running</li>
+      <li><code>ecp-elasticsearch-security-setup</code> &rarr; <code>Exited (0)</code> &mdash; this is normal, don't restart it</li>
+    </ul>
+
+    <p><strong>Step 1: Check if kibana.yml got re-broken</strong></p>
+    <pre><code>sudo grep -A 2 "verification_mode" /opt/elastic_container/kibana.yml</code></pre>
+    <p>If it shows dot notation (<code>ssl.verification_mode: none</code> on one line), re-fix:</p>
+    <pre><code>sudo sed -i 's|    ssl.verification_mode: none|    ssl:\n      verification_mode: none|' /opt/elastic_container/kibana.yml</code></pre>
+    <p>If it shows the nested form (<code>ssl:</code> then <code>verification_mode: none</code> on the next line), it's good &mdash; skip.</p>
+
+    <p><strong>Step 2: Restart Kibana</strong></p>
+    <pre><code>sudo docker restart ecp-kibana
+sudo docker logs ecp-kibana --tail 30 -f</code></pre>
+    <p>Wait 60 seconds for "Kibana is now available". <code>Ctrl-C</code> to exit the log tail.</p>
+
+    <p><strong>Step 3: Get the current elastic password</strong></p>
+    <p>Since "Passphrase has been reset" fired, the old password may not work anymore. Check <code>.env</code>:</p>
+    <pre><code>sudo grep -i password /opt/elastic_container/.env 2>/dev/null</code></pre>
+    <p>Or reset to a known value:</p>
+    <pre><code>sudo docker exec ecp-elasticsearch bin/elasticsearch-reset-password -u elastic --batch -a</code></pre>
+    <p>That prints a new password. Copy it, use it to log into Kibana.</p>
+
+    <p><strong>Step 4: Verify Kibana loads</strong></p>
+    <p>Browse to <code>https://10.1.20.2:5601</code> &mdash; the login page should appear. Log in with <code>elastic</code> plus the current password.</p>
 
     <hr class="divider">
 
