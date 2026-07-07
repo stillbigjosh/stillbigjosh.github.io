@@ -481,7 +481,7 @@
       <li><strong>No Kali VM in the range.</strong> Attacks come from the home PC over WireGuard. This is the single biggest RAM decision, freeing 4 GB that goes to Elastic and leaving genuine headroom on the host.</li>
     </ol>
 
-    <p>If ingestion is still stable under sustained attack telemetry, drop the Elastic container to 6 GB. Below that, Elasticsearch will start throwing errors and the dashboard will go blank.</p>
+    <p>If ingestion is still unstable under sustained attack telemetry, drop the Elastic container to 6 GB. Below that, Elasticsearch will start throwing errors and the dashboard will go blank.</p>
 
     <p>Disk-wise, GOAD-Light plus Elastic runs comfortably in around 100 GB provisioned; Proxmox thin-provisions so actual usage is much lower.</p>
 
@@ -550,12 +550,7 @@ export LUDUS_URL='https://127.0.0.1:8080'</code></pre>
       <li><code>debian-12-x64-server-template</code> (Elastic server)</li>
     </ul>
 
-    <figure>
-      <img src="https://cdn-images-1.medium.com/max/800/1*mHy44lDLUXuFsfffFWvfHw.png" alt="Templates list on Proxmox GUI">
-      <figcaption>Templates list on Proxmox GUI</figcaption>
-    </figure>
-    
-    <p>Both should already exist in the Ludus template library from earlier work on this host (visible as VMs 105 and 101 in the Proxmox screenshot above). Verify directly on Ludus host:</p>
+    <p>Both should already exist in the Ludus template library from earlier work on this host (visible as VMs 105 and 101 in the Proxmox screenshot). Verify:</p>
     <pre><code>ludus templates list</code></pre>
 
     <figure>
@@ -1135,6 +1130,33 @@ nslookup sevenkingdoms.local 10.&lt;rangenum&gt;.10.10</code></pre>
       <li>RDP directly into Windows VMs using their <code>10.&lt;rangenum&gt;.10.X</code> addresses (any RDP client works; default GOAD creds documented in the GOAD repo)</li>
       <li>SSH to the Elastic server at <code>10.&lt;rangenum&gt;.20.2</code> as <code>localuser</code> with password <code>password</code></li>
     </ul>
+
+    <h4>Callbacks</h4>
+    <p>If you need to train with a C2 or get a reverse shell, it's also imperative to allow callbacks. Blocking callbacks is a Ludus default, so you'll need to enable them explicitly. On the Proxmox host, add a rule to the range config allowing VMs on VLAN 10 to reach the WireGuard IP:</p>
+    <pre><code>ludus --user $GOAD_USER range config get > /tmp/config-check.yml
+nano /tmp/config-check.yml</code></pre>
+    <pre><code>network:
+  rules:
+    - name: Allow VLAN 10 callbacks to WireGuard
+      vlan_src: 10
+      vlan_dst: wireguard
+      protocol: all
+      ports: all
+      action: ACCEPT</code></pre>
+    <p>Add the <code>network</code> block at the bottom of the config, at the same indentation level as <code>ludus</code>. So the full file ends with:</p>
+    <pre><code>      ludus_elastic_stack_version: "8.15.0"
+
+network:
+  rules:
+    - name: Allow VLAN 10 callbacks to WireGuard
+      vlan_src: 10
+      vlan_dst: wireguard
+      protocol: all
+      ports: all
+      action: ACCEPT</code></pre>
+    <p>Then redeploy:</p>
+    <pre><code>ludus --user $GOAD_USER range config set -f /tmp/config-check.yml
+ludus --user $GOAD_USER range deploy -t network --limit $GOAD_USER-router</code></pre>
 
     <h4>Set up attack tooling on the home PC</h4>
     <p>Pick one of these paths, depending on the home PC OS:</p>
