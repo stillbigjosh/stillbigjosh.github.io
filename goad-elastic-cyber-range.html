@@ -481,7 +481,7 @@
       <li><strong>No Kali VM in the range.</strong> Attacks come from the home PC over WireGuard. This is the single biggest RAM decision, freeing 4 GB that goes to Elastic and leaving genuine headroom on the host.</li>
     </ol>
 
-    <p>If ingestion is still unstable under sustained attack telemetry, drop the Elastic container to 6 GB. Below that, Elasticsearch will start throwing errors and the dashboard will go blank.</p>
+    <p>If ingestion is still stable under sustained attack telemetry, drop the Elastic container to 6 GB. Below that, Elasticsearch will start throwing errors and the dashboard will go blank.</p>
 
     <p>Disk-wise, GOAD-Light plus Elastic runs comfortably in around 100 GB provisioned; Proxmox thin-provisions so actual usage is much lower.</p>
 
