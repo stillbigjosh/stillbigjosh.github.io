@@ -372,8 +372,8 @@
       <span>~20 min read</span>
     </div>
     <p class="lead">
-      A walkthrough of standing up a working cyber range on a single home Proxmox box: a small
-      two-forest Active Directory attack lab (GOAD-Light) with a full Elastic Security stack layered
+      A walkthrough of standing up a working cyber range on a single home Proxmox box: a
+      forest Active Directory attack lab (GOAD-Light) with a full Elastic Security stack layered
       on top as the EDR/SIEM, all deployed through Ludus v2 on a 24 GB mini PC.
     </p>
   </header>
@@ -393,7 +393,7 @@
     </p>
     <p><strong>The end state:</strong></p>
     <ul>
-      <li>Three Windows VMs forming a two-forest Active Directory environment with intentional misconfigurations to exploit</li>
+      <li>Three Windows VMs forming a forest Active Directory environment with intentional misconfigurations to exploit</li>
       <li>One Debian VM running the full Elastic stack (Elasticsearch, Kibana, Fleet Server) as EDR/SIEM</li>
       <li>Elastic Agents deployed to every Windows VM, streaming Sysmon and Windows events to Kibana</li>
       <li>Attacks driven from the home PC over WireGuard (no in-range Kali VM), which frees RAM for Elastic and keeps attack tooling on hardware you already know</li>
