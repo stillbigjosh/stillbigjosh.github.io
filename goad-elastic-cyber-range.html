@@ -819,7 +819,7 @@ nc -zv 10.1.10.22 445</code></pre>
       <li><code>ram_gb: 8</code> matches the role's recommended default. Since attacks come from the home PC (no in-range Kali eating RAM), 8 GB fits the budget comfortably and gives Elasticsearch enough heap plus headroom for Kibana and Fleet on the same box. Below 4 GB, Elasticsearch will OOM under load.</li>
       <li><code>cpus: 4</code> gives enough headroom for indexing plus queries.</li>
       <li><code>linux: true</code> tells Ludus to skip Windows-specific setup (no sysprep, no domain join).</li>
-      <li><code>testing.snapshot: false</code> skips this VM when the range enters testing mode &mdash; you don't want to revert your EDR server during an attack simulation, since it would lose all captured telemetry.</li>
+      <li><code>testing.snapshot: false</code> skips this VM when the range enters testing mode; you don't want to revert your EDR server during an attack simulation, since it would lose all captured telemetry.</li>
       <li><code>roles</code> invokes the container role.</li>
       <li><code>role_vars.ludus_elastic_password</code> sets the elastic superuser password, used later to log into Kibana.</li>
       <li><code>role_vars.ludus_elastic_stack_version</code> pins a specific Elastic version. Using <code>"8.15.0"</code> (or whatever the current stable series is at build time) prevents drift and makes this environment reproducible later. Check the role's README on GitHub for the currently recommended version.</li>
@@ -901,8 +901,8 @@ sudo docker pull docker.elastic.co/beats/elastic-agent:8.15.0</code></pre>
 
     <p>Elastic Fleet has two kinds of policies:</p>
     <ul>
-      <li><strong>Fleet Server policy</strong> &mdash; for the Fleet Server component itself. Only one Fleet Server needs it, and the one in the Docker container is already enrolled with it.</li>
-      <li><strong>Endpoint / Agent policies</strong> &mdash; for hosts you want to monitor. Windows VMs need one of these.</li>
+      <li><strong>Fleet Server policy</strong>; for the Fleet Server component itself. Only one Fleet Server needs it, and the one in the Docker container is already enrolled with it.</li>
+      <li><strong>Endpoint / Agent policies</strong>; for hosts you want to monitor. Windows VMs need one of these.</li>
     </ul>
     <p>Enrolling Windows machines against the Fleet-Server-Policy would try to make them into Fleet Servers, which fails or creates a broken configuration.</p>
 
@@ -917,7 +917,7 @@ sudo docker pull docker.elastic.co/beats/elastic-agent:8.15.0</code></pre>
       <li>Advanced options: leave defaults</li>
     </ul>
     <p><strong>Step 4:</strong> Click "Create agent policy" at the bottom.</p>
-    <p><strong>Step 5:</strong> Add integrations &mdash; this is where the actual detection value comes from. Once the policy is created, click "Add integration". The three most valuable integrations for GOAD-Light attack detection:</p>
+    <p><strong>Step 5:</strong> Add integrations; this is where the actual detection value comes from. Once the policy is created, click "Add integration". The three most valuable integrations for GOAD-Light attack detection:</p>
     <ol>
       <li><strong>Elastic Defend:</strong> Elastic's EDR. Includes prebuilt malware detection, memory protection, response actions. Big feature; enable it.</li>
       <li><strong>Windows:</strong> collects Windows event logs (Security, Sysmon, PowerShell, Application). This is where Kerberoasting/DCSync/etc detection rules read from.</li>
@@ -927,10 +927,10 @@ sudo docker pull docker.elastic.co/beats/elastic-agent:8.15.0</code></pre>
 
     <p><strong>Step 6:</strong> Go to the Enrollment tokens tab. Two rows should now be visible: a <code>Default (&hellip;)</code> row bound to <code>Fleet-Server-Policy</code> (ignore this), and a new row bound to <code>Windows Endpoints</code>. Click the eye icon to reveal the secret and copy the full string.</p>
 
-    <p><strong>Also grab the Fleet Server URL</strong> &mdash; in the Fleet UI, click the Settings tab (top of Fleet page) and look for the "Fleet Server hosts" section. It will show something like <code>https://10.1.20.2:8220</code>. Copy that URL.</p>
+    <p><strong>Also grab the Fleet Server URL</strong>; in the Fleet UI, click the Settings tab (top of Fleet page) and look for the "Fleet Server hosts" section. It will show something like <code>https://10.1.20.2:8220</code>. Copy that URL.</p>
 
     <div class="callout">
-      If the Fleet Server URL isn't present, click "Add Fleet Server". In the dialog: <strong>Name</strong> &mdash; <code>fleet-server</code> (or anything descriptive); <strong>URL</strong> &mdash; <code>https://10.1.20.2:8220</code>; <strong>Is default</strong> &mdash; check this box; then Save. The URL <code>https://10.1.20.2:8220</code> is the address agents use to enroll and stream data. Port 8220 is the standard Fleet Server port, and Fleet Server in the container is listening on that port on the Elastic VM.
+      If the Fleet Server URL isn't present, click "Add Fleet Server". In the dialog: <strong>Name</strong>; <code>fleet-server</code> (or anything descriptive); <strong>URL</strong>; <code>https://10.1.20.2:8220</code>; <strong>Is default</strong>; check this box; then Save. The URL <code>https://10.1.20.2:8220</code> is the address agents use to enroll and stream data. Port 8220 is the standard Fleet Server port, and Fleet Server in the container is listening on that port on the Elastic VM.
     </div>
 
     <p>Before committing to deploying agents, one last check from the Ludus host:</p>
@@ -1089,7 +1089,7 @@ ludus --user $GOAD_USER snapshots revert pre-kerberoast-attempt-1
     </ul>
     <p><strong>Testing mode is overkill for:</strong></p>
     <ul>
-      <li><strong>AD attack technique practice</strong> (Kerberoasting, DCSync, delegation abuse): these don't leak anything meaningful even if internet is on &mdash; the attack vectors are internal to the domain</li>
+      <li><strong>AD attack technique practice</strong> (Kerberoasting, DCSync, delegation abuse): these don't leak anything meaningful even if internet is on; the attack vectors are internal to the domain</li>
       <li><strong>Tuning detection rules:</strong> internet may be wanted to search docs, view rule details on Elastic's site, download rule updates</li>
       <li><strong>Note-taking or screenshotting:</strong> no benefit</li>
     </ul>
@@ -1169,7 +1169,7 @@ sudo apt update
 sudo apt install -y crackmapexec impacket-scripts bloodhound.py \
   kerbrute enum4linux-ng smbclient</code></pre>
 
-    <p><strong>Option 2: Native Kali or Parrot on the home PC.</strong> Already have the tools &mdash; just install WireGuard and connect.</p>
+    <p><strong>Option 2: Native Kali or Parrot on the home PC.</strong> Already have the tools; just install WireGuard and connect.</p>
     <p><strong>Option 3: Local Kali VM on the home PC.</strong> Boot the Kali VM in VMware Workstation, VirtualBox, or UTM. Install WireGuard on the guest and connect from inside the VM. This gives full GUI tools (BloodHound CE, Burp) without touching the home PC OS.</p>
     <p><strong>Option 4: Docker containers.</strong> Good for isolated per-tool workflows:</p>
     <pre><code>docker run --rm -it --network host \
@@ -1303,7 +1303,7 @@ sudo cat /opt/elastic_container/kibana.yml | grep -A2 verification</code></pre>
     <p>Should show:</p>
     <pre><code>ssl:
       verification_mode: none</code></pre>
-    <p>Restart Kibana (you'll see <code>[info][root] Kibana is now available</code> after 30&ndash;90 seconds; <code>Ctrl-C</code> to stop tailing):</p>
+    <p>Restart Kibana (you'll see <code>[info][root] Kibana is now available</code> after 90 seconds; <code>Ctrl-C</code> to stop tailing):</p>
     <pre><code>sudo docker restart ecp-kibana
 sudo docker logs ecp-kibana -f</code></pre>
     <p>Once healthy:</p>
@@ -1351,14 +1351,14 @@ sudo docker ps -a</code></pre>
       <li><code>ecp-elasticsearch</code> &rarr; likely Running</li>
       <li><code>ecp-kibana</code> &rarr; may or may not be Running (this is what we need to check)</li>
       <li><code>ecp-fleet-server</code> &rarr; likely Running</li>
-      <li><code>ecp-elasticsearch-security-setup</code> &rarr; <code>Exited (0)</code> &mdash; this is normal, don't restart it</li>
+      <li><code>ecp-elasticsearch-security-setup</code> &rarr; <code>Exited (0)</code>; this is normal, don't restart it</li>
     </ul>
 
     <p><strong>Step 1: Check if kibana.yml got re-broken</strong></p>
     <pre><code>sudo grep -A 2 "verification_mode" /opt/elastic_container/kibana.yml</code></pre>
     <p>If it shows dot notation (<code>ssl.verification_mode: none</code> on one line), re-fix:</p>
     <pre><code>sudo sed -i 's|    ssl.verification_mode: none|    ssl:\n      verification_mode: none|' /opt/elastic_container/kibana.yml</code></pre>
-    <p>If it shows the nested form (<code>ssl:</code> then <code>verification_mode: none</code> on the next line), it's good &mdash; skip.</p>
+    <p>If it shows the nested form (<code>ssl:</code> then <code>verification_mode: none</code> on the next line), it's good; skip.</p>
 
     <p><strong>Step 2: Restart Kibana</strong></p>
     <pre><code>sudo docker restart ecp-kibana
