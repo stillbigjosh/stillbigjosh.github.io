@@ -207,6 +207,12 @@
       letter-spacing: -1.5px;
       line-height: 1.05;
     }
+    .hero-name .certs {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0;
+    }
     .hero-subtitle {
       color: var(--accent);
       font-family: var(--mono);
@@ -336,6 +342,7 @@
     }
     .blog-title { color: var(--heading); font-size: 15px; font-weight: 600; }
     .blog-desc { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .blog-more { text-align: center; margin-top: 22px; }
 
     /* ── Contact ──────────────────────────────────────────────────── */
     .contact-label {
@@ -401,7 +408,7 @@
     <div class="hero-inner">
       <div>
         <p class="hero-prompt" id="hero-prompt"></p>
-        <h1 class="hero-name">stillbigjosh</h1>
+        <h1 class="hero-name">stillbigjosh<span class="certs">, CPTS, CRTA</span></h1>
         <p class="hero-subtitle">OFFENSIVE SECURITY &middot; FOUNDER &middot; RESEARCHER</p>
         <p class="hero-tagline">
           Penetration testing, red team operations &amp; adversary emulation.
@@ -567,12 +574,46 @@
       <span class="section-hash">##</span>
       <h2 class="section-title">Blog / Writing</h2>
     </div>
-    <div class="card blog-panel">
-      <div>
-        <p class="blog-title">Read on Medium</p>
-        <p class="blog-desc">stillbigjosh.medium.com &mdash; security research, tools &amp; insights</p>
-      </div>
-      <a href="https://stillbigjosh.medium.com" target="_blank" rel="noopener" class="btn-outline">Visit &rarr;</a>
+    <div class="grid-2">
+
+      <a href="https://stillbigjosh.medium.com/analysis-of-russian-troll-farm-using-anomalous-detection-b56dcdafa9d5" target="_blank" rel="noopener" class="card project-card">
+        <p class="project-name">Analysis of Russian Troll Farm using Anomalous Detection</p>
+        <p class="project-type">Data Analysis &middot; Anomaly Detection</p>
+        <p class="project-desc">Investigating Russian troll farm activity through anomalous detection techniques.</p>
+        <span class="project-link">&rarr; read on medium</span>
+      </a>
+
+      <a href="https://stillbigjosh.medium.com/experimental-study-on-multiple-machine-learning-algorithms-fe20164250a7" target="_blank" rel="noopener" class="card project-card">
+        <p class="project-name">Experimental Study on Multiple Machine Learning Algorithms</p>
+        <p class="project-type">Machine Learning &middot; Research</p>
+        <p class="project-desc">A comparative experimental study across multiple machine learning algorithms.</p>
+        <span class="project-link">&rarr; read on medium</span>
+      </a>
+
+      <a href="https://stillbigjosh.medium.com/multinomial-naive-bayes-for-spam-detection-27bcb8d14da5" target="_blank" rel="noopener" class="card project-card">
+        <p class="project-name">Multinomial Naive Bayes for Spam Detection</p>
+        <p class="project-type">Machine Learning &middot; NLP</p>
+        <p class="project-desc">Implementing Multinomial Naive Bayes for classifying and detecting spam.</p>
+        <span class="project-link">&rarr; read on medium</span>
+      </a>
+
+      <a href="https://stillbigjosh.medium.com/using-neo-c2-framework-to-run-bofs-assemblies-fb4392a6b81c" target="_blank" rel="noopener" class="card project-card">
+        <p class="project-name">Using Neo C2 Framework to run BOFs, Assemblies &amp; PEs</p>
+        <p class="project-type">Red Team &middot; C2 &middot; Offensive Tooling</p>
+        <p class="project-desc">Walkthrough on executing BOFs, .NET assemblies and PEs through the Neo C2 framework.</p>
+        <span class="project-link">&rarr; read on medium</span>
+      </a>
+
+      <a href="https://stillbigjosh.medium.com/purple-team-lab-detection-scenarios-for-game-of-active-directory-with-elastic-edr-445e842258f9" target="_blank" rel="noopener" class="card project-card">
+        <p class="project-name">Purple Team Lab: Detection Scenarios for GOAD with Elastic EDR</p>
+        <p class="project-type">Purple Team &middot; Active Directory &middot; Elastic</p>
+        <p class="project-desc">Detection scenarios and opsec analysis in a GOAD + Elastic Security cyber range.</p>
+        <span class="project-link">&rarr; read on medium</span>
+      </a>
+
+    </div>
+    <div class="blog-more">
+      <a href="https://stillbigjosh.medium.com" target="_blank" rel="noopener" class="btn-outline">Read other writeups on Medium &rarr;</a>
     </div>
   </section>
 
