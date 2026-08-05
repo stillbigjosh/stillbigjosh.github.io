@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="stillbigjosh writeup">
+<title>Writeup - stillbigjosh</title>
+<style>
+  /* ── Reset & Base (matches main site) ────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #282828;
+    --bg-alt:    #32302f;
+    --card:      #3c3836;
+    --card-hover:#45403f;
+    --heading:   #ebdbb2;
+    --text:      #d5c4a1;
+    --muted:     #bdae93;
+    --dim:       #928374;
+    --border:    #504945;
+    --accent:    #b8bb26;
+    --accent-h:  #d5d34a;
+    --yellow:    #fabd2f;
+    --orange:    #fe8019;
+    --red:       #fb4934;
+    --radius:    10px;
+
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+            Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --mono: 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas,
+            'Courier New', monospace;
+
+    --main-width: 760px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body { min-height: 100vh; line-height: 1.6; }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-h); }
+
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  /* ── Navigation (matches main site) ──────────────────────────── */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(40, 40, 40, 0.86);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+  .nav-logo {
+    color: var(--heading);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    font-size: 16px;
+    font-family: var(--mono);
+  }
+  .nav-logo .dot { color: var(--accent); }
+  .nav-back {
+    color: var(--muted);
+    font-size: 13.5px;
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-back:hover { color: var(--accent); }
+
+  /* ── Article shell ────────────────────────────────────────────── */
+  .article-hero {
+    max-width: var(--main-width);
+    margin: 0 auto;
+    padding: 48px 24px 0;
+  }
+  .kicker {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .article-title {
+    color: var(--heading);
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    line-height: 1.18;
+  }
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 16px;
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+  .article-meta span { display: flex; align-items: center; gap: 6px; }
+  .article-meta .sep { color: var(--border); }
+
+  .lead {
+    color: var(--muted);
+    font-size: 16.5px;
+    line-height: 1.75;
+    margin-top: 22px;
+    max-width: 620px;
+  }
+
+  /* ── Content wrapper ──────────────────────────────────────────── */
+  .content {
+    max-width: var(--main-width);
+    margin: 0 auto;
+    padding: 8px 24px 60px;
+  }
+
+  .content h2 {
+    color: var(--heading);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin: 52px 0 18px;
+    padding-top: 6px;
+    scroll-margin-top: 80px;
+  }
+  .content h2 .h-tag {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 16px;
+    margin-right: 10px;
+    font-weight: 600;
+  }
+  .content h3 {
+    color: var(--heading);
+    font-size: 18px;
+    font-weight: 700;
+    margin: 30px 0 12px;
+    scroll-margin-top: 80px;
+  }
+  .content h4 {
+    color: var(--yellow);
+    font-size: 15px;
+    font-weight: 700;
+    margin: 24px 0 10px;
+    font-family: var(--mono);
+    letter-spacing: 0.2px;
+  }
+
+  .content p {
+    color: var(--text);
+    font-size: 15.5px;
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+  .content strong { color: var(--heading); font-weight: 700; }
+  .content em { color: var(--muted); font-style: italic; }
+
+  .content ul, .content ol {
+    margin: 0 0 18px 22px;
+    color: var(--text);
+    font-size: 15.5px;
+    line-height: 1.8;
+  }
+  .content li { margin-bottom: 6px; }
+  .content li strong { color: var(--heading); }
+
+  .content code {
+    font-family: var(--mono);
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    color: var(--accent-h);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 0.88em;
+    white-space: nowrap;
+  }
+
+  .content pre {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 6px 0 22px;
+  }
+  .content pre code {
+    background: none;
+    border: none;
+    color: var(--accent);
+    padding: 0;
+    font-size: 13.5px;
+    line-height: 1.65;
+    white-space: pre;
+    display: block;
+  }
+  .content pre .cmt { color: var(--dim); }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 46px 0;
+  }
+
+  blockquote, .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 18px;
+    margin: 18px 0 22px;
+    color: var(--muted);
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+  .callout strong { color: var(--heading); }
+  .callout.warn { border-left-color: var(--orange); }
+  .callout.note { border-left-color: var(--yellow); }
+
+  /* ── Figures / images ─────────────────────────────────────────── */
+  figure {
+    margin: 22px 0 30px;
+  }
+  figure img {
+    width: 100%;
+    display: block;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  figcaption {
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 12px;
+    text-align: center;
+    margin-top: 9px;
+    letter-spacing: 0.2px;
+  }
+
+  /* ── Table of contents ────────────────────────────────────────── */
+  .toc-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin: 30px 0 10px;
+  }
+  .toc-title {
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .toc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .toc-list a {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .toc-list a:hover { background: var(--bg-alt); color: var(--accent); }
+  .toc-num {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    flex-shrink: 0;
+    width: 20px;
+  }
+
+  /* ── Tables ───────────────────────────────────────────────────── */
+  .kv-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0 24px;
+    font-size: 14px;
+    font-family: var(--mono);
+  }
+  .kv-table th, .kv-table td {
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .kv-table th { color: var(--dim); font-weight: 600; font-size: 12px; letter-spacing: 0.5px; }
+
+  /* ── Back-to-top / footer nav ─────────────────────────────────── */
+  .article-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    margin-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .article-footer-nav a {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .article-footer-nav a:hover { color: var(--accent); }
+
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 26px 24px;
+    text-align: center;
+    color: var(--dim);
+    font-size: 13px;
+    font-family: var(--mono);
+    max-width: var(--main-width);
+    margin: 20px auto 0;
+  }
+
+  @media (max-width: 640px) {
+    .nav-inner { padding: 12px 16px; }
+    .article-hero { padding: 36px 16px 0; }
+    .article-title { font-size: 27px; }
+    .content { padding: 8px 16px 50px; }
+    .content h2 { font-size: 20px; }
+    .kv-table { font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ── Navigation ─────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <span class="nav-logo">stillbigjosh<span class="dot">_</span></span>
+      <a href="index.html#projects" class="nav-back">&larr; back to projects</a>
+    </div>
+  </nav>
+
+  <!-- ── Article hero (filled from markdown frontmatter) ────────── -->
+  <header class="article-hero" id="hero">
+    <p class="kicker" id="kicker"></p>
+    <h1 class="article-title" id="title"></h1>
+    <div class="article-meta" id="meta"></div>
+    <p class="lead" id="lead"></p>
+  </header>
+
+  <!-- ── Rendered markdown goes here ─────────────────────────────── -->
+  <div class="content" id="content"></div>
+
+  <footer class="footer">
+    stillbigjosh &copy; 2026 &middot; built with purpose
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script>
+    // ── Load a markdown writeup and render it with the site theme ──
+    // Usage: writeup.html?file=writeups/my-writeup.md
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const file = params.get('file') || 'writeups/goad-writeup.md';
+
+      function slugify(text) {
+        return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      }
+
+      function estimateReadTime(body) {
+        const words = body.replace(/[#*`>!\[\]()\-]/g, ' ').split(/\s+/).filter(Boolean).length;
+        const mins = Math.max(1, Math.round(words / 200));
+        return '~' + mins + ' min read';
+      }
+
+      function parseFrontmatter(raw) {
+        const m = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+        if (!m) return { meta: {}, body: raw };
+        const meta = {};
+        m[1].split('\n').forEach(function (line) {
+          const idx = line.indexOf(':');
+          if (idx === -1) return;
+          const key = line.slice(0, idx).trim();
+          let val = line.slice(idx + 1).trim();
+          val = val.replace(/^["']|["']$/g, '');
+          meta[key] = val;
+        });
+        return { meta: meta, body: raw.slice(m[0].length) };
+      }
+
+      function postProcess(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+
+        // h2 -> prepend the "##" tag prefix
+        div.querySelectorAll('h2').forEach(function (h) {
+          h.innerHTML = '<span class="h-tag">##</span>' + h.innerHTML;
+        });
+
+        // code blocks -> dim comment lines (lines starting with #)
+        div.querySelectorAll('pre code').forEach(function (code) {
+          const lines = code.innerHTML.split('\n');
+          code.innerHTML = lines.map(function (line) {
+            if (line.trim().startsWith('#')) {
+              return '<span class="cmt">' + line + '</span>';
+            }
+            return line;
+          }).join('\n');
+        });
+
+        // figures: image paragraph followed by an italic caption paragraph
+        const ps = Array.prototype.slice.call(div.querySelectorAll('p'));
+        ps.forEach(function (p, i) {
+          const img = p.querySelector('img');
+          if (!img) return;
+          const next = ps[i + 1];
+          if (next && next.querySelector('em') && !next.querySelector('img')) {
+            const fig = document.createElement('figure');
+            const cap = document.createElement('figcaption');
+            cap.textContent = next.querySelector('em').textContent;
+            fig.appendChild(img.cloneNode(true));
+            fig.appendChild(cap);
+            p.replaceWith(fig);
+            next.remove();
+          }
+        });
+
+        // callouts: blockquotes starting with [!NOTE] / [!WARN]
+        div.querySelectorAll('blockquote').forEach(function (bq) {
+          const text = bq.textContent.trim();
+          let cls = '';
+          if (text.startsWith('[!NOTE]')) { cls = 'note'; bq.innerHTML = bq.innerHTML.replace('[!NOTE]', ''); }
+          else if (text.startsWith('[!WARN]')) { cls = 'warn'; bq.innerHTML = bq.innerHTML.replace('[!WARN]', ''); }
+          if (cls) bq.classList.add('callout', cls);
+        });
+
+        // tables -> kv-table styling
+        div.querySelectorAll('table').forEach(function (t) { t.classList.add('kv-table'); });
+
+        // horizontal rules -> divider
+        div.querySelectorAll('hr').forEach(function (h) { h.classList.add('divider'); });
+
+        return div.innerHTML;
+      }
+
+      function buildToc(content, meta) {
+        const headings = content.querySelectorAll('h2, h3');
+        if (!headings.length) return;
+
+        const toc = document.createElement('div');
+        toc.className = 'toc-card';
+        toc.innerHTML = '<p class="toc-title">Table of Contents</p>';
+        const ul = document.createElement('ul');
+        ul.className = 'toc-list';
+
+        let num = 0;
+        headings.forEach(function (h) {
+          const label = h.textContent.replace('##', '').trim();
+          const id = slugify(label);
+          h.id = id;
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = '#' + id;
+          const span = document.createElement('span');
+          span.className = 'toc-num';
+          if (h.tagName === 'H2') {
+            num++;
+            span.textContent = String(num).padStart(2, '0');
+          } else {
+            span.textContent = '\u2022';
+          }
+          a.appendChild(span);
+          a.appendChild(document.createTextNode(label));
+          li.appendChild(a);
+          ul.appendChild(li);
+        });
+
+        // optional extra TOC link (e.g. a "Part 2" external link)
+        if (meta.toc_extra) {
+          const parts = meta.toc_extra.split('|');
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = parts[1] || '#';
+          a.target = '_blank';
+          a.rel = 'noopener';
+          const span = document.createElement('span');
+          span.className = 'toc-num';
+          span.textContent = '\u2022';
+          a.appendChild(span);
+          a.appendChild(document.createTextNode(parts[0]));
+          li.appendChild(a);
+          ul.appendChild(li);
+        }
+
+        toc.appendChild(ul);
+        content.insertBefore(toc, content.firstChild);
+      }
+
+      function render(meta, body) {
+        // hero
+        document.getElementById('kicker').textContent = meta.kicker || 'Writeup';
+        document.getElementById('title').textContent = meta.title || 'Untitled';
+        document.title = (meta.title || 'Writeup') + ' - stillbigjosh';
+        document.querySelector('meta[name="description"]').setAttribute('content', meta.lead || meta.title || '');
+
+        const metaEl = document.getElementById('meta');
+        const tags = meta.tags ? meta.tags.split('\u00b7').map(function (s) { return s.trim(); }).join(' \u00b7 ') : '';
+        const readTime = meta.read_time || estimateReadTime(body);
+        metaEl.innerHTML =
+          '<span>stillbigjosh</span>' +
+          '<span class="sep">\u00b7</span>' +
+          (tags ? '<span>' + tags + '</span><span class="sep">\u00b7</span>' : '') +
+          '<span>' + readTime + '</span>';
+        document.getElementById('lead').textContent = meta.lead || '';
+
+        // body
+        const content = document.getElementById('content');
+        content.innerHTML = postProcess(marked.parse(body));
+
+        // TOC
+        buildToc(content, meta);
+
+        // footer nav
+        const footerNav = document.createElement('div');
+        footerNav.className = 'article-footer-nav';
+        footerNav.innerHTML =
+          '<a href="#hero">&uarr; back to top</a>' +
+          '<a href="index.html#projects">&larr; back to projects</a>';
+        content.appendChild(footerNav);
+      }
+
+      fetch(file)
+        .then(function (res) {
+          if (!res.ok) throw new Error('not found');
+          return res.text();
+        })
+        .then(function (raw) {
+          const parsed = parseFrontmatter(raw);
+          render(parsed.meta, parsed.body);
+        })
+        .catch(function () {
+          document.getElementById('content').innerHTML =
+            '<p>Could not load writeup: <code>' + file + '</code></p>';
+        });
+    })();
+  </script>
+
+</body>
+</html>
