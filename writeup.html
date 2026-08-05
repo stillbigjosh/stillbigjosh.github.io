@@ -381,7 +381,7 @@
     // Usage: writeup.html?file=writeups/my-writeup.md
     (function () {
       const params = new URLSearchParams(window.location.search);
-      const file = params.get('file') || 'writeups/sample-writeup.md';
+      const file = params.get('file') || 'writeups/goad-writeup.md';
 
       function slugify(text) {
         return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
