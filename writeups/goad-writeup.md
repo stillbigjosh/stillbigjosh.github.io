@@ -3,7 +3,7 @@ title: "Building a Game Of Active Directory Cyber range with Elastic SIEM/EDR st
 kicker: "Homelab · Cyber Range · Active Directory"
 tags: "Ludus v2 · GOAD-Light · Elastic Security"
 lead: "A walkthrough of standing up a working cyber range on a single home Proxmox box: a forest Active Directory attack lab (GOAD-Light) with a full Elastic Security stack layered on top as the EDR/SIEM, all deployed through Ludus v2 on a 24 GB mini PC."
-toc_extra: "Part 2 - Purple Team Lab: Detection scenarios for Active Directory with Elastic SIEM/EDR stack|https://stillbigjosh.medium.com/purple-team-lab-detection-scenarios-for-game-of-active-directory-with-elastic-edr-445e842258f9"
+toc_extra: "Part 2 - Purple Team Lab: Detection scenarios for Active Directory with Elastic SIEM/EDR stack|https://stillbigjosh.github.io/writeup.html?file=writeups/purple-team-lab-detection-scenarios.md"
 ---
 
 ![GOAD-Light + Elastic EDR network topology diagram](https://cdn-images-1.medium.com/max/800/1*0IZtJWQi32mCiZDL6OXGhg.png)
@@ -1250,4 +1250,4 @@ Some questions worth answering if you deployed this cyber range just like this b
 
 The lab is not the point; the loop between attack, telemetry, detection, and rule tuning is. Every subsequent GOAD reset gives another lap.
 
-Continue by [reading my follow-up Detection scenario process](https://stillbigjosh.medium.com/purple-team-lab-detection-scenarios-for-game-of-active-directory-with-elastic-edr-445e842258f9?sharedUserId=stillbigjosh), that covers how to turn AD attack techniques you already know and turn them into structured detection practice, so you understand what defenders see and learn to operate in a monitored environment.
+Continue by [reading my follow-up Detection scenario process](https://stillbigjosh.github.io/writeup.html?file=writeups/purple-team-lab-detection-scenarios.md), that covers how to turn AD attack techniques you already know and turn them into structured detection practice, so you understand what defenders see and learn to operate in a monitored environment.
