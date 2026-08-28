@@ -1250,4 +1250,4 @@ Some questions worth answering if you deployed this cyber range just like this b
 
 The lab is not the point; the loop between attack, telemetry, detection, and rule tuning is. Every subsequent GOAD reset gives another lap.
 
-Continue by [reading my follow-up Detection scenario process](https://stillbigjosh.github.io/writeup.html?file=writeups/purple-team-lab-detection-scenarios.md), that covers how to turn AD attack techniques you already know and turn them into structured detection practice, so you understand what defenders see and learn to operate in a monitored environment.
+Continue by [reading my follow-up Detection scenario process](https://stillbigjosh.github.io/writeup.html?file=writeups/detection-scenarios.md), that covers how to turn AD attack techniques you already know and turn them into structured detection practice, so you understand what defenders see and learn to operate in a monitored environment.
