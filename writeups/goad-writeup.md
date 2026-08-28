@@ -3,7 +3,7 @@ title: "Building a Game Of Active Directory Cyber range with Elastic stack on Lu
 kicker: "Homelab · Cyber Range · Active Directory"
 tags: "Ludus v2 · GOAD-Light · Elastic Security"
 lead: "A walkthrough of standing up a working cyber range on a single home Proxmox box: a forest Active Directory attack lab (GOAD-Light) with a full Elastic Security stack, all deployed through Ludus v2."
-toc_extra: "Part 2 - Purple Team Lab: Detection scenarios for Active Directory with Elastic SIEM/EDR stack|https://stillbigjosh.github.io/writeup.html?file=writeups/purple-team-lab-detection-scenarios.md"
+toc_extra: "Part 2 - Purple Team Lab: Detection scenarios for Active Directory with Elastic SIEM/EDR stack|https://stillbigjosh.github.io/writeup.html?file=writeups/detection-scenarios.md"
 ---
 
 ![GOAD-Light + Elastic EDR network topology diagram](https://cdn-images-1.medium.com/max/800/1*0IZtJWQi32mCiZDL6OXGhg.png)
