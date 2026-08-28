@@ -1,8 +1,8 @@
 ---
-title: "Building a Game Of Active Directory Cyber range with Elastic SIEM/EDR stack on Ludus v2"
+title: "Building a Game Of Active Directory Cyber range with Elastic stack on Ludus v2"
 kicker: "Homelab · Cyber Range · Active Directory"
 tags: "Ludus v2 · GOAD-Light · Elastic Security"
-lead: "A walkthrough of standing up a working cyber range on a single home Proxmox box: a forest Active Directory attack lab (GOAD-Light) with a full Elastic Security stack layered on top as the EDR/SIEM, all deployed through Ludus v2 on a 24 GB mini PC."
+lead: "A walkthrough of standing up a working cyber range on a single home Proxmox box: a forest Active Directory attack lab (GOAD-Light) with a full Elastic Security stack, all deployed through Ludus v2."
 toc_extra: "Part 2 - Purple Team Lab: Detection scenarios for Active Directory with Elastic SIEM/EDR stack|https://stillbigjosh.github.io/writeup.html?file=writeups/purple-team-lab-detection-scenarios.md"
 ---
 
@@ -21,7 +21,7 @@ This guide walks through building a working cyber range on a home Proxmox box: a
 - Attacks driven from the home PC over WireGuard (no in-range Kali VM), which frees RAM for Elastic and keeps attack tooling on hardware you already know
 - Full isolation from any other range on the same host, reached over WireGuard from a laptop or the home PC
 
-**Hardware target:** a mini PC with 24 GB RAM and a Ryzen 7 6800U (an integrated GPU, no discrete GPU). Storage over 200 GB SSD.
+**Hardware target:** a mini PC with Ryzen 7 6800U (an integrated GPU, no discrete GPU). Storage over 200 GB SSD.
 
 **Software baseline:** Proxmox 9.1.6 host at `192.168.1.100`, Ludus v2 installed and healthy, an existing user (`stillbigjosh`) with a personal "Development and testing Range" already installed, that is currently powered off.
 
