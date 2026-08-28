@@ -55,7 +55,7 @@ This new Active Directory range will get a separate Ludus user (created by the G
 
 ## Hardware Reality Check
 
-The Ren Pro 6000 has 24 GB RAM total. Proxmox and Ludus need some for themselves. Every VM eats a chunk. This is the RAM budget planned against:
+Proxmox and Ludus need some RAM for themselves. Every VM eats a chunk as well. This is the RAM budget planned against:
 
 ![RAM budget breakdown table](https://cdn-images-1.medium.com/max/800/1*ZGPr4eNh8f2QjNGsPSYAuQ.png)
 *RAM Budget*
