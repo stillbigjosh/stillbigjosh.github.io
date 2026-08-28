@@ -2,7 +2,7 @@
 title: "Detection scenarios for Active Directory"
 kicker: "Purple Team · Active Directory · Elastic"
 tags: "Purple Team · Active Directory · Elastic SIEM/EDR · GOAD"
-lead: "A follow-up to Building a Game of Active Directory + Elastic EDR Cyber Range on Ludus. This post covers what to actually do with the lab: turn AD attack techniques into structured detection practice, understand what defenders see, and learn to operate against a monitored environment."
+lead: "A follow-up to Building a Game of Active Directory + Elastic EDR Cyber Range on Ludus. This post covers: turning AD attack techniques into structured detection practice, understanding what defenders see, and learning to operate against a monitored environment."
 ---
 
 ![Ludus Active Directory Topology](https://cdn-images-1.medium.com/max/800/1*rygwFpdxirdKUZQUm58Jwg.png)
