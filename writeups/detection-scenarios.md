@@ -1,8 +1,8 @@
 ---
-title: "Purple Team Lab: Detection scenarios for Active Directory with Elastic SIEM/EDR stack"
+title: "Detection scenarios for Active Directory"
 kicker: "Purple Team · Active Directory · Elastic"
 tags: "Purple Team · Active Directory · Elastic SIEM/EDR · GOAD"
-lead: "A follow-up to Building a Game of Active Directory + Elastic EDR Cyber Range on Ludus v2. This post covers what to actually do with the lab: turn AD attack techniques into structured detection practice, understand what defenders see, and learn to operate against a monitored environment."
+lead: "A follow-up to Building a Game of Active Directory + Elastic EDR Cyber Range on Ludus. This post covers what to actually do with the lab: turn AD attack techniques into structured detection practice, understand what defenders see, and learn to operate against a monitored environment."
 ---
 
 ![Ludus Active Directory Topology](https://cdn-images-1.medium.com/max/800/1*rygwFpdxirdKUZQUm58Jwg.png)
@@ -10,7 +10,7 @@ lead: "A follow-up to Building a Game of Active Directory + Elastic EDR Cyber Ra
 
 ## Overview
 
-This is a follow-up to Building a Game of Active Directory + Elastic EDR Cyber Range on Ludus v2. That post covered the infrastructure: getting Game Of Active Directory and Elastic Defend deployed, agents enrolled, telemetry flowing into Kibana, and a clean snapshot to iterate from.
+This is a follow-up to [Building an Active Directory Cyber range with Elastic stack](writeup.html?file=writeups/goad-writeup.md) . That post covered the infrastructure: getting Game Of Active Directory and Elastic Defend deployed, agents enrolled, telemetry flowing into Kibana, and a clean snapshot to iterate from.
 
 This post covers what to actually do with it.
 
