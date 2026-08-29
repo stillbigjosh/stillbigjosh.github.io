@@ -249,6 +249,15 @@
       display: block;
     }
 
+    /* ── HTB Badge ────────────────────────────────────────────────── */
+    .htb-badge {
+      display: inline-block;
+      margin-top: 22px;
+      transition: opacity 0.18s ease;
+    }
+    .htb-badge:hover { opacity: 0.85; }
+    .htb-badge img { max-width: 100%; height: auto; }
+
     /* ── Stats ────────────────────────────────────────────────────── */
     .stat-grid {
       display: grid;
@@ -418,6 +427,9 @@
           <a href="#projects" class="btn-primary">View Projects</a>
           <a href="#contact" class="btn-outline">Contact</a>
         </div>
+        <a href="https://erebus.systems/tools/htb?u=stillbigjosh" target="_blank" rel="noopener" class="htb-badge">
+          <img src="https://erebus.systems/tools/htb/badge/stillbigjosh.svg" alt="stillbigjosh on Hack The Box" width="420" height="96">
+        </a>
       </div>
       <div class="hero-photo">
         <img src="image/IMG_7853.jpg" alt="stillbigjosh — offensive security practitioner">
