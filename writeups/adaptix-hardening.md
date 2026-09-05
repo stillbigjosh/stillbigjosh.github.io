@@ -2,7 +2,7 @@
 title: "Hardening Adaptix C2 - Reducing Infrastructure and Agent Fingerprints"
 kicker: "Offensive Security . C2 Infrastructure . OPSEC"
 tags: "Adaptix C2 . OPSEC . Red Team . Infrastructure Hardening"
-lead: "A practical walkthrough of hardening an Adaptix C2 deployment: replacing default certificates, decoy pages, listener configurations, and endpoint signatures to reduce the fingerprint surface that threat intelligence platforms and blue teams use to identify attacker infrastructure."
+lead: "A practical walkthrough of hardening an Adaptix C2 deployment: replacing default signatures to reduce the fingerprint surface that threat intel and blue teams use to identify red team infrastructure."
 ---
 
 ![Adaptix C2 infrastructure topology diagram](image/adaptix-hardening/adaptix-c2-infra.svg)
