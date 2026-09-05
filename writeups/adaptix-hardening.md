@@ -8,6 +8,8 @@ lead: "A practical walkthrough of hardening an Adaptix C2 deployment: replacing 
 ![Adaptix C2 infrastructure topology diagram](image/adaptix-hardening/adaptix-c2-infra.svg)
 *Adaptix C2 infrastructure topology on the Trinity Range*
 
+> This guide assumes a working Adaptix C2 deployment. For installation from scratch, see [Adaptix C2 Setup - Deploying a Teamserver on Ludus](writeup.html?file=writeups/adaptix-setup.md).
+
 > The Adaptix C2 teamserver runs on **trinity-urchin**, an unprivileged LXC container (CTID 200) on the Proxmox host. The operator GUI client on **trinity-gadget** connects over TLS to manage listeners, generate payloads, and interact with agents. Both sit on VLAN 10 behind the Ludus-managed router, which provides NAT to the internet for payload staging and DNS callbacks.
 
 ## Node Details
