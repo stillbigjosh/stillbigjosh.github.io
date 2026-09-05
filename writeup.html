@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="stillbigjosh writeup">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="stillbigjosh">
+<meta property="og:title" content="Writeup - stillbigjosh">
+<meta property="og:description" content="">
+<meta property="og:url" content="">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Writeup - stillbigjosh">
+<meta name="twitter:description" content="">
 <title>Writeup - stillbigjosh</title>
 <style>
   /* ── Reset & Base (matches main site) ────────────────────────── */
@@ -769,7 +777,15 @@
         document.getElementById('kicker').textContent = meta.kicker || 'Writeup';
         document.getElementById('title').textContent = meta.title || 'Untitled';
         document.title = (meta.title || 'Writeup') + ' - stillbigjosh';
-        document.querySelector('meta[name="description"]').setAttribute('content', meta.lead || meta.title || '');
+
+        var desc = meta.lead || meta.title || '';
+        var fullTitle = (meta.title || 'Writeup') + ' - stillbigjosh';
+        document.querySelector('meta[name="description"]').setAttribute('content', desc);
+        document.querySelector('meta[property="og:title"]').setAttribute('content', fullTitle);
+        document.querySelector('meta[property="og:description"]').setAttribute('content', desc);
+        document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
+        document.querySelector('meta[name="twitter:title"]').setAttribute('content', fullTitle);
+        document.querySelector('meta[name="twitter:description"]').setAttribute('content', desc);
 
         var metaEl = document.getElementById('meta');
         var tags = meta.tags ? meta.tags.split('·').map(function (s) { return s.trim(); }).join(' · ') : '';
@@ -801,7 +817,7 @@
         function buildShareButtons(container) {
           container.innerHTML =
             '<span class="share-label">Share</span>' +
-            '<a class="share-btn" href="https://x.com/intent/tweet?url=' + encodedUrl + '&text=' + encodedTitle + '" target="_blank" rel="noopener">' + xIcon + 'X</a>' +
+            '<a class="share-btn" href="https://x.com/intent/tweet?url=' + encodedUrl + '&text=' + encodeURIComponent(pageTitle + ' by @stillbigjosh') + '" target="_blank" rel="noopener">' + xIcon + 'X</a>' +
             '<a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=' + encodedUrl + '" target="_blank" rel="noopener">' + linkedInIcon + 'LinkedIn</a>' +
             '<button class="share-btn copy-url-btn" type="button">' + copyIcon + 'Copy URL</button>';
 
