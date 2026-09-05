@@ -48,7 +48,7 @@ lead: "A practical walkthrough of hardening an Adaptix C2 deployment: replacing 
 
 ---
 
-## Change the Default Certificate
+## Default Certificate
 
 The SSL certificate used by the Adaptix C2 server is auto-generated during installation.
 
@@ -116,7 +116,7 @@ The principle: your infrastructure should be invisible in bulk scanning data. A 
 
 ---
 
-## Change the Decoy Page
+## Decoy Page
 
 The `404page.html` that the default profile references in the `dist/` folder is Adaptix's decoy page. When anyone hits your C2 server on any URL that is not the actual C2 endpoint, the server returns that page with a 404 status code.
 
@@ -156,9 +156,25 @@ The replacement `error.aspx` renders a standard IIS-style error page:
 ![Custom IIS-style 404 error page](image/adaptix-hardening/custom-error-page.png)
 *Custom error page mimicking a standard IIS 404 response*
 
+### Why You Must Change the Decoy Page
+
+The default 404 page is an immediate positive identification. It does not just hint at Adaptix. It prints the framework name in plain text. Any defender, automated scanner, or threat intelligence crawler that hits a non-existent path on your server gets a page that explicitly says "AdaptixC2 404."
+
+**What happens during an engagement:**
+
+- Incident responders who extract a callback domain from a phishing email will browse to it manually. The first thing they try is the root path or a random URI. If they see "AdaptixC2 404," the investigation jumps straight to C2 identification without any further analysis.
+- Automated threat intelligence platforms continuously probe known C2 ports with HTTP requests to non-standard paths. The response body is hashed and compared against a signature database. The default Adaptix 404 page has a known hash. A match flags the IP immediately.
+- Web application firewalls and proxy appliances that inspect HTTP responses can pattern-match on the body content. The string "AdaptixC2" in a 404 response is a trivial detection rule.
+
+**What a proper decoy page achieves:**
+
+A realistic IIS error page with correct headers (`Server: Microsoft IIS/10.0`, `X-Powered-By: ASP.NET`) presents a consistent cover story across every layer of inspection. The response body looks like any of the millions of IIS servers returning standard 404 pages on the internet. The HTTP headers reinforce that impression. There is nothing for a signature database to match against, and nothing for a human analyst to flag on a quick manual check.
+
+The decoy page is the first thing an adversary or defender sees when probing your infrastructure. It needs to be the most boring, unremarkable response possible.
+
 ---
 
-## Change the Teamserver Endpoint
+## Teamserver Endpoint
 
 It is common for operators to leave the default teamserver port and endpoint path:
 
@@ -169,9 +185,9 @@ Teamserver:
   endpoint: "/endpoint"
 ```
 
-This is bad OPSEC. Port `4321` with a `/endpoint` URI is a known signature that threat intelligence platforms associate with Adaptix.
+This is bad OPSEC.
 
-For the endpoint, pick something that matches your cover story and looks like a real IIS application:
+For the port and endpoint, pick something that matches your cover story and looks like a real IIS application:
 
 ```yaml
 Teamserver:
@@ -182,11 +198,111 @@ Teamserver:
 
 Then restart the Adaptix service.
 
+### Why You Must Change the Default Endpoint
+
+The default port and URI path are documented, public knowledge. Threat intelligence platforms maintain databases of known C2 endpoint signatures, and Adaptix's defaults are catalogued alongside every other framework.
+
+**What gets matched against:**
+
+- **Port 4321** is not a standard service port. It does not correspond to HTTP, HTTPS, or any well-known application protocol. A port scan that finds 4321 open already narrows the list of candidate services to a handful of C2 frameworks and niche applications. Combined with a TLS handshake or HTTP response on that port, the identification becomes near-certain.
+- **The `/endpoint` URI** is generic enough to seem harmless in isolation, but in combination with port 4321 it forms a composite signature. Threat intelligence rules match on port-plus-path pairs, not just one or the other. The default combination is effectively a fingerprint.
+- **Automated probing tools** such as JARM, Shodan's HTTP fingerprinter, and custom blue team scanners send requests to known C2 ports and paths. A 200 or structured response on `4321/endpoint` is a confirmed hit.
+
+**What a hardened endpoint achieves:**
+
+Port 8443 is a standard alternative HTTPS port used by thousands of legitimate web applications, management consoles, and API gateways. Traffic to 8443 does not stand out in firewall logs or network flow analysis. The URI `/submit.aspx` is consistent with the IIS/ASP.NET cover story established by your headers, certificate, and decoy page. Every layer of the infrastructure tells the same story, and none of the individual components match a known C2 signature.
+
+The goal is to make your teamserver indistinguishable from a routine web application at every level of inspection: port, path, headers, certificate, and error responses.
+
 ---
 
-## Change the Teamserver Operator Password
+## Teamserver Operator Password
 
 This should go without saying. Do not leave the default `pass1` as the teamserver password.
+
+---
+
+## JARM Fingerprinting
+
+JARM is a TLS server fingerprinting technique developed by Salesforce's threat intelligence team. Unlike JA3S, which fingerprints a single TLS server hello in response to a specific client hello, JARM actively probes the server with 10 specially crafted TLS client hello packets and hashes the combined server responses into a single 62-character fingerprint.
+
+**Why this matters for C2 servers:**
+
+A perfect Let's Encrypt certificate, a clean IIS decoy page, and hardened headers will defeat manual inspection and most automated scanners. But JARM fingerprints the TLS implementation itself, not the certificate or the HTTP layer above it. Two servers running the same TLS library with the same configuration will produce the same JARM hash, regardless of what certificate they present or what HTTP content they serve.
+
+Adaptix's teamserver uses a specific TLS stack and configuration. If that combination produces a JARM hash that has been catalogued by threat intelligence services, your server can be identified as an Adaptix instance even with every other hardening measure in place. The JARM hash is independent of your certificate, your headers, and your decoy pages.
+
+**How to check your own JARM hash:**
+
+Clone the [JARM repository](https://github.com/salesforce/jarm) and scan your server:
+
+```shell
+git clone https://github.com/salesforce/jarm.git
+python3 jarm/jarm.py your-server-ip -p 8443
+```
+
+Compare the resulting hash against public JARM databases. If the hash matches a known Adaptix or C2 framework signature, you need to modify the TLS configuration to change the fingerprint.
+
+**Mitigation strategies:**
+
+### Modify the Profile TLS Configuration
+
+Adaptix exposes its full TLS configuration directly in the profile YAML under the `HttpServer.tls` block. You do not need to touch source code or rebuild the framework. The default configuration looks like this:
+
+```yaml
+tls:
+  min_version: "TLS1.2"
+  max_version: "TLS1.3"
+  prefer_server_cipher_suites: false
+  cipher_suites:
+    - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+    - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+    - "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+    - "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+    - "TLS_RSA_WITH_AES_128_GCM_SHA256"
+    - "TLS_RSA_WITH_AES_256_GCM_SHA384"
+```
+
+Every field in this block influences the JARM hash:
+
+- **`cipher_suites`** - Reordering, adding, or removing entries changes the cipher the server selects in response to each of JARM's 10 probes. This is the highest-impact change.
+- **`prefer_server_cipher_suites`** - Setting this to `true` forces the server to pick its own preferred cipher rather than deferring to the client's preference, which changes the server hello for every probe.
+- **`min_version` / `max_version`** - Changing which TLS versions are accepted changes how the server responds to probes that target specific versions.
+- **`enable_http2`** (in the `http` block) - ALPN negotiation for HTTP/2 is a TLS extension that affects the fingerprint.
+
+Your JARM hash should be consistent with your cover story. If your headers, certificate, and decoy page all impersonate IIS 10.0 on Windows Server, the JARM hash should match IIS, not Nginx or Apache. A defender who sees IIS response headers but an Nginx JARM hash has a contradiction that immediately warrants deeper investigation.
+
+To approximate the JARM fingerprint of IIS 10.0 on Windows Server 2019/2022, mirror its default cipher suite order and TLS behavior:
+
+```yaml
+tls:
+  min_version: "TLS1.2"
+  max_version: "TLS1.3"
+  prefer_server_cipher_suites: true
+  cipher_suites:
+    - "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+    - "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+    - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+    - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+    - "TLS_RSA_WITH_AES_256_GCM_SHA384"
+    - "TLS_RSA_WITH_AES_128_GCM_SHA256"
+```
+
+IIS defaults to `prefer_server_cipher_suites: true` (Windows calls this "server cipher suite order" in Group Policy), prefers ECDSA over RSA variants, and still includes the non-ECDHE RSA suites for backward compatibility. The key difference from the Adaptix default is the cipher ordering and the server-side preference enforcement.
+
+The workflow: change the TLS block in your profile, restart the Adaptix service, JARM scan yourself, compare the hash against known signatures, and iterate until the result is clean. This is a profile-level change that takes effect on the next restart with no rebuilding required.
+
+> Note that an exact IIS JARM match is not guaranteed through profile changes alone, because the underlying Go TLS library (crypto/tls) may handle certain probe edge cases differently than Windows SChannel. If the hash is still identifiable after tuning the profile, use one of the approaches below.
+
+### Place an IIS Reverse Proxy in Front of the Teamserver
+
+If profile-level tuning does not produce a clean hash, an actual IIS instance running as a reverse proxy is the most cover-consistent approach. IIS with Application Request Routing (ARR) terminates TLS using Windows SChannel, producing a genuine IIS JARM hash. The JARM scan hits IIS, not Adaptix. This also means your TLS stack, HTTP headers, and error pages are all coming from real IIS, making the cover story airtight at every layer. If IIS is not an option, Nginx or Caddy will produce a clean non-C2 hash, but the JARM will not match the IIS cover story.
+
+### Use a CDN or Cloud Load Balancer
+
+If your C2 server sits behind Cloudflare, AWS ALB, or a similar service, the JARM scan fingerprints the CDN's TLS stack. This is the strongest mitigation because CDN JARM hashes are shared by millions of legitimate domains.
+
+The principle is the same as every other section in this article: your infrastructure should look like everything else on the internet, not like a C2 framework.
 
 ---
 
@@ -199,38 +315,46 @@ Connect to the teamserver with the hardened endpoint and credentials:
 
 ### HTTPS Listener
 
-For the HTTPS listener, change every default value. Start with the **URIs**:
+For the HTTPS listener, change every default value. Each field that ships with a recognizable default is a detection opportunity for the blue team. The goal is to make every aspect of the listener's HTTP behavior indistinguishable from the web application you are impersonating.
+
+**URIs:**
 
 ![Custom listener URIs configured to resemble IIS endpoints](image/adaptix-hardening/listener-uris.png)
 *Listener URIs set to innocuous paths consistent with the IIS cover story*
 
-> Ensure the URIs are innocuous, appear harmless, and remain consistent with your cover story.
+The URIs are the paths the beacon calls back to. Default URIs are documented and signatured. Proxy logs, web application firewalls, and network monitoring tools all log request paths. If a defender sees repeated requests to a path that matches a known C2 callback URI, the traffic gets flagged regardless of how clean the rest of your infrastructure looks. Pick paths that are consistent with your cover story and that would not look unusual in a proxy log alongside normal employee web traffic.
 
-The **User-Agent**:
+**User-Agent:**
 
 ![Custom User-Agent string in the listener configuration](image/adaptix-hardening/listener-useragent.png)
 *User-Agent set to a realistic browser string*
 
-The **Heartbeat Header**:
+The User-Agent string appears in every HTTP request the beacon sends. Default or outdated User-Agent strings are a common detection vector. Enterprise proxy logs are routinely filtered for anomalous User-Agent values, and a string that does not match any browser in the organization's software inventory stands out immediately. Use a User-Agent that matches the target environment. If the organization runs Windows 10 with Chrome, use a current Chrome-on-Windows-10 string. An Edge string in an all-Chrome environment, or a Chrome 90 string when the current version is 126, draws attention.
+
+**Heartbeat Header:**
 
 ![Custom heartbeat header field](image/adaptix-hardening/listener-heartbeat-header.png)
 *Heartbeat header renamed to blend with standard web application headers*
 
-The **Page Error** (the HTML returned for invalid requests to listener URIs):
+The heartbeat header is a custom HTTP header the beacon uses to communicate session state with the teamserver. Custom HTTP headers are visible in proxy logs, SSL inspection appliances, and any network tool that parses HTTP traffic. A header name that does not correspond to any known web standard or application framework is an anomaly. Name it something that looks like a standard session management header (e.g., `X-Session-Id`, `X-Request-Token`) so it blends in with the thousands of custom headers that legitimate web applications use.
+
+**Page Error:**
 
 ![Custom page error HTML source mimicking IIS](image/adaptix-hardening/listener-page-error.png)
 *Page error set to the HTML source of a real IIS error page*
 
-> Add the HTML source of a real error page.
+The page error is the HTML the listener returns when it receives a request to a valid listener URI but from a source that is not a beacon (e.g., a defender manually browsing to the path, or a scanner probing it). The default error response may contain identifiable strings or an unusual structure. Replace it with the HTML source of a real error page from whatever web server you are impersonating. Copy it from an actual IIS server if possible.
 
-The **Page Payload** (the JSON structure wrapping C2 data):
+**Page Payload:**
 
 ![Custom page payload mimicking ASP.NET form data](image/adaptix-hardening/listener-page-payload.png)
 *Payload wrapper structured to resemble ASP.NET ViewState and form data*
 
-> Make the JSON payload look legitimate and consistent with your cover story. In this case, the payload mimics an ASP.NET page payload with ViewState and EventValidation fields.
+The page payload defines the JSON structure that wraps actual C2 data in HTTP responses. Deep packet inspection appliances and SSL inspection proxies parse response bodies. If the JSON structure uses unusual field names or a layout that does not match any known application, it can be flagged for manual review. Structure the payload to resemble something the cover application would return. In this case, the payload mimics ASP.NET ViewState and EventValidation fields, which is exactly what an IIS web application would include in a form response.
 
-Lastly, use a **legitimate SSL (HTTPS) certificate** for the listener as well.
+**SSL Certificate:**
+
+Use a legitimate SSL (HTTPS) certificate for the listener as well. The same principles from the certificate section apply here. The listener's TLS certificate is what the beacon validates when connecting, and what any network inspection tool sees when intercepting the traffic.
 
 Leave nothing to chance.
 
@@ -265,7 +389,9 @@ Practical prepend choices based on what you want to imitate:
 - `220 mail.example.com ESMTP\r\n` - Looks like an SMTP greeting
 - `+OK POP3 server ready\r\n` - Looks like a POP3 mail server
 
-The prepend should match whatever makes sense for the port you are running on. A header inconsistent with the port you chose makes no sense and draws more attention than sending nothing.
+The prepend should match whatever makes sense for the port you are running on.
+
+**What not to do:** Do not put an SSH banner on port 443, or an SMTP greeting on port 8080. A defender who sees SSH protocol negotiation on an HTTPS port flags it immediately. The mismatch between the expected protocol for that port and the actual bytes on the wire is a stronger signal than sending no prepend at all. If you run the TCP listener on port 22, use an SSH banner. If you run it on port 25, use an SMTP greeting. If there is no natural protocol for your chosen port, consider whether a TCP listener is the right choice for that scenario at all.
 
 ---
 
@@ -312,3 +438,91 @@ Before the engagement, the operator decides which BOFs to stage on the teamserve
 
 ![Adaptix Framework session overview with active beacon and command console](image/adaptix-hardening/adaptix-session-overview.png)
 *Active beacon session in the Adaptix Framework showing the lean command set and agent details*
+
+---
+
+## Verification
+
+Hardening without verification is guesswork. After making every change in this article, audit your own infrastructure the way a defender or threat intelligence analyst would. If you can identify your server as a C2 teamserver, so can they.
+
+### Certificate Verification
+
+Inspect the certificate your server presents:
+
+```shell
+openssl s_client -connect your-server-ip:8443 </dev/null 2>/dev/null | openssl x509 -noout -subject -issuer -dates
+```
+
+Confirm the issuer is Let's Encrypt (or your chosen CA), not a self-signed certificate with default Adaptix subject fields. Check the validity dates. A certificate valid for exactly 365 or 3650 days from today is a self-signed certificate indicator.
+
+### Decoy Page Verification
+
+Hit your server on the root path and a random URI:
+
+```shell
+curl -k -s -D - https://your-server-ip:8443/
+curl -k -s -D - https://your-server-ip:8443/nonexistent-path
+```
+
+Both should return your custom IIS-style error page with the correct headers (`Server: Microsoft IIS/10.0`, `X-Powered-By: ASP.NET`). The response body should contain no reference to Adaptix, no default framework strings, and no unusual HTML structure. Compare the output against a real IIS 404 response. They should be indistinguishable.
+
+### HTTP Header Verification
+
+Inspect the full set of response headers:
+
+```shell
+curl -k -s -I https://your-server-ip:8443/
+```
+
+Look for any headers that leak the underlying framework. The `Server` header should show IIS. There should be no `X-Powered-By: Express`, no framework-specific headers, and no version strings that contradict your cover story. Every header should be consistent with the application you are impersonating.
+
+### Port Scan Profile
+
+Scan your server the way a threat intelligence platform would:
+
+```shell
+nmap -sV -sC -p 8443 your-server-ip
+```
+
+Review the service detection output. Nmap should identify the port as HTTPS with the certificate details you configured. It should not flag the service as a known C2 framework. If Nmap's service detection scripts identify anything unusual, investigate what triggered the match.
+
+### JARM Hash Verification
+
+```shell
+python3 jarm.py your-server-ip 8443
+```
+
+Compare the output against known C2 JARM hashes published by threat intelligence teams. If your hash matches a catalogued C2 fingerprint, implement one of the mitigations from the JARM section above and re-scan.
+
+### Shodan and Censys Check
+
+If your server is internet-facing, search for its IP on Shodan and Censys after it has been running for 24-48 hours. These platforms continuously scan the internet and will index your server. Check whether your server has been tagged with any C2-related labels. If it has, identify which signal triggered the tag and fix it.
+
+The verification process is not a one-time task. Run these checks after every configuration change, after certificate renewals, and periodically during long engagements. Infrastructure that was clean on day one can drift as certificates expire, services restart with default configs, or upstream scanning tools add new signatures.
+
+---
+
+## Hardening Checklist
+
+A quick-reference summary of every change covered in this article. Use this as a pre-engagement audit list.
+
+| Component | Default (Vulnerable) | Hardened | Why It Matters |
+|-----------|---------------------|----------|----------------|
+| TLS Certificate | Auto-generated self-signed (`server.rsa.crt`) | Let's Encrypt via DNS-01 challenge | Default cert is fingerprinted by Censys/Shodan |
+| Decoy Page | `404page.html` displaying "AdaptixC2 404" | Custom IIS-style `error.aspx` | Default page positively identifies the framework |
+| Teamserver Port | `4321` | `8443` | Non-standard port narrows identification to C2 frameworks |
+| Teamserver Endpoint | `/endpoint` | `/submit.aspx` | Default path is a known Adaptix signature |
+| Teamserver Password | `pass1` | Strong, unique password | Default credentials are public knowledge |
+| HTTP `Server` Header | Default/missing | `Microsoft IIS/10.0` | Reinforces cover story in proxy logs |
+| HTTP `X-Powered-By` Header | Missing | `ASP.NET` | Consistent with IIS impersonation |
+| Listener URIs | Framework defaults | Innocuous paths matching cover story | Default URIs are signatured in threat intel databases |
+| User-Agent | Default/outdated string | Current browser string matching target environment | Anomalous User-Agents are filtered in proxy logs |
+| Heartbeat Header | Default header name | Standard-looking session header (e.g., `X-Session-Id`) | Custom headers are visible in proxy and DPI logs |
+| Listener Page Error | Default error response | Real IIS error page HTML | Default response may contain identifiable strings |
+| Listener Page Payload | Default JSON structure | ASP.NET-style ViewState/EventValidation wrapper | DPI appliances parse response body structure |
+| Listener SSL Certificate | Default/self-signed | Legitimate CA-issued certificate | Same fingerprinting risk as teamserver certificate |
+| SMB Pipe Name | Default Adaptix pipe name | Name matching a real Windows/application pipe | Default pipe names are signatured by EDR |
+| TCP Prepend Data | `\x12\xabSimple\x20word\xa` | Protocol banner matching the listener port | Default bytes do not imitate any real protocol |
+| JARM Hash | Raw Adaptix TLS stack | Reverse proxy (Nginx/Caddy) or CDN in front | JARM fingerprints the TLS implementation itself |
+
+**Before every engagement:** walk through this table top to bottom. For each row, verify the hardened value is in place using the commands in the Verification section. Any single default left unchanged can be the signal that burns your infrastructure.
