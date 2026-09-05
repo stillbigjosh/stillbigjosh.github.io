@@ -1,0 +1,194 @@
+<svg viewBox="0 0 1200 1020" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Adaptix C2 Infrastructure diagram showing Proxmox host, VLAN 10 network, trinity-urchin C2 server, trinity-gadget operator workstation, with legend and node details">
+
+  <!-- Full background -->
+  <rect width="1200" height="1020" fill="#0e1117"/>
+
+  <!-- ===== NETWORK DIAGRAM SECTION ===== -->
+
+  <!-- Proxmox host region -->
+  <rect x="30" y="30" width="1140" height="560" rx="10"
+        fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="60" y="65" fill="#8b949e" font-size="15" font-weight="700"
+        letter-spacing="0.08em" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">PROXMOX HOST</text>
+  <text x="60" y="88" fill="#8b949e" font-size="14" font-family="SF Mono, Menlo, Consolas, monospace">192.168.1.100</text>
+
+  <!-- VLAN 10 region -->
+  <rect x="70" y="110" width="1060" height="460" rx="8"
+        fill="#58a6ff" fill-opacity="0.08" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="6 4" stroke-opacity="0.4"/>
+  <text x="100" y="142" fill="#58a6ff" font-size="15" font-weight="700"
+        letter-spacing="0.06em" opacity="0.85" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">VLAN 10 - vmbr1002</text>
+  <text x="100" y="164" fill="#58a6ff" font-size="13" opacity="0.6" font-family="SF Mono, Menlo, Consolas, monospace">10.2.10.0/24</text>
+
+  <!-- Router -->
+  <rect x="450" y="190" width="260" height="100" rx="6"
+        fill="#161b22" stroke="#30363d" stroke-width="2"/>
+  <rect x="450" y="190" width="260" height="5" rx="3" fill="#8b949e"/>
+  <text x="580" y="224" fill="#c9d1d9" font-size="16" font-weight="700" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Router</text>
+  <text x="580" y="248" fill="#8b949e" font-size="13" text-anchor="middle" font-family="SF Mono, Menlo, Consolas, monospace">VM 107 . Debian 11</text>
+  <text x="580" y="270" fill="#8b949e" font-size="13" text-anchor="middle" font-family="SF Mono, Menlo, Consolas, monospace">10.2.10.254</text>
+
+  <!-- ===== trinity-urchin (C2 Server) ===== -->
+  <rect x="100" y="380" width="400" height="170" rx="6"
+        fill="#161b22" stroke="#3fb950" stroke-width="2"/>
+  <rect x="100" y="380" width="400" height="5" rx="3" fill="#3fb950"/>
+  <text x="300" y="416" fill="#c9d1d9" font-size="17" font-weight="700" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">trinity-urchin</text>
+  <text x="300" y="438" fill="#8b949e" font-size="13" text-anchor="middle" font-family="SF Mono, Menlo, Consolas, monospace">LXC 200 . Debian 13</text>
+  <text x="300" y="458" fill="#3fb950" font-size="13" text-anchor="middle" font-family="SF Mono, Menlo, Consolas, monospace">10.2.10.20</text>
+
+  <!-- Server detail separator -->
+  <line x1="125" y1="472" x2="475" y2="472" stroke="#30363d" stroke-width="0.8"/>
+  <text x="140" y="496" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">SERVICE</text>
+  <text x="265" y="496" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">adaptixserver</text>
+  <text x="140" y="516" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">LISTEN</text>
+  <text x="265" y="516" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">:8443/submit.aspx</text>
+  <text x="140" y="536" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">TLS</text>
+  <text x="265" y="536" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">self-signed RSA</text>
+
+  <!-- ===== trinity-gadget (Client) ===== -->
+  <rect x="660" y="380" width="400" height="170" rx="6"
+        fill="#161b22" stroke="#d29922" stroke-width="2"/>
+  <rect x="660" y="380" width="400" height="5" rx="3" fill="#d29922"/>
+  <text x="860" y="416" fill="#c9d1d9" font-size="17" font-weight="700" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">trinity-gadget</text>
+  <text x="860" y="438" fill="#8b949e" font-size="13" text-anchor="middle" font-family="SF Mono, Menlo, Consolas, monospace">VM 108 . Windows 11</text>
+  <text x="860" y="458" fill="#d29922" font-size="13" text-anchor="middle" font-family="SF Mono, Menlo, Consolas, monospace">10.2.10.11</text>
+
+  <!-- Client detail separator -->
+  <line x1="685" y1="472" x2="1035" y2="472" stroke="#30363d" stroke-width="0.8"/>
+  <text x="700" y="496" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">CLIENT</text>
+  <text x="825" y="496" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">AdaptixClient.exe</text>
+  <text x="700" y="516" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">TOOLS</text>
+  <text x="825" y="516" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">Extension-Kit BOFs</text>
+  <text x="700" y="536" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">BUILD</text>
+  <text x="825" y="536" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">MSYS2 + mingw + Qt6</text>
+
+  <!-- ===== CONNECTIONS ===== -->
+
+  <!-- Router to WAN -->
+  <line x1="580" y1="190" x2="580" y2="110"
+        stroke="#c9d1d9" stroke-width="1.5" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  <text x="600" y="158" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">NAT to WAN</text>
+
+  <!-- Router to Urchin -->
+  <line x1="500" y1="290" x2="350" y2="378"
+        stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="380" y="330" fill="#3fb950" font-size="12" opacity="0.85" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">gateway</text>
+
+  <!-- Router to Gadget -->
+  <line x1="660" y1="290" x2="810" y2="378"
+        stroke="#d29922" stroke-width="1.5"/>
+  <text x="750" y="330" fill="#d29922" font-size="12" opacity="0.85" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">gateway</text>
+
+  <!-- Client to Server (C2 channel) -->
+  <line x1="660" y1="460" x2="500" y2="460"
+        stroke="#58a6ff" stroke-width="2.5" marker-end="url(#arrow-accent)"
+        stroke-dasharray="8 4"/>
+  <text x="555" y="448" fill="#58a6ff" font-size="13" font-weight="700" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">HTTPS :8443</text>
+  <text x="555" y="482" fill="#58a6ff" font-size="11" text-anchor="middle" opacity="0.7" font-family="SF Mono, Menlo, Consolas, monospace">operator auth</text>
+
+  <!-- ===== DESCRIPTION TEXT ===== -->
+  <text x="60" y="625" fill="#c9d1d9" font-size="13" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">
+    <tspan x="60" dy="0">The Adaptix C2 teamserver runs on </tspan><tspan font-weight="700">trinity-urchin</tspan><tspan>, an unprivileged LXC container (CTID 200) on the Proxmox host.</tspan>
+    <tspan x="60" dy="22">The operator GUI client on </tspan><tspan font-weight="700">trinity-gadget</tspan><tspan> connects over TLS to manage listeners, generate payloads, and interact</tspan>
+    <tspan x="60" dy="22">with agents. Both sit on VLAN 10 behind the Ludus-managed router, which provides NAT to the internet for payload</tspan>
+    <tspan x="60" dy="22">staging and DNS callbacks.</tspan>
+  </text>
+
+  <!-- ===== LEGEND BAR ===== -->
+  <rect x="30" y="710" width="1140" height="44" rx="6"
+        fill="#161b22" stroke="#30363d" stroke-width="1"/>
+
+  <!-- Green: C2 Server -->
+  <rect x="70" y="725" width="14" height="14" rx="3" fill="#3fb950"/>
+  <text x="92" y="737" fill="#8b949e" font-size="13" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">C2 Server (LXC)</text>
+
+  <!-- Orange: Operator -->
+  <rect x="310" y="725" width="14" height="14" rx="3" fill="#d29922"/>
+  <text x="332" y="737" fill="#8b949e" font-size="13" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Operator Workstation (VM)</text>
+
+  <!-- Blue: C2 Channel -->
+  <rect x="590" y="725" width="14" height="14" rx="3" fill="#58a6ff"/>
+  <text x="612" y="737" fill="#8b949e" font-size="13" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">C2 Control Channel</text>
+
+  <!-- Grey: Infrastructure -->
+  <rect x="830" y="725" width="14" height="14" rx="3" fill="#8b949e"/>
+  <text x="852" y="737" fill="#8b949e" font-size="13" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Infrastructure</text>
+
+  <!-- ===== DETAIL CARDS ===== -->
+
+  <!-- Card 1: trinity-urchin -->
+  <rect x="30" y="780" width="370" height="220" rx="8"
+        fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <circle cx="55" cy="808" r="6" fill="#3fb950"/>
+  <text x="70" y="813" fill="#c9d1d9" font-size="14" font-weight="700" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">trinity-urchin</text>
+
+  <text x="55" y="845" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Type</text>
+  <text x="165" y="845" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">LXC (CTID 200)</text>
+  <text x="55" y="868" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">OS</text>
+  <text x="165" y="868" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">Debian 13</text>
+  <text x="55" y="891" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">IP</text>
+  <text x="165" y="891" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">10.2.10.20</text>
+  <text x="55" y="914" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Port</text>
+  <text x="165" y="914" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">8443/tcp</text>
+  <text x="55" y="937" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Endpoint</text>
+  <text x="165" y="937" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">/submit.aspx</text>
+  <text x="55" y="960" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Profile</text>
+  <text x="165" y="960" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">IIS 10.0 / ASP.NET</text>
+  <text x="55" y="983" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Service</text>
+  <text x="165" y="983" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">systemd (adaptix)</text>
+
+  <!-- Card 2: trinity-gadget -->
+  <rect x="415" y="780" width="370" height="220" rx="8"
+        fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <circle cx="440" cy="808" r="6" fill="#d29922"/>
+  <text x="455" y="813" fill="#c9d1d9" font-size="14" font-weight="700" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">trinity-gadget</text>
+
+  <text x="440" y="845" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Type</text>
+  <text x="555" y="845" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">VM (VMID 108)</text>
+  <text x="440" y="868" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">OS</text>
+  <text x="555" y="868" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">Windows 11 Ent</text>
+  <text x="440" y="891" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">IP</text>
+  <text x="555" y="891" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">10.2.10.11</text>
+  <text x="440" y="914" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Client</text>
+  <text x="555" y="914" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">AdaptixClient.exe</text>
+  <text x="440" y="937" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">BOFs</text>
+  <text x="555" y="937" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">Extension-Kit</text>
+  <text x="440" y="960" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Toolchain</text>
+  <text x="555" y="960" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">MSYS2 / mingw64</text>
+
+  <!-- Card 3: Range Network -->
+  <rect x="800" y="780" width="370" height="220" rx="8"
+        fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <circle cx="825" cy="808" r="6" fill="#8b949e"/>
+  <text x="840" y="813" fill="#c9d1d9" font-size="14" font-weight="700" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Range Network</text>
+
+  <text x="825" y="845" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Bridge</text>
+  <text x="940" y="845" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">vmbr1002</text>
+  <text x="825" y="868" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">VLAN</text>
+  <text x="940" y="868" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">10</text>
+  <text x="825" y="891" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Subnet</text>
+  <text x="940" y="891" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">10.2.10.0/24</text>
+  <text x="825" y="914" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Gateway</text>
+  <text x="940" y="914" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">10.2.10.254</text>
+  <text x="825" y="937" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">Router</text>
+  <text x="940" y="937" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">VM 107 / Debian 11</text>
+  <text x="825" y="960" fill="#8b949e" font-size="12" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">DNS</text>
+  <text x="940" y="960" fill="#c9d1d9" font-size="12" font-family="SF Mono, Menlo, Consolas, monospace">8.8.8.8 (external)</text>
+
+  <!-- ===== ARROW MARKERS ===== -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5"
+            markerWidth="10" markerHeight="8" orient="auto-start-reverse">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#c9d1d9"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 7" refX="10" refY="3.5"
+            markerWidth="10" markerHeight="8" orient="auto-start-reverse">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 7" refX="10" refY="3.5"
+            markerWidth="10" markerHeight="8" orient="auto-start-reverse">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3fb950"/>
+    </marker>
+  </defs>
+
+</svg>
