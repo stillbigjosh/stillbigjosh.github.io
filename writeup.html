@@ -32,6 +32,7 @@
             'Courier New', monospace;
 
     --main-width: 760px;
+    --sidebar-width: 260px;
   }
 
   html {
@@ -62,7 +63,7 @@
     border-bottom: 1px solid var(--border);
   }
   .nav-inner {
-    max-width: 1024px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 14px 24px;
     display: flex;
@@ -88,11 +89,101 @@
   }
   .nav-back:hover { color: var(--accent); }
 
+  /* ── Layout: sidebar + main ──────────────────────────────────── */
+  .layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    gap: 0;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────────────── */
+  .sidebar {
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .sidebar-label {
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 0 20px;
+    margin-bottom: 12px;
+  }
+
+  .sidebar-nav {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sidebar-nav a {
+    display: block;
+    padding: 10px 20px;
+    color: var(--text);
+    font-size: 13.5px;
+    line-height: 1.4;
+    border-left: 3px solid transparent;
+    transition: all 0.15s ease;
+  }
+  .sidebar-nav a:hover {
+    background: var(--bg-alt);
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+  .sidebar-nav a.active {
+    background: var(--bg-alt);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+  .sidebar-nav .nav-kicker {
+    display: block;
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+    margin-top: 3px;
+  }
+  .sidebar-nav a:hover .nav-kicker,
+  .sidebar-nav a.active .nav-kicker { color: var(--muted); }
+
+  .sidebar-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 20px;
+  }
+
+  .sidebar-home {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: var(--mono);
+    transition: color 0.15s;
+  }
+  .sidebar-home:hover { color: var(--accent); }
+
+  /* ── Main content area ───────────────────────────────────────── */
+  .main { padding: 0 24px; }
+
   /* ── Article shell ────────────────────────────────────────────── */
   .article-hero {
     max-width: var(--main-width);
-    margin: 0 auto;
-    padding: 48px 24px 0;
+    padding: 48px 0 0;
   }
   .kicker {
     color: var(--accent);
@@ -132,8 +223,7 @@
   /* ── Content wrapper ──────────────────────────────────────────── */
   .content {
     max-width: var(--main-width);
-    margin: 0 auto;
-    padding: 8px 24px 60px;
+    padding: 8px 0 60px;
   }
 
   .content h2 {
@@ -313,6 +403,13 @@
   }
   .kv-table th { color: var(--dim); font-weight: 600; font-size: 12px; letter-spacing: 0.5px; }
 
+  /* ── Table horizontal scroll ─────────────────────────────────── */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 6px 0 24px;
+  }
+  .table-wrap .kv-table { margin: 0; }
+
   /* ── Back-to-top / footer nav ─────────────────────────────────── */
   .article-footer-nav {
     display: flex;
@@ -337,14 +434,109 @@
     font-size: 13px;
     font-family: var(--mono);
     max-width: var(--main-width);
-    margin: 20px auto 0;
+    margin: 20px 0 0;
+  }
+
+  /* ── Share bar ────────────────────────────────────────────────── */
+  .share-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .share-bar .share-label {
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+  }
+  .share-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--card-hover);
+  }
+  .share-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
+  .share-btn.copied {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .share-bar-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .share-bar-footer .share-label {
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar {
+      position: relative;
+      top: 0;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+    }
+    .sidebar-nav {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0;
+      padding: 0 12px;
+    }
+    .sidebar-nav a {
+      border-left: none;
+      border-bottom: 3px solid transparent;
+      padding: 8px 12px;
+      font-size: 12.5px;
+    }
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      border-left-color: transparent;
+      border-bottom-color: var(--accent);
+    }
+    .sidebar-nav .nav-kicker { display: none; }
+    .sidebar-label { padding: 0 16px; margin-bottom: 8px; }
+    .sidebar-divider { margin: 8px 16px; }
+    .sidebar-home { padding: 8px 16px; }
+    .main { padding: 0 16px; }
+    .article-hero { padding: 36px 0 0; }
+    .article-title { font-size: 27px; }
   }
 
   @media (max-width: 640px) {
     .nav-inner { padding: 12px 16px; }
-    .article-hero { padding: 36px 16px 0; }
-    .article-title { font-size: 27px; }
-    .content { padding: 8px 16px 50px; }
     .content h2 { font-size: 20px; }
     .kv-table { font-size: 12.5px; }
   }
@@ -360,48 +552,104 @@
     </div>
   </nav>
 
-  <!-- ── Article hero (filled from markdown frontmatter) ────────── -->
-  <header class="article-hero" id="hero">
-    <p class="kicker" id="kicker"></p>
-    <h1 class="article-title" id="title"></h1>
-    <div class="article-meta" id="meta"></div>
-    <p class="lead" id="lead"></p>
-  </header>
+  <!-- ── Layout: sidebar + main ─────────────────────────────────── -->
+  <div class="layout">
 
-  <!-- ── Rendered markdown goes here ─────────────────────────────── -->
-  <div class="content" id="content"></div>
+    <!-- ── Sidebar navigator ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <p class="sidebar-label">Writeups</p>
+      <ul class="sidebar-nav" id="sidebar-nav"></ul>
+      <hr class="sidebar-divider">
+      <a href="index.html" class="sidebar-home">&larr; stillbigjosh.github.io</a>
+    </aside>
 
-  <footer class="footer">
-    stillbigjosh &copy; 2026 &middot; built with purpose
-  </footer>
+    <!-- ── Main article ───────────────────────────────────────────── -->
+    <div class="main">
+      <header class="article-hero" id="hero">
+        <p class="kicker" id="kicker"></p>
+        <h1 class="article-title" id="title"></h1>
+        <div class="article-meta" id="meta"></div>
+        <p class="lead" id="lead"></p>
+        <div class="share-bar" id="share-bar"></div>
+      </header>
+
+      <div class="content" id="content"></div>
+
+      <footer class="footer">
+        stillbigjosh &copy; 2026 &middot; built with purpose
+      </footer>
+    </div>
+
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
   <script>
+    // ── Writeup registry ──────────────────────────────────────────
+    // Add new writeups here. Order determines sidebar order.
+    var WRITEUPS = [
+      {
+        file: 'writeups/adaptix-hardening.md',
+        title: 'Hardening Adaptix C2',
+        kicker: 'C2 Infrastructure · OPSEC'
+      },
+      {
+        file: 'writeups/adaptix-setup.md',
+        title: 'Adaptix C2 Setup',
+        kicker: 'C2 Infrastructure · Lab Build'
+      },
+      {
+        file: 'writeups/detection-scenarios.md',
+        title: 'Detection Scenarios for Active Directory',
+        kicker: 'Purple Team · Elastic SIEM/EDR'
+      },
+      {
+        file: 'writeups/goad-writeup.md',
+        title: 'Active Directory Cyber-range with Elastic Stack',
+        kicker: 'Homelab · Cyber Range'
+      }
+    ];
+
     // ── Load a markdown writeup and render it with the site theme ──
     // Usage: writeup.html?file=writeups/my-writeup.md
     (function () {
-      const params = new URLSearchParams(window.location.search);
-      const file = params.get('file') || 'writeups/goad-writeup.md';
+      var params = new URLSearchParams(window.location.search);
+      var file = params.get('file') || 'writeups/goad-writeup.md';
+
+      // Build sidebar
+      var sidebarNav = document.getElementById('sidebar-nav');
+      WRITEUPS.forEach(function (w) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = 'writeup.html?file=' + w.file;
+        if (w.file === file) a.classList.add('active');
+        a.textContent = w.title;
+        var span = document.createElement('span');
+        span.className = 'nav-kicker';
+        span.textContent = w.kicker;
+        a.appendChild(span);
+        li.appendChild(a);
+        sidebarNav.appendChild(li);
+      });
 
       function slugify(text) {
         return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
       }
 
       function estimateReadTime(body) {
-        const words = body.replace(/[#*`>!\[\]()\-]/g, ' ').split(/\s+/).filter(Boolean).length;
-        const mins = Math.max(1, Math.round(words / 200));
+        var words = body.replace(/[#*`>!\[\]()\-]/g, ' ').split(/\s+/).filter(Boolean).length;
+        var mins = Math.max(1, Math.round(words / 200));
         return '~' + mins + ' min read';
       }
 
       function parseFrontmatter(raw) {
-        const m = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+        var m = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
         if (!m) return { meta: {}, body: raw };
-        const meta = {};
+        var meta = {};
         m[1].split('\n').forEach(function (line) {
-          const idx = line.indexOf(':');
+          var idx = line.indexOf(':');
           if (idx === -1) return;
-          const key = line.slice(0, idx).trim();
-          let val = line.slice(idx + 1).trim();
+          var key = line.slice(0, idx).trim();
+          var val = line.slice(idx + 1).trim();
           val = val.replace(/^["']|["']$/g, '');
           meta[key] = val;
         });
@@ -409,7 +657,7 @@
       }
 
       function postProcess(html) {
-        const div = document.createElement('div');
+        var div = document.createElement('div');
         div.innerHTML = html;
 
         // h2 -> prepend the "##" tag prefix
@@ -419,7 +667,7 @@
 
         // code blocks -> dim comment lines (lines starting with #)
         div.querySelectorAll('pre code').forEach(function (code) {
-          const lines = code.innerHTML.split('\n');
+          var lines = code.innerHTML.split('\n');
           code.innerHTML = lines.map(function (line) {
             if (line.trim().startsWith('#')) {
               return '<span class="cmt">' + line + '</span>';
@@ -429,14 +677,14 @@
         });
 
         // figures: image paragraph followed by an italic caption paragraph
-        const ps = Array.prototype.slice.call(div.querySelectorAll('p'));
+        var ps = Array.prototype.slice.call(div.querySelectorAll('p'));
         ps.forEach(function (p, i) {
-          const img = p.querySelector('img');
+          var img = p.querySelector('img');
           if (!img) return;
-          const next = ps[i + 1];
+          var next = ps[i + 1];
           if (next && next.querySelector('em') && !next.querySelector('img')) {
-            const fig = document.createElement('figure');
-            const cap = document.createElement('figcaption');
+            var fig = document.createElement('figure');
+            var cap = document.createElement('figcaption');
             cap.textContent = next.querySelector('em').textContent;
             fig.appendChild(img.cloneNode(true));
             fig.appendChild(cap);
@@ -447,8 +695,8 @@
 
         // callouts: blockquotes starting with [!NOTE] / [!WARN]
         div.querySelectorAll('blockquote').forEach(function (bq) {
-          const text = bq.textContent.trim();
-          let cls = '';
+          var text = bq.textContent.trim();
+          var cls = '';
           if (text.startsWith('[!NOTE]')) { cls = 'note'; bq.innerHTML = bq.innerHTML.replace('[!NOTE]', ''); }
           else if (text.startsWith('[!WARN]')) { cls = 'warn'; bq.innerHTML = bq.innerHTML.replace('[!WARN]', ''); }
           if (cls) bq.classList.add('callout', cls);
@@ -464,30 +712,30 @@
       }
 
       function buildToc(content, meta) {
-        const headings = content.querySelectorAll('h2, h3');
+        var headings = content.querySelectorAll('h2, h3');
         if (!headings.length) return;
 
-        const toc = document.createElement('div');
+        var toc = document.createElement('div');
         toc.className = 'toc-card';
         toc.innerHTML = '<p class="toc-title">Table of Contents</p>';
-        const ul = document.createElement('ul');
+        var ul = document.createElement('ul');
         ul.className = 'toc-list';
 
-        let num = 0;
+        var num = 0;
         headings.forEach(function (h) {
-          const label = h.textContent.replace('##', '').trim();
-          const id = slugify(label);
+          var label = h.textContent.replace('##', '').trim();
+          var id = slugify(label);
           h.id = id;
-          const li = document.createElement('li');
-          const a = document.createElement('a');
+          var li = document.createElement('li');
+          var a = document.createElement('a');
           a.href = '#' + id;
-          const span = document.createElement('span');
+          var span = document.createElement('span');
           span.className = 'toc-num';
           if (h.tagName === 'H2') {
             num++;
             span.textContent = String(num).padStart(2, '0');
           } else {
-            span.textContent = '\u2022';
+            span.textContent = '•';
           }
           a.appendChild(span);
           a.appendChild(document.createTextNode(label));
@@ -497,15 +745,15 @@
 
         // optional extra TOC link (e.g. a "Part 2" external link)
         if (meta.toc_extra) {
-          const parts = meta.toc_extra.split('|');
-          const li = document.createElement('li');
-          const a = document.createElement('a');
+          var parts = meta.toc_extra.split('|');
+          var li = document.createElement('li');
+          var a = document.createElement('a');
           a.href = parts[1] || '#';
           a.target = '_blank';
           a.rel = 'noopener';
-          const span = document.createElement('span');
+          var span = document.createElement('span');
           span.className = 'toc-num';
-          span.textContent = '\u2022';
+          span.textContent = '•';
           a.appendChild(span);
           a.appendChild(document.createTextNode(parts[0]));
           li.appendChild(a);
@@ -523,30 +771,69 @@
         document.title = (meta.title || 'Writeup') + ' - stillbigjosh';
         document.querySelector('meta[name="description"]').setAttribute('content', meta.lead || meta.title || '');
 
-        const metaEl = document.getElementById('meta');
-        const tags = meta.tags ? meta.tags.split('\u00b7').map(function (s) { return s.trim(); }).join(' \u00b7 ') : '';
-        const readTime = meta.read_time || estimateReadTime(body);
+        var metaEl = document.getElementById('meta');
+        var tags = meta.tags ? meta.tags.split('·').map(function (s) { return s.trim(); }).join(' · ') : '';
+        var readTime = meta.read_time || estimateReadTime(body);
         metaEl.innerHTML =
           '<span>stillbigjosh</span>' +
-          '<span class="sep">\u00b7</span>' +
-          (tags ? '<span>' + tags + '</span><span class="sep">\u00b7</span>' : '') +
+          '<span class="sep">·</span>' +
+          (tags ? '<span>' + tags + '</span><span class="sep">·</span>' : '') +
           '<span>' + readTime + '</span>';
         document.getElementById('lead').textContent = meta.lead || '';
 
         // body
-        const content = document.getElementById('content');
+        var content = document.getElementById('content');
         content.innerHTML = postProcess(marked.parse(body));
 
         // TOC
         buildToc(content, meta);
 
+        // share buttons
+        var pageUrl = window.location.href;
+        var pageTitle = meta.title || 'Writeup';
+        var encodedUrl = encodeURIComponent(pageUrl);
+        var encodedTitle = encodeURIComponent(pageTitle);
+
+        var xIcon = '<svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+        var linkedInIcon = '<svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>';
+        var copyIcon = '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+
+        function buildShareButtons(container) {
+          container.innerHTML =
+            '<span class="share-label">Share</span>' +
+            '<a class="share-btn" href="https://x.com/intent/tweet?url=' + encodedUrl + '&text=' + encodedTitle + '" target="_blank" rel="noopener">' + xIcon + 'X</a>' +
+            '<a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=' + encodedUrl + '" target="_blank" rel="noopener">' + linkedInIcon + 'LinkedIn</a>' +
+            '<button class="share-btn copy-url-btn" type="button">' + copyIcon + 'Copy URL</button>';
+
+          container.querySelector('.copy-url-btn').addEventListener('click', function () {
+            var btn = this;
+            navigator.clipboard.writeText(pageUrl).then(function () {
+              btn.classList.add('copied');
+              btn.innerHTML = copyIcon + 'Copied';
+              setTimeout(function () {
+                btn.classList.remove('copied');
+                btn.innerHTML = copyIcon + 'Copy URL';
+              }, 2000);
+            });
+          });
+        }
+
+        // hero share bar
+        buildShareButtons(document.getElementById('share-bar'));
+
         // footer nav
-        const footerNav = document.createElement('div');
+        var footerNav = document.createElement('div');
         footerNav.className = 'article-footer-nav';
         footerNav.innerHTML =
           '<a href="#hero">&uarr; back to top</a>' +
           '<a href="index.html#projects">&larr; back to projects</a>';
         content.appendChild(footerNav);
+
+        // footer share bar
+        var footerShare = document.createElement('div');
+        footerShare.className = 'share-bar share-bar-footer';
+        buildShareButtons(footerShare);
+        content.appendChild(footerShare);
       }
 
       fetch(file)
@@ -555,7 +842,7 @@
           return res.text();
         })
         .then(function (raw) {
-          const parsed = parseFrontmatter(raw);
+          var parsed = parseFrontmatter(raw);
           render(parsed.meta, parsed.body);
         })
         .catch(function () {
