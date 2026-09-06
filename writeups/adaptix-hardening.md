@@ -427,7 +427,7 @@ With Adaptix's approach:
 
 **3. You only load what you need.** Doing AD enumeration? Load the AD-BOF. Need credentials? Load Creds-BOF. You never have lateral movement code sitting in memory while you are still doing recon. Each phase of the operation only exposes the tooling relevant to that phase.
 
-**4. No fork and run.** This is critical. Cobalt Strike's older model spawned a sacrificial process (`rundll32.exe`, `dllhost.exe`), injected capability code into it, ran it, and killed the process. That pattern generates process creation events, cross-process injection events, and suspicious parent-child relationships. EDR picks up on all of these signals. Adaptix's `execute-assembly` loads the .NET CLR directly into the beacon process, runs the assembly in the same process context, and tears down the CLR hosting. No new process, no injection into another process, no telemetry trail.
+**4. No fork and run.** Cobalt Strike or other c2s spawned a sacrificial process (`rundll32.exe`, `dllhost.exe`), injected (un)managed assemblies or shellcode into it, run it, and killed the process. That pattern generates process creation events, cross-process injection events, and suspicious parent-child relationships. EDR picks up on all of these signals. Adaptix's `execute-assembly` loads the .NET CLR directly into the beacon process, runs the assembly in the same process context, and tears down the CLR hosting. No new process, no injection into another process, no telemetry trail.
 
 ![The execute-assembly command help showing in-process .NET execution](image/adaptix-hardening/execute-assembly-help.png)
 *In-process .NET assembly execution: no sacrificial process, no cross-process injection*
