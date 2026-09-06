@@ -207,7 +207,7 @@ The default port and URI path are documented, public knowledge. Threat intellige
 **What gets matched against:**
 
 - **Port 4321** is not a standard service port. It does not correspond to HTTP, HTTPS, or any well-known application protocol. A port scan that finds 4321 open already narrows the list of candidate services to a handful of C2 frameworks and niche applications. Combined with a TLS handshake or HTTP response on that port, the identification becomes near-certain.
-- **The `/endpoint` URI** is generic enough to seem harmless in isolation, but in combination with port 4321 it forms a composite signature. Threat intelligence rules match on port-plus-path pairs, not just one or the other. The default combination is effectively a fingerprint.
+- **The `/endpoint` URI** is generic enough to seem harmless in isolation, but in combination with port 4321 it forms a clear picture. Threat intelligence rules match on port-plus-path pairs, not just one or the other. The default combination is effectively a fingerprint.
 - **Automated probing tools** such as JARM, Shodan's HTTP fingerprinter, and custom blue team scanners send requests to known C2 ports and paths. A 200 or structured response on `4321/endpoint` is a confirmed hit.
 
 **What a hardened endpoint achieves:**
