@@ -387,7 +387,7 @@ else if (StrLenA(moduleName) > 7 && StrNCmpA(moduleName, extPfx, 7) == 0)
     isApiSetDll = TRUE;
 ```
 
-**What changed:** The string literals were replaced with character arrays that are built on the stack at runtime. When you write a string literal like `"api-ms-win-"` in C/C++, the compiler stores that entire string as a contiguous block of readable text in the binary's data section. Any tool that scans the binary (even a simple `strings` command) can find it.
+**What changed:** The string literals were replaced with character arrays that are built on the stack at runtime. When you write a string literal like `"api-ms-win-"` in C/C++, the compiler stores that entire string as readable text in the binary's data section. Any tool that scans the binary (even a simple `strings` command) can find it.
 
 When you instead declare a char array with individual character values like `{'a','p','i','-',...}`, the compiler handles it differently. Instead of placing the string in the data section, it generates a series of `mov` instructions in the code section that build the string on the stack when the function runs. The characters are encoded as parts of CPU instructions, not as a readable string. A signature scanner looking for the string `api-ms-win-` in the binary will not find it.
 
