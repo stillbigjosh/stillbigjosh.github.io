@@ -6,12 +6,14 @@
   <meta name="description" content="stillbigjosh — Offensive Security Practitioner, Penetration Tester, Founder of Hercules Suite">
   <title>stillbigjosh</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐋</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ── Reset & Base ─────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* Gruvbox-inspired warm palette (PaperMod feel) */
       --bg:        #1d2021;
       --bg-alt:    #282828;
       --card:      #3c3836;
@@ -27,6 +29,18 @@
       --orange:    #fe8019;
       --radius:    10px;
 
+      --teal:      #8ec07c;
+      --purple:    #d3869b;
+      --blue:      #83a598;
+      --red:       #fb4934;
+
+      --glow-accent: rgba(216, 166, 87, 0.25);
+      --glow-teal:   rgba(142, 192, 124, 0.25);
+      --glow-purple: rgba(211, 134, 155, 0.25);
+      --glow-blue:   rgba(131, 165, 152, 0.25);
+
+      --display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                 Roboto, sans-serif;
       --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
               Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       --mono: 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas,
@@ -45,12 +59,42 @@
       text-rendering: optimizeLegibility;
     }
 
-    body { min-height: 100vh; line-height: 1.6; }
+    body { min-height: 100vh; line-height: 1.6; overflow-x: hidden; }
 
-    a { color: var(--accent); text-decoration: none; }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
     a:hover { color: var(--accent-h); }
 
     ::selection { background: var(--accent); color: var(--bg); }
+
+    /* ── Scroll reveal ────────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; }
+    .reveal-delay-4 { transition-delay: 0.32s; }
+
+    /* ── Subtle alternating section backgrounds ─────────────────── */
+    .section:nth-of-type(even)::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, var(--border) 0.8px, transparent 0.8px);
+      background-size: 24px 24px;
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .section { position: relative; }
+    .section > * { position: relative; z-index: 1; }
 
     /* ── Section wrapper ──────────────────────────────────────────── */
     .section {
@@ -68,7 +112,7 @@
     }
 
     .section-hash {
-      color: var(--accent);
+      color: var(--section-color, var(--accent));
       font-family: var(--mono);
       font-size: 15px;
       font-weight: 600;
@@ -76,10 +120,20 @@
 
     .section-title {
       color: var(--heading);
-      font-size: 22px;
+      font-family: var(--display);
+      font-size: 24px;
       font-weight: 700;
-      letter-spacing: -0.4px;
+      letter-spacing: -0.5px;
     }
+
+    /* ── Per-section color identity ───────────────────────────────── */
+    #about    { --section-color: var(--accent); }
+    #projects { --section-color: var(--orange); }
+    #blog     { --section-color: var(--teal);   }
+    #recognition { --section-color: var(--purple); }
+    #press    { --section-color: var(--blue);   }
+    #training { --section-color: var(--orange); }
+    #contact  { --section-color: var(--accent); }
 
     /* ── Card ─────────────────────────────────────────────────────── */
     .card {
@@ -87,15 +141,26 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 18px 20px;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 0.25s ease,
+                  background 0.25s ease,
+                  box-shadow 0.25s ease;
     }
 
     a.card:hover,
     .card.hoverable:hover {
-      border-color: var(--accent);
+      border-color: var(--section-color, var(--accent));
       background: var(--card-hover);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3),
+                  0 0 0 1px var(--section-color, var(--accent)),
+                  0 0 20px var(--glow-accent);
     }
+
+    #projects a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--orange), 0 0 20px rgba(254,128,25,0.2); }
+    #blog a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--teal), 0 0 20px var(--glow-teal); }
+    #recognition a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--purple), 0 0 20px var(--glow-purple); }
+    #press a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--blue), 0 0 20px var(--glow-blue); }
 
     /* ── Grids ────────────────────────────────────────────────────── */
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -127,17 +192,28 @@
       transition: all 0.18s ease;
     }
     .btn-primary {
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--accent) 0%, var(--orange) 100%);
       color: var(--bg);
       border: 1px solid var(--accent);
+      box-shadow: 0 2px 12px rgba(216, 166, 87, 0.25);
     }
-    .btn-primary:hover { background: var(--accent-h); border-color: var(--accent-h); color: var(--bg); }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--accent-h) 0%, #ff9030 100%);
+      border-color: var(--accent-h);
+      color: var(--bg);
+      box-shadow: 0 4px 20px rgba(216, 166, 87, 0.4);
+      transform: translateY(-1px);
+    }
     .btn-outline {
       border: 1px solid var(--border);
       color: var(--heading);
       background: transparent;
     }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 12px var(--glow-accent);
+    }
 
     /* ── Navigation ───────────────────────────────────────────────── */
     .nav {
@@ -183,7 +259,29 @@
     .nav-links a.active { color: var(--accent); }
 
     /* ── Hero ─────────────────────────────────────────────────────── */
+    .hero-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 40%, rgba(216,166,87,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 30%, rgba(254,128,25,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-wrap canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.4;
+    }
     .hero {
+      position: relative;
       max-width: var(--main-width);
       margin: 0 auto;
       padding: 56px 24px 20px;
@@ -203,7 +301,8 @@
     }
     .hero-name {
       color: var(--heading);
-      font-size: 44px;
+      font-family: var(--display);
+      font-size: 46px;
       font-weight: 800;
       letter-spacing: -1.5px;
       line-height: 1.05;
@@ -215,11 +314,20 @@
       letter-spacing: 0;
     }
     .hero-subtitle {
-      color: var(--accent);
+      background: linear-gradient(90deg, var(--accent), var(--orange), var(--accent));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s ease-in-out infinite;
       font-family: var(--mono);
       font-size: 13px;
       letter-spacing: 1px;
       margin: 12px 0 16px;
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% center; }
+      50% { background-position: 200% center; }
     }
     .hero-tagline {
       color: var(--text);
@@ -237,10 +345,15 @@
       width: 150px;
       height: 150px;
       border-radius: 16px;
-      border: 2px solid var(--accent);
+      border: 2px solid transparent;
+      background-image: linear-gradient(var(--card), var(--card)),
+                        linear-gradient(135deg, var(--accent), var(--orange));
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
       overflow: hidden;
       flex-shrink: 0;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35),
+                  0 0 20px var(--glow-accent);
     }
     .hero-photo img {
       width: 100%;
@@ -312,7 +425,7 @@
       letter-spacing: 0.5px;
     }
     .project-desc { color: var(--text); font-size: 14px; line-height: 1.6; flex: 1; }
-    .project-link { color: var(--accent); font-size: 13px; margin-top: 4px; font-family: var(--mono); }
+    .project-link { color: var(--section-color, var(--accent)); font-size: 13px; margin-top: 4px; font-family: var(--mono); }
 
     /* ── Recognition ──────────────────────────────────────────────── */
     .row-item {
@@ -323,7 +436,7 @@
     }
     .row-left { display: flex; align-items: center; gap: 14px; }
     .row-icon {
-      color: var(--accent);
+      color: var(--section-color, var(--accent));
       font-size: 18px;
       flex-shrink: 0;
       line-height: 1;
@@ -331,13 +444,13 @@
     .row-name { color: var(--heading); font-size: 15px; font-weight: 600; }
     .row-desc { color: var(--muted); font-size: 12.5px; margin-top: 3px; }
     .row-action {
-      color: var(--accent);
+      color: var(--section-color, var(--accent));
       font-size: 12px;
       font-family: var(--mono);
       white-space: nowrap;
       flex-shrink: 0;
     }
-    a.card:hover .row-action { color: var(--accent-h); }
+    a.card:hover .row-action { color: var(--heading); }
 
     /* ── Press / Blog stacked list ────────────────────────────────── */
     .stack { display: flex; flex-direction: column; gap: 12px; }
@@ -415,34 +528,34 @@
   </nav>
 
   <!-- ── Hero ───────────────────────────────────────────────────── -->
-  <section class="hero" id="hero">
-    <div class="hero-inner">
-      <div>
-        <p class="hero-prompt" id="hero-prompt"></p>
-        <h1 class="hero-name">stillbigjosh <span class="certs">CRTO, CPTS, CRTA</span></h1>
-        <p class="hero-subtitle">OFFENSIVE SECURITY &middot; FOUNDER &middot; RESEARCHER</p>
+  <div class="hero-wrap">
+    <canvas id="hero-particles"></canvas>
+    <section class="hero" id="hero">
+      <div class="hero-inner">
+        <div>
+          <p class="hero-prompt" id="hero-prompt"></p>
+          <h1 class="hero-name">stillbigjosh <span class="certs">CRTO, CPTS, CRTA</span></h1>
+          <p class="hero-subtitle">OFFENSIVE SECURITY &middot; FOUNDER &middot; RESEARCHER</p>
 
-        <div class="hero-cta">
-          <a href="#projects" class="btn-primary">View Projects</a>
-          <a href="#contact" class="btn-outline">Contact</a>
+          <div class="hero-cta">
+            <a href="#projects" class="btn-primary">View Projects</a>
+            <a href="#contact" class="btn-outline">Contact</a>
+          </div>
         </div>
-        <!-- <a href="https://app.hackthebox.com/public/users/84052" target="_blank" rel="noopener" class="htb-badge">
-          <img src="https://erebus.systems/tools/htb/badge/stillbigjosh.svg" alt="stillbigjosh on Hack The Box" width="420" height="96">
-        </a>-->
+        <div class="hero-photo">
+          <img src="image/IMG_7853.jpg" alt="stillbigjosh — offensive security practitioner">
+        </div>
       </div>
-      <div class="hero-photo">
-        <img src="image/IMG_7853.jpg" alt="stillbigjosh — offensive security practitioner">
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
   <!-- ── About ──────────────────────────────────────────────────── -->
   <section class="section" id="about">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="section-hash">##</span>
       <h2 class="section-title">About</h2>
     </div>
-    <div class="about-grid">
+    <div class="about-grid reveal reveal-delay-1">
       <p class="about-bio">
         Offensive security practitioner specialising in infrastructure penetration testing, red team operations, and AI/ML adversarial assessments. 
         My work spans the full offensive stack - from initial access and evasion to post-exploitation and lateral movement.
@@ -467,42 +580,42 @@
 
   <!-- ── Projects ───────────────────────────────────────────────── -->
   <section class="section" id="projects">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="section-hash">##</span>
       <h2 class="section-title">Projects</h2>
     </div>
     <div class="grid-2">
 
-      <a href="https://herculessuite.io" target="_blank" rel="noopener" class="card project-card">
+      <a href="https://herculessuite.io" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
         <p class="project-name">Hercules Suite</p>
         <p class="project-type">Enterprise BEC Simulation Platform</p>
         <p class="project-desc">Africa's first native Business Email Compromise simulation platform for enterprise security teams.</p>
         <span class="project-link">&rarr; herculessuite.io</span>
       </a>
 
-      <a href="https://github.com/stillbigjosh/Neo" target="_blank" rel="noopener" class="card project-card">
+      <a href="https://github.com/stillbigjosh/Neo" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
         <p class="project-name">Neo C2</p>
         <p class="project-type">Open-Source C2 Framework</p>
         <p class="project-desc">Command and control framework for red team operations and adversary simulation.</p>
         <span class="project-link">&rarr; view on github</span>
       </a>
-      
-      <a href="https://github.com/stillbigjosh/powershell_obfuscator" target="_blank" rel="noopener" class="card project-card">
+
+      <a href="https://github.com/stillbigjosh/powershell_obfuscator" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
         <p class="project-name">PowerShell Obfuscator</p>
         <p class="project-type">Windows &middot; Evasion &middot; AV</p>
         <p class="project-desc">Auxiliary utility for PowerShell scripts. Applies multiple layers of obfuscation while preserving their functionality.</p>
         <span class="project-link">&rarr; view on github</span>
       </a>
 
-      <a href="writeup.html?file=writeups/detection-scenarios.md" class="card project-card">
+      <a href="writeup.html?file=writeups/detection-scenarios.md" class="card project-card reveal reveal-delay-2">
         <p class="project-name">Detection Scenarios for Active Directory</p>
         <p class="project-type">Purple Team &middot; Active Directory &middot; Elastic</p>
         <p class="project-desc">Structured detection practice: 8 attack scenarios mapped to Elastic prebuilt rules, KQL confirmation queries, opsec research questions, and custom rule building for detection gaps in an Active Directory.</p>
         <span class="project-link">&rarr; read the writeup</span>
       </a>
 
-      <a href="writeup.html?file=writeups/adaptix-hardening.md" class="card project-card">
-        <p class="project-name">Hardening Adaptix C2</p>
+      <a href="writeup.html?file=writeups/adaptix-hardening.md" class="card project-card reveal reveal-delay-1">
+        <p class="project-name">Hardening Adaptix C2 Series</p>
         <p class="project-type">Offensive Security &middot; C2 Infrastructure &middot; OPSEC</p>
         <p class="project-desc">OPSEC hardening for a deployed Adaptix C2 server, focused on making infrastructure blend into normal traffic and reducing the signals that threat intel use to identify attacker tooling.</p>
         <span class="project-link">&rarr; read the writeup</span>
@@ -513,41 +626,41 @@
 
   <!-- ── Blog ───────────────────────────────────────────────────── -->
   <section class="section" id="blog">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="section-hash">##</span>
       <h2 class="section-title">Blog / Writing</h2>
     </div>
     <div class="grid-2">
 
-      <a href="writeup.html?file=writeups/goad-writeup.md" class="card project-card">
+      <a href="writeup.html?file=writeups/goad-writeup.md" class="card project-card reveal reveal-delay-1">
         <p class="project-name">Active Directory Cyber-range with Elastic stack</p>
         <p class="project-type">Homelab &middot; Ludus v2 &middot; Active Directory &middot; OpSec & Detections</p>
         <p class="project-desc">Building an Active Directory attack lab layered with a full Elastic stack, built end-to-end on a Proxmox host.</p>
         <span class="project-link">&rarr; read the writeup</span>
       </a>
       
-      <a href="https://stillbigjosh.medium.com/experimental-study-on-multiple-machine-learning-algorithms-fe20164250a7" target="_blank" rel="noopener" class="card project-card">
+      <a href="https://stillbigjosh.medium.com/experimental-study-on-multiple-machine-learning-algorithms-fe20164250a7" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
         <p class="project-name">Experimental Study on Multiple Machine Learning Algorithms</p>
         <p class="project-type">Machine Learning &middot; Research</p>
         <p class="project-desc">A comparative experimental study across multiple machine learning algorithms.</p>
         <span class="project-link">&rarr; read on medium</span>
       </a>
 
-      <a href="https://stillbigjosh.medium.com/multinomial-naive-bayes-for-spam-detection-27bcb8d14da5" target="_blank" rel="noopener" class="card project-card">
+      <a href="https://stillbigjosh.medium.com/multinomial-naive-bayes-for-spam-detection-27bcb8d14da5" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
         <p class="project-name">Multinomial Naive Bayes for Basic Spam Detection</p>
         <p class="project-type">Machine Learning &middot; NLP</p>
         <p class="project-desc">Implementing Multinomial Naive Bayes for basic spam classification and detection.</p>
         <span class="project-link">&rarr; read on medium</span>
       </a>
 
-      <a href="https://stillbigjosh.medium.com/bec-vs-email-security-5314e16d9514" target="_blank" rel="noopener" class="card project-card">
+      <a href="https://stillbigjosh.medium.com/bec-vs-email-security-5314e16d9514" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
         <p class="project-name">SPF, DKIM & DMARC</p>
         <p class="project-type">Vulnerability Assesment &middot; Email</p>
         <p class="project-desc">Understanding email security controls and Preventing Email Spoofing.</p>
         <span class="project-link">&rarr; read on medium</span>
       </a>
-      
-      <a href="https://stillbigjosh.medium.com/using-neo-c2-framework-to-run-bofs-assemblies-fb4392a6b81c" target="_blank" rel="noopener" class="card project-card">
+
+      <a href="https://stillbigjosh.medium.com/using-neo-c2-framework-to-run-bofs-assemblies-fb4392a6b81c" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
         <p class="project-name">Using Neo C2 Framework to run BOFs, Assemblies &amp; PEs</p>
         <p class="project-type">Red Team &middot; C2 &middot; Offensive Tooling</p>
         <p class="project-desc">Walkthrough on executing BOFs, .NET assemblies and PEs through the Neo C2 framework.</p>
@@ -562,13 +675,13 @@
 
   <!-- ── Recognition ────────────────────────────────────────────── -->
   <section class="section" id="recognition">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="section-hash">##</span>
       <h2 class="section-title">Recognition / Hall of Fame</h2>
     </div>
     <div class="grid-2">
 
-      <a href="https://hackerone.com/stillbigjosh/badges?type=user" target="_blank" rel="noopener" class="card row-item">
+      <a href="https://hackerone.com/stillbigjosh/badges?type=user" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
         <div class="row-left">
           <span class="row-icon">&#9632;</span>
           <div>
@@ -579,7 +692,7 @@
         <span class="row-action">&rarr; VIEW</span>
       </a>
 
-      <a href="https://www.openbugbounty.org/researchers/0xSkywalker/" target="_blank" rel="noopener" class="card row-item">
+      <a href="https://www.openbugbounty.org/researchers/0xSkywalker/" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
         <div class="row-left">
           <span class="row-icon">&#9632;</span>
           <div>
@@ -590,7 +703,7 @@
         <span class="row-action">&rarr; VIEW</span>
       </a>
 
-      <a href="https://ctf.hackthebox.com/user/profile/946643" target="_blank" rel="noopener" class="card row-item">
+      <a href="https://ctf.hackthebox.com/user/profile/946643" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
         <div class="row-left">
           <span class="row-icon">&#9632;</span>
           <div>
@@ -601,7 +714,7 @@
         <span class="row-action">&rarr; VIEW</span>
       </a>
 
-      <a href="https://app.hackthebox.com/users/84052" target="_blank" rel="noopener" class="card row-item">
+      <a href="https://app.hackthebox.com/users/84052" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
         <div class="row-left">
           <span class="row-icon">&#9632;</span>
           <div>
@@ -617,28 +730,28 @@
 
   <!-- ── Press ──────────────────────────────────────────────────── -->
   <section class="section" id="press">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="section-hash">##</span>
       <h2 class="section-title">Press / Media</h2>
     </div>
     <div class="stack">
 
-      <a href="https://ctoatncsc.substack.com/p/cto-at-ncsc-summary-week-ending-december-e1e" target="_blank" rel="noopener" class="card row-item">
+      <a href="https://ctoatncsc.substack.com/p/cto-at-ncsc-summary-week-ending-december-e1e" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
         <span class="press-title">CTO at NCSC Summary: week ending December 7th</span>
         <span class="row-action">&rarr; READ</span>
       </a>
 
-      <a href="https://coinstats.app/news/72d4c7955fe79ab8922c9affa859ca8536bd545f86e760a5b1b8f5eb8a728860_Bitcoin-Future-at-Risk-Experts-Discuss-the-Biggest-Threats-Over-the-Next-510-Years/" target="_blank" rel="noopener" class="card row-item">
+      <a href="https://coinstats.app/news/72d4c7955fe79ab8922c9affa859ca8536bd545f86e760a5b1b8f5eb8a728860_Bitcoin-Future-at-Risk-Experts-Discuss-the-Biggest-Threats-Over-the-Next-510-Years/" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
         <span class="press-title">Bitcoin Future at Risk</span>
         <span class="row-action">&rarr; READ</span>
       </a>
 
-      <a href="https://hackread.com/google-vp-boycotts-black-hat-2020-over-name/" target="_blank" rel="noopener" class="card row-item">
+      <a href="https://hackread.com/google-vp-boycotts-black-hat-2020-over-name/" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
         <span class="press-title">Google VP Boycotts Black Hat 2020</span>
         <span class="row-action">&rarr; READ</span>
       </a>
 
-      <a href="https://www.twitch.tv/videos/776695446?tt_content=vod&tt_medium=mobile_web_share" target="_blank" rel="noopener" class="card row-item">
+      <a href="https://www.twitch.tv/videos/776695446?tt_content=vod&tt_medium=mobile_web_share" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
         <span class="press-title">#EndSARS Stream on Twitch</span>
         <span class="row-action">&rarr; WATCH</span>
       </a>
@@ -648,13 +761,13 @@
 
   <!-- ── Affiliate / Training ─────────────────────────────────────── -->
   <section class="section" id="training">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="section-hash">##</span>
       <h2 class="section-title">Recommended Training</h2>
     </div>
     <div class="stack">
 
-      <a href="https://www.zeropointsecurity.co.uk/link/wh9RPJ" target="_blank" rel="noopener" class="card row-item">
+      <a href="https://www.zeropointsecurity.co.uk/link/wh9RPJ" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
         <div class="row-left">
           <span class="row-icon">&#9632;</span>
           <div>
@@ -670,18 +783,18 @@
 
   <!-- ── Contact ────────────────────────────────────────────────── -->
   <section class="section" id="contact">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="section-hash">##</span>
       <h2 class="section-title">Contact</h2>
     </div>
     <div class="grid-2">
 
-      <div class="card">
+      <div class="card reveal reveal-delay-1">
         <p class="contact-label">Email</p>
         <a href="mailto:contact@stillbigjosh.com" class="contact-value">contact@stillbigjosh.com</a>
       </div>
 
-      <div class="card">
+      <div class="card reveal reveal-delay-2">
         <p class="contact-label">Social</p>
         <div class="contact-social">
           <a href="https://github.com/stillbigjosh" target="_blank" rel="noopener">GitHub</a>
@@ -739,6 +852,91 @@
       );
 
       sections.forEach((s) => observer.observe(s));
+    })();
+
+    // ── Scroll-reveal observer ───────────────────────────────────
+    (function () {
+      const reveals = document.querySelectorAll('.reveal');
+      const ro = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('visible');
+              ro.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      );
+      reveals.forEach((el) => ro.observe(el));
+    })();
+
+    // ── Hero particle field ──────────────────────────────────────
+    (function () {
+      const canvas = document.getElementById('hero-particles');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w, h, particles;
+      const COUNT = 50;
+      const MAX_DIST = 120;
+
+      function resize() {
+        const wrap = canvas.parentElement;
+        w = canvas.width = wrap.offsetWidth;
+        h = canvas.height = wrap.offsetHeight;
+      }
+
+      function init() {
+        resize();
+        particles = [];
+        for (let i = 0; i < COUNT; i++) {
+          particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            r: Math.random() * 1.8 + 0.6
+          });
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        for (let i = 0; i < COUNT; i++) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h;
+          if (p.y > h) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(216, 166, 87, 0.5)';
+          ctx.fill();
+
+          for (let j = i + 1; j < COUNT; j++) {
+            const q = particles[j];
+            const dx = p.x - q.x;
+            const dy = p.y - q.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < MAX_DIST) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(q.x, q.y);
+              ctx.strokeStyle = 'rgba(216, 166, 87, ' + (0.15 * (1 - dist / MAX_DIST)) + ')';
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+
+      init();
+      draw();
+      window.addEventListener('resize', resize);
     })();
   </script>
 

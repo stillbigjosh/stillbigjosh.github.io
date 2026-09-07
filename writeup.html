@@ -14,6 +14,9 @@
 <meta name="twitter:description" content="">
 <title>Writeup - stillbigjosh</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐋</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* ── Reset & Base (matches main site) ────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,8 +36,15 @@
     --yellow:    #fabd2f;
     --orange:    #fe8019;
     --red:       #fb4934;
+    --teal:      #8ec07c;
+    --purple:    #d3869b;
+    --blue:      #83a598;
     --radius:    10px;
 
+    --glow-accent: rgba(216, 166, 87, 0.25);
+
+    --display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+               Roboto, sans-serif;
     --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
             Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     --mono: 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas,
@@ -54,9 +64,9 @@
     text-rendering: optimizeLegibility;
   }
 
-  body { min-height: 100vh; line-height: 1.6; }
+  body { min-height: 100vh; line-height: 1.6; overflow-x: hidden; }
 
-  a { color: var(--accent); text-decoration: none; }
+  a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
   a:hover { color: var(--accent-h); }
 
   ::selection { background: var(--accent); color: var(--bg); }
@@ -168,6 +178,41 @@
   .sidebar-nav a:hover .nav-kicker,
   .sidebar-nav a.active .nav-kicker { color: var(--muted); }
 
+  /* ── Sidebar series groups ──────────────────────────────────── */
+  .sidebar-group {
+    margin-top: 6px;
+  }
+  .sidebar-group-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px 6px;
+    color: var(--heading);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    cursor: default;
+    user-select: none;
+  }
+  .sidebar-group-label::after {
+    content: ':';
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 14px;
+    margin-left: -4px;
+  }
+  .sidebar-group .sidebar-nav a {
+    padding-left: 34px;
+    font-size: 13px;
+    border-left: 2px solid var(--border);
+    margin-left: 20px;
+  }
+  .sidebar-group .sidebar-nav a:hover,
+  .sidebar-group .sidebar-nav a.active {
+    border-left-color: var(--accent);
+  }
+
   .sidebar-divider {
     border: none;
     border-top: 1px solid var(--border);
@@ -195,15 +240,25 @@
     padding: 48px 0 0;
   }
   .kicker {
-    color: var(--accent);
+    background: linear-gradient(90deg, var(--accent), var(--orange), var(--accent));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s ease-in-out infinite;
     font-family: var(--mono);
     font-size: 12.5px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     margin-bottom: 16px;
   }
+  @keyframes shimmer {
+    0%, 100% { background-position: 0% center; }
+    50% { background-position: 200% center; }
+  }
   .article-title {
     color: var(--heading);
+    font-family: var(--display);
     font-size: 34px;
     font-weight: 800;
     letter-spacing: -0.8px;
@@ -237,6 +292,7 @@
 
   .content h2 {
     color: var(--heading);
+    font-family: var(--display);
     font-size: 24px;
     font-weight: 700;
     letter-spacing: -0.3px;
@@ -594,27 +650,37 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
   <script>
     // ── Writeup registry ──────────────────────────────────────────
-    // Add new writeups here. Order determines sidebar order.
-    var WRITEUPS = [
+    // Groups define sidebar series folders. Ungrouped items appear at top level.
+    var SIDEBAR = [
       {
-        file: 'writeups/adaptix-hardening.md',
-        title: 'Hardening Adaptix C2',
-        kicker: 'C2 Infrastructure · OPSEC'
+        group: 'Hardening Adaptix C2 series',
+        items: [
+          {
+            file: 'writeups/adaptix-setup.md',
+            title: 'Adaptix C2 Setup',
+            kicker: 'C2 Infrastructure · Lab Build'
+          },
+          {
+            file: 'writeups/adaptix-hardening.md',
+            title: 'Reducing Infrastructure and Agent Fingerprints',
+            kicker: 'C2 Infrastructure · OPSEC'
+          }
+        ]
       },
       {
-        file: 'writeups/adaptix-setup.md',
-        title: 'Adaptix C2 Setup',
-        kicker: 'C2 Infrastructure · Lab Build'
-      },
-      {
-        file: 'writeups/detection-scenarios.md',
-        title: 'Detection Scenarios for Active Directory',
-        kicker: 'Purple Team · Elastic SIEM/EDR'
-      },
-      {
-        file: 'writeups/goad-writeup.md',
-        title: 'Active Directory Cyber-range with Elastic Stack',
-        kicker: 'Homelab · Cyber Range'
+        group: 'Active Directory series',
+        items: [
+          {
+            file: 'writeups/detection-scenarios.md',
+            title: 'Detection Scenarios for Active Directory',
+            kicker: 'Purple Team · Elastic SIEM/EDR'
+          },
+          {
+            file: 'writeups/goad-writeup.md',
+            title: 'Active Directory Cyber-range with Elastic Stack',
+            kicker: 'Homelab · Cyber Range'
+          }
+        ]
       }
     ];
 
@@ -624,9 +690,10 @@
       var params = new URLSearchParams(window.location.search);
       var file = params.get('file') || 'writeups/goad-writeup.md';
 
-      // Build sidebar
+      // Build sidebar with series groups
       var sidebarNav = document.getElementById('sidebar-nav');
-      WRITEUPS.forEach(function (w) {
+
+      function buildWriteupLink(w, container) {
         var li = document.createElement('li');
         var a = document.createElement('a');
         a.href = 'writeup.html?file=' + w.file;
@@ -637,7 +704,28 @@
         span.textContent = w.kicker;
         a.appendChild(span);
         li.appendChild(a);
-        sidebarNav.appendChild(li);
+        container.appendChild(li);
+      }
+
+      SIDEBAR.forEach(function (entry) {
+        if (entry.group) {
+          var groupDiv = document.createElement('li');
+          groupDiv.className = 'sidebar-group';
+          var label = document.createElement('div');
+          label.className = 'sidebar-group-label';
+          label.textContent = entry.group;
+          groupDiv.appendChild(label);
+          var groupNav = document.createElement('ul');
+          groupNav.className = 'sidebar-nav';
+          groupNav.style.gap = '0';
+          entry.items.forEach(function (w) {
+            buildWriteupLink(w, groupNav);
+          });
+          groupDiv.appendChild(groupNav);
+          sidebarNav.appendChild(groupDiv);
+        } else {
+          buildWriteupLink(entry, sidebarNav);
+        }
       });
 
       function slugify(text) {
