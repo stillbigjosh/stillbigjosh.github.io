@@ -9,7 +9,7 @@ lead: "Modifying the Adaptix C2 beacon agent source code to remove static detect
 
 ## How This Process Works
 
-The goal is to take a generated Adaptix agent payload (an `.exe` or `.bin` file), find the byte patterns that security tools flag, trace those patterns back to the original source code, and modify the source so the compiler produces different bytes while keeping the same behavior.
+The goal is to take a generated Adaptix agent payload (an `.exe` file), find the byte patterns that security tools flag, trace those patterns back to the original source code, and modify the source so the compiler produces different bytes while keeping the same behavior.
 
 The workflow for each change follows the same cycle:
 
