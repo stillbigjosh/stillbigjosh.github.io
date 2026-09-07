@@ -130,6 +130,7 @@
     #about    { --section-color: var(--accent); }
     #projects { --section-color: var(--orange); }
     #blog     { --section-color: var(--teal);   }
+    #medium   { --section-color: var(--blue);   }
     #recognition { --section-color: var(--purple); }
     #press    { --section-color: var(--blue);   }
     #training { --section-color: var(--orange); }
@@ -159,6 +160,7 @@
 
     #projects a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--orange), 0 0 20px rgba(254,128,25,0.2); }
     #blog a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--teal), 0 0 20px var(--glow-teal); }
+    #medium a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--blue), 0 0 20px var(--glow-blue); }
     #recognition a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--purple), 0 0 20px var(--glow-purple); }
     #press a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--blue), 0 0 20px var(--glow-blue); }
 
@@ -519,6 +521,7 @@
         <li><a href="#about">about</a></li>
         <li><a href="#projects">projects</a></li>
         <li><a href="#blog">blog</a></li>
+        <li><a href="#medium">medium</a></li>
         <li><a href="#recognition">recognition</a></li>
         <li><a href="#press">press</a></li>
         <li><a href="#training">training</a></li>
@@ -628,45 +631,59 @@
   <section class="section" id="blog">
     <div class="section-head reveal">
       <span class="section-hash">##</span>
-      <h2 class="section-title">Blog / Writing</h2>
+      <h2 class="section-title">Writings</h2>
     </div>
     <div class="grid-2">
-
       <a href="writeup.html?file=writeups/goad-writeup.md" class="card project-card reveal reveal-delay-1">
         <p class="project-name">Active Directory Cyber-range with Elastic stack</p>
         <p class="project-type">Homelab &middot; Ludus v2 &middot; Active Directory &middot; OpSec & Detections</p>
         <p class="project-desc">Building an Active Directory attack lab layered with a full Elastic stack, built end-to-end on a Proxmox host.</p>
         <span class="project-link">&rarr; read the writeup</span>
       </a>
-      
-      <a href="https://stillbigjosh.medium.com/experimental-study-on-multiple-machine-learning-algorithms-fe20164250a7" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
+
+      <a href="writeup.html?file=writeups/adaptix-setup.md" class="card project-card reveal reveal-delay-2">
+        <p class="project-name">Adaptix C2 Setup</p>
+        <p class="project-type">C2 Infrastructure &middot; Lab Build</p>
+        <p class="project-desc">Setting up an Adaptix C2 server for red team operations and adversary simulation exercises.</p>
+        <span class="project-link">&rarr; read the writeup</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Medium ────────────────────────────────────────────────── -->
+  <section class="section" id="medium">
+    <div class="section-head reveal">
+      <span class="section-hash">##</span>
+      <h2 class="section-title">Medium</h2>
+    </div>
+    <div class="grid-2">
+      <a href="https://stillbigjosh.medium.com/experimental-study-on-multiple-machine-learning-algorithms-fe20164250a7" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
         <p class="project-name">Experimental Study on Multiple Machine Learning Algorithms</p>
         <p class="project-type">Machine Learning &middot; Research</p>
         <p class="project-desc">A comparative experimental study across multiple machine learning algorithms.</p>
         <span class="project-link">&rarr; read on medium</span>
       </a>
 
-      <a href="https://stillbigjosh.medium.com/multinomial-naive-bayes-for-spam-detection-27bcb8d14da5" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
+      <a href="https://stillbigjosh.medium.com/multinomial-naive-bayes-for-spam-detection-27bcb8d14da5" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
         <p class="project-name">Multinomial Naive Bayes for Basic Spam Detection</p>
         <p class="project-type">Machine Learning &middot; NLP</p>
         <p class="project-desc">Implementing Multinomial Naive Bayes for basic spam classification and detection.</p>
         <span class="project-link">&rarr; read on medium</span>
       </a>
 
-      <a href="https://stillbigjosh.medium.com/bec-vs-email-security-5314e16d9514" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
+      <a href="https://stillbigjosh.medium.com/bec-vs-email-security-5314e16d9514" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
         <p class="project-name">SPF, DKIM & DMARC</p>
         <p class="project-type">Vulnerability Assesment &middot; Email</p>
         <p class="project-desc">Understanding email security controls and Preventing Email Spoofing.</p>
         <span class="project-link">&rarr; read on medium</span>
       </a>
 
-      <a href="https://stillbigjosh.medium.com/using-neo-c2-framework-to-run-bofs-assemblies-fb4392a6b81c" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
+      <a href="https://stillbigjosh.medium.com/using-neo-c2-framework-to-run-bofs-assemblies-fb4392a6b81c" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
         <p class="project-name">Using Neo C2 Framework to run BOFs, Assemblies &amp; PEs</p>
         <p class="project-type">Red Team &middot; C2 &middot; Offensive Tooling</p>
         <p class="project-desc">Walkthrough on executing BOFs, .NET assemblies and PEs through the Neo C2 framework.</p>
         <span class="project-link">&rarr; read on medium</span>
       </a>
-
     </div>
     <div class="blog-more">
       <a href="https://stillbigjosh.medium.com" target="_blank" rel="noopener" class="btn-outline">Read other writeups on Medium &rarr;</a>
