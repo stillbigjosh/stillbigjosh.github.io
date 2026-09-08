@@ -914,3 +914,7 @@ The shift from vailla penetration testing-level work to detection-aware operatio
 Once you internalize that, evasion becomes an engineering problem: given the detection logic, which input parameters can you control, and which changes produce a different detection outcome?
 
 This lab gives you a repeatable, fully instrumented environment to practice exactly that. Every snapshot revert is a fresh attempt. Every Kibana query is a feedback signal.
+
+---
+
+**Previous:** [Part 1: Active Directory Cyber-range with Elastic Stack](writeup.html?file=writeups/goad-writeup.md)

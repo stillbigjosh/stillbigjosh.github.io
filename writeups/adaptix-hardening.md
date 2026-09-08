@@ -528,3 +528,7 @@ A quick-reference summary of every change covered in this article. Use this as a
 | JARM Hash | Raw Adaptix TLS stack | Reverse proxy (Nginx/Caddy) or CDN in front | JARM fingerprints the TLS implementation itself |
 
 **Before every engagement:** walk through this table top to bottom. For each row, verify the hardened value is in place using the commands in the Verification section. Any single default left unchanged can be the signal that burns your infrastructure.
+
+---
+
+**Previous:** [Part 1: Adaptix C2 Setup](writeup.html?file=writeups/adaptix-setup.md) | **Next:** [Part 3: Beacon Source Modifications](writeup.html?file=writeups/adaptix-beacon-mods.md)

@@ -262,3 +262,7 @@ Once connected, you can create listeners, generate payloads, and load Extension-
 ## Next Steps
 
 The teamserver is now running with default settings. Before using it in any engagement or testing scenario, apply the OPSEC hardening steps covered in [Hardening Adaptix C2 - Reducing Infrastructure and Agent Fingerprints](writeup.html?file=writeups/adaptix-hardening.md). That guide covers replacing the default TLS certificate, customizing error pages and HTTP headers, hardening listener configurations, tuning the JARM fingerprint, and verifying the result.
+
+---
+
+**Next in series:** [Part 2: Reducing Infrastructure and Agent Fingerprints](writeup.html?file=writeups/adaptix-hardening.md)

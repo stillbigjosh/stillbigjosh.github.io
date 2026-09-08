@@ -1902,6 +1902,4 @@ All compiled plugin outputs go to: `dist/extenders/`
 
 ---
 
-## Previous Parts
-
-- **Part 3:** [Part 3: Beacon Source Modifications](writeup.html?file=writeups/adaptix-beacon-mods.md) - Finding and fixing specific byte-pattern signatures using ThreatCheck and Ghidra (Changes 1-9)
+**Previous:** [Part 3: Beacon Source Modifications](writeup.html?file=writeups/adaptix-beacon-mods.md)

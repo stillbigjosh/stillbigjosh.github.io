@@ -584,3 +584,7 @@ Everything described here targets static signatures: specific byte patterns and 
 - **Heuristic/ML classification** - Machine learning models used by endpoint protection can classify binaries based on structural features that go beyond simple byte matching.
 - **Code signing** - The binary is unsigned, which is itself a signal to security tools.
 - **Delivery method** - How the payload gets onto the target and how it is executed are separate detection surfaces.
+
+---
+
+**Previous:** [Part 2: Reducing Infrastructure and Agent Fingerprints](writeup.html?file=writeups/adaptix-hardening.md) | **Next:** [Part 4: Custom Cipher, Hash Seed, and Structural Changes](writeup.html?file=writeups/adaptix-cipher-mods.md)
