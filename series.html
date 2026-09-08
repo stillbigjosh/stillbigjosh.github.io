@@ -327,7 +327,7 @@
     var SERIES = {
       adaptix: {
         title: 'Hardening Adaptix C2',
-        kicker: 'Offensive Security . C2 Infrastructure . OPSEC',
+        kicker: 'Red Team . C2 Infrastructure . OPSEC',
         desc: 'A multi-part series on hardening an Adaptix C2 deployment for red team operations. Covers initial setup, reducing infrastructure and agent fingerprints, and modifying beacon source code to remove static detection signatures.',
         tags: 'Adaptix C2 . Red Team . OPSEC',
         parts: [
@@ -340,13 +340,13 @@
           {
             file: 'writeups/adaptix-hardening.md',
             title: 'Reducing Infrastructure and Agent Fingerprints',
-            kicker: 'C2 Infrastructure . OPSEC',
+            kicker: 'C2 Infrastructure . OPSEC . Red Team',
             desc: 'Replacing default signatures across the Adaptix C2 stack to reduce the fingerprint surface that threat intel and blue teams use to identify red team infrastructure.'
           },
           {
             file: 'writeups/adaptix-beacon-mods.md',
             title: 'Beacon Source Modifications',
-            kicker: 'Static Evasion . Source Modification',
+            kicker: 'Static Evasion . Source Modification . Red Team',
             desc: 'Tracing ThreatCheck detections through Ghidra back to the beacon agent source code and making targeted edits to change the compiled output without breaking functionality.'
           }
         ]
