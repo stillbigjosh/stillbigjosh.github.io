@@ -1,6 +1,6 @@
 ---
 title: "Hardening Adaptix C2 - Beacon Source Modifications"
-kicker: "Offensive Security . C2 Infrastructure . OPSEC"
+kicker: "Red Team . C2 Infrastructure . OPSEC"
 tags: "Adaptix C2 . OPSEC . Red Team . Static Evasion . Source Modification"
 lead: "Modifying the Adaptix C2 beacon agent source code to remove static detection signatures from the compiled payload. Finding what gets flagged, tracing it back to the source, and making targeted edits to change the compiled output without breaking functionality."
 ---
