@@ -376,11 +376,15 @@
     (function () {
       var params = new URLSearchParams(window.location.search);
       var seriesId = params.get('series');
-      var series = SERIES[seriesId];
+
+      // Only allow known series IDs (keys of SERIES object)
+      var series = seriesId && SERIES.hasOwnProperty(seriesId) ? SERIES[seriesId] : null;
 
       if (!series) {
-        document.getElementById('hero').innerHTML =
-          '<p style="color:var(--muted);margin-top:40px;">Series not found.</p>';
+        var errP = document.createElement('p');
+        errP.style.cssText = 'color:var(--muted);margin-top:40px;';
+        errP.textContent = 'Series not found.';
+        document.getElementById('hero').appendChild(errP);
         return;
       }
 
@@ -393,30 +397,76 @@
       document.querySelector('meta[name="twitter:description"]').setAttribute('content', series.desc);
 
       var hero = document.getElementById('hero');
-      hero.innerHTML =
-        '<p class="series-kicker">' + series.kicker + '</p>' +
-        '<h1 class="series-title">' + series.title + '</h1>' +
-        '<p class="series-desc">' + series.desc + '</p>' +
-        '<div class="series-meta">' +
-          '<span>' + series.parts.length + ' parts</span>' +
-          '<span style="color:var(--border);">&middot;</span>' +
-          '<span>' + series.tags + '</span>' +
-        '</div>' +
-        '<div class="share-bar" id="share-bar"></div>';
+
+      var kicker = document.createElement('p');
+      kicker.className = 'series-kicker';
+      kicker.textContent = series.kicker;
+      hero.appendChild(kicker);
+
+      var h1 = document.createElement('h1');
+      h1.className = 'series-title';
+      h1.textContent = series.title;
+      hero.appendChild(h1);
+
+      var descP = document.createElement('p');
+      descP.className = 'series-desc';
+      descP.textContent = series.desc;
+      hero.appendChild(descP);
+
+      var metaDiv = document.createElement('div');
+      metaDiv.className = 'series-meta';
+      var countSpan = document.createElement('span');
+      countSpan.textContent = series.parts.length + ' parts';
+      var sepSpan = document.createElement('span');
+      sepSpan.style.color = 'var(--border)';
+      sepSpan.innerHTML = '&middot;';
+      var tagsSpan = document.createElement('span');
+      tagsSpan.textContent = series.tags;
+      metaDiv.appendChild(countSpan);
+      metaDiv.appendChild(sepSpan);
+      metaDiv.appendChild(tagsSpan);
+      hero.appendChild(metaDiv);
+
+      var shareBarDiv = document.createElement('div');
+      shareBarDiv.className = 'share-bar';
+      shareBarDiv.id = 'share-bar';
+      hero.appendChild(shareBarDiv);
 
       var partsList = document.getElementById('parts-list');
       series.parts.forEach(function (part, i) {
         var a = document.createElement('a');
-        a.href = 'writeup.html?file=' + part.file;
+        a.href = 'writeup.html?file=' + encodeURIComponent(part.file);
         a.className = 'part-card';
-        a.innerHTML =
-          '<div class="part-num">' + String(i + 1).padStart(2, '0') + '</div>' +
-          '<div class="part-body">' +
-            '<p class="part-title">' + part.title + '</p>' +
-            '<p class="part-kicker">' + part.kicker + '</p>' +
-            '<p class="part-desc">' + part.desc + '</p>' +
-            '<span class="part-action">&rarr; read</span>' +
-          '</div>';
+
+        var numDiv = document.createElement('div');
+        numDiv.className = 'part-num';
+        numDiv.textContent = String(i + 1).padStart(2, '0');
+
+        var bodyDiv = document.createElement('div');
+        bodyDiv.className = 'part-body';
+
+        var titleP = document.createElement('p');
+        titleP.className = 'part-title';
+        titleP.textContent = part.title;
+
+        var kickerP = document.createElement('p');
+        kickerP.className = 'part-kicker';
+        kickerP.textContent = part.kicker;
+
+        var descP = document.createElement('p');
+        descP.className = 'part-desc';
+        descP.textContent = part.desc;
+
+        var actionSpan = document.createElement('span');
+        actionSpan.className = 'part-action';
+        actionSpan.innerHTML = '&rarr; read';
+
+        bodyDiv.appendChild(titleP);
+        bodyDiv.appendChild(kickerP);
+        bodyDiv.appendChild(descP);
+        bodyDiv.appendChild(actionSpan);
+        a.appendChild(numDiv);
+        a.appendChild(bodyDiv);
         partsList.appendChild(a);
       });
 

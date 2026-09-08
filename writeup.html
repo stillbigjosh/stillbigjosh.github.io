@@ -693,7 +693,21 @@
     // Usage: writeup.html?file=writeups/my-writeup.md
     (function () {
       var params = new URLSearchParams(window.location.search);
-      var file = params.get('file') || 'writeups/goad-writeup.md';
+      var requestedFile = params.get('file') || 'writeups/goad-writeup.md';
+
+      // Build allowlist from SIDEBAR registry
+      var allowedFiles = [];
+      SIDEBAR.forEach(function (entry) {
+        if (entry.group) {
+          entry.items.forEach(function (w) { allowedFiles.push(w.file); });
+        } else {
+          allowedFiles.push(entry.file);
+        }
+      });
+
+      var file = allowedFiles.indexOf(requestedFile) !== -1
+        ? requestedFile
+        : null;
 
       // Build sidebar with series groups
       var sidebarNav = document.getElementById('sidebar-nav');
@@ -884,11 +898,26 @@
         var metaEl = document.getElementById('meta');
         var tags = meta.tags ? meta.tags.split('·').map(function (s) { return s.trim(); }).join(' · ') : '';
         var readTime = meta.read_time || estimateReadTime(body);
-        metaEl.innerHTML =
-          '<span>stillbigjosh</span>' +
-          '<span class="sep">·</span>' +
-          (tags ? '<span>' + tags + '</span><span class="sep">·</span>' : '') +
-          '<span>' + readTime + '</span>';
+        metaEl.textContent = '';
+        var authorSpan = document.createElement('span');
+        authorSpan.textContent = 'stillbigjosh';
+        metaEl.appendChild(authorSpan);
+        var sep1 = document.createElement('span');
+        sep1.className = 'sep';
+        sep1.textContent = '·';
+        metaEl.appendChild(sep1);
+        if (tags) {
+          var tagsSpan = document.createElement('span');
+          tagsSpan.textContent = tags;
+          metaEl.appendChild(tagsSpan);
+          var sep2 = document.createElement('span');
+          sep2.className = 'sep';
+          sep2.textContent = '·';
+          metaEl.appendChild(sep2);
+        }
+        var timeSpan = document.createElement('span');
+        timeSpan.textContent = readTime;
+        metaEl.appendChild(timeSpan);
         document.getElementById('lead').textContent = meta.lead || '';
 
         // body
@@ -946,6 +975,11 @@
         content.appendChild(footerShare);
       }
 
+      if (!file) {
+        window.location.replace('index.html');
+        return;
+      }
+
       fetch(file)
         .then(function (res) {
           if (!res.ok) throw new Error('not found');
@@ -956,8 +990,12 @@
           render(parsed.meta, parsed.body);
         })
         .catch(function () {
-          document.getElementById('content').innerHTML =
-            '<p>Could not load writeup: <code>' + file + '</code></p>';
+          var errP = document.createElement('p');
+          var errCode = document.createElement('code');
+          errCode.textContent = file;
+          errP.textContent = 'Could not load writeup: ';
+          errP.appendChild(errCode);
+          document.getElementById('content').appendChild(errP);
         });
     })();
   </script>
