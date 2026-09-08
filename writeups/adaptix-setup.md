@@ -1,6 +1,6 @@
 ---
 title: "Adaptix C2 Setup - Deploying a Teamserver on Ludus"
-kicker: "Offensive Security . C2 Infrastructure . Lab Build"
+kicker: "Red Team . C2 Infrastructure . Lab Build"
 tags: "Adaptix C2 . Ludus . Proxmox . Red Team"
 lead: "A step-by-step guide to deploying an Adaptix C2 teamserver on a Ludus cyber range: building the server in an unprivileged LXC container, compiling the operator client and Extension-Kit BOFs on a Windows VM, and connecting everything over a private VLAN."
 ---
