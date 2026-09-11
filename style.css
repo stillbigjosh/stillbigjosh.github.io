@@ -122,6 +122,7 @@ a:hover { color: var(--accent-h); }
 #medium   { --section-color: var(--blue);   }
 #recognition { --section-color: var(--purple); }
 #press    { --section-color: var(--blue);   }
+#services { --section-color: var(--purple); }
 #training { --section-color: var(--orange); }
 #contact  { --section-color: var(--accent); }
 
@@ -485,6 +486,47 @@ a.card:hover,
               0 0 20px var(--glow-teal);
 }
 
+/* ── Services ─────────────────────────────────────────────────── */
+.services-intro {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 20px;
+}
+.service-icon {
+  color: var(--purple);
+  line-height: 1;
+}
+.service-name {
+  color: var(--heading);
+  font-size: 15px;
+  font-weight: 700;
+}
+.service-desc {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+#services .card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3),
+              0 0 0 1px var(--purple),
+              0 0 20px var(--glow-purple);
+}
+.services-cta {
+  text-align: center;
+  margin-top: 24px;
+}
+
 /* ── Projects ─────────────────────────────────────────────────── */
 .project-card { display: flex; flex-direction: column; gap: 8px; }
 .project-name { color: var(--heading); font-size: 16px; font-weight: 700; }
@@ -576,6 +618,7 @@ a.card:hover .row-action { color: var(--heading); }
   .hero-name { font-size: 36px; }
   .stat-grid { grid-template-columns: 1fr; }
   .about-grid { grid-template-columns: 1fr; }
+  .services-grid { grid-template-columns: 1fr; }
   .cert-grid { grid-template-columns: 1fr; }
   .cert-card { flex-direction: row; text-align: left; }
   .page-header { padding: 32px 16px 0; }
