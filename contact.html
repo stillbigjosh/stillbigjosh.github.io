@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contact — stillbigjosh">
+  <title>Contact — stillbigjosh</title>
+  <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo" style="text-decoration:none;">stillbigjosh<span class="dot">_</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">about</a></li>
+        <li><a href="projects.html">projects</a></li>
+        <li><a href="writings.html">writings</a></li>
+        <li><a href="recognition.html">recognition</a></li>
+        <li><a href="contact.html" class="active">contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="hero-wrap">
+    <canvas id="hero-particles"></canvas>
+    <div class="page-header">
+      <h1>Contact &amp; Training</h1>
+      <p>Get in touch or explore recommended training resources.</p>
+    </div>
+  </div>
+
+  <section class="section" id="training">
+    <div class="section-head reveal">
+      <span class="section-hash">##</span>
+      <h2 class="section-title">Recommended Training</h2>
+    </div>
+    <div class="stack">
+
+      <a href="https://www.zeropointsecurity.co.uk/link/wh9RPJ" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
+        <div class="row-left">
+          <span class="row-icon">&#9632;</span>
+          <div>
+            <p class="row-name">Zero-Point Security</p>
+            <p class="row-desc">Industry-leading red team and offensive security courses. RTO, RTO II &amp; more. Sign up through my affiliate link to get started.</p>
+          </div>
+        </div>
+        <span class="row-action">&rarr; ENROLL</span>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="section-head reveal">
+      <span class="section-hash">##</span>
+      <h2 class="section-title">Contact</h2>
+    </div>
+    <div class="grid-2">
+
+      <div class="card reveal reveal-delay-1">
+        <p class="contact-label">Email</p>
+        <a href="mailto:contact@stillbigjosh.com" class="contact-value">contact@stillbigjosh.com</a>
+      </div>
+
+      <div class="card reveal reveal-delay-2">
+        <p class="contact-label">Social</p>
+        <div class="contact-social">
+          <a href="https://github.com/stillbigjosh" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.linkedin.com/in/stillbigjosh/" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://x.com/stillbigjosh" target="_blank" rel="noopener">X</a>
+          <a href="https://soundcloud.com/alojoecee" target="_blank" rel="noopener">SoundCloud</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    stillbigjosh &copy; 2026 &middot; built with purpose
+  </footer>
+
+  <script>
+    (function () {
+      const reveals = document.querySelectorAll('.reveal');
+      const ro = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); }
+          });
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      );
+      reveals.forEach((el) => ro.observe(el));
+    })();
+
+    (function () {
+      const canvas = document.getElementById('hero-particles');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w, h, particles;
+      const COUNT = 50, MAX_DIST = 120;
+      function resize() { const wrap = canvas.parentElement; w = canvas.width = wrap.offsetWidth; h = canvas.height = wrap.offsetHeight; }
+      function init() { resize(); particles = []; for (let i = 0; i < COUNT; i++) particles.push({ x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4, r: Math.random()*1.8+0.6 }); }
+      function draw() {
+        ctx.clearRect(0,0,w,h);
+        for (let i = 0; i < COUNT; i++) {
+          const p = particles[i]; p.x += p.vx; p.y += p.vy;
+          if (p.x<0) p.x=w; if (p.x>w) p.x=0; if (p.y<0) p.y=h; if (p.y>h) p.y=0;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle='rgba(216,166,87,0.5)'; ctx.fill();
+          for (let j = i+1; j < COUNT; j++) { const q = particles[j], dx = p.x-q.x, dy = p.y-q.y, dist = Math.sqrt(dx*dx+dy*dy); if (dist<MAX_DIST) { ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.strokeStyle='rgba(216,166,87,'+(0.15*(1-dist/MAX_DIST))+')'; ctx.lineWidth=0.5; ctx.stroke(); } }
+        }
+        requestAnimationFrame(draw);
+      }
+      init(); draw(); window.addEventListener('resize', resize);
+    })();
+  </script>
+
+</body>
+</html>

@@ -9,590 +9,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* ── Reset & Base ─────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #1d2021;
-      --bg-alt:    #282828;
-      --card:      #3c3836;
-      --card-hover:#45403f;
-      --heading:   #ebdbb2;
-      --text:      #d5c4a1;
-      --muted:     #bdae93;
-      --dim:       #928374;
-      --border:    #504945;
-      --accent:    #d8a657;
-      --accent-h:  #e0b974;
-      --yellow:    #fabd2f;
-      --orange:    #fe8019;
-      --radius:    10px;
-
-      --teal:      #8ec07c;
-      --purple:    #d3869b;
-      --blue:      #83a598;
-      --red:       #fb4934;
-
-      --glow-accent: rgba(216, 166, 87, 0.25);
-      --glow-teal:   rgba(142, 192, 124, 0.25);
-      --glow-purple: rgba(211, 134, 155, 0.25);
-      --glow-blue:   rgba(131, 165, 152, 0.25);
-
-      --display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-                 Roboto, sans-serif;
-      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-              Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      --mono: 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas,
-              'Courier New', monospace;
-
-      --main-width: 760px;
-    }
-
-    html {
-      scroll-behavior: smooth;
-      font-family: var(--sans);
-      background: var(--bg);
-      color: var(--text);
-      font-size: 16px;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-
-    body { min-height: 100vh; line-height: 1.6; overflow-x: hidden; }
-
-    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
-    a:hover { color: var(--accent-h); }
-
-    ::selection { background: var(--accent); color: var(--bg); }
-
-    /* ── Scroll reveal ────────────────────────────────────────────── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(28px);
-      transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-                  transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .reveal-delay-1 { transition-delay: 0.08s; }
-    .reveal-delay-2 { transition-delay: 0.16s; }
-    .reveal-delay-3 { transition-delay: 0.24s; }
-    .reveal-delay-4 { transition-delay: 0.32s; }
-
-    /* ── Subtle alternating section backgrounds ─────────────────── */
-    .section:nth-of-type(even)::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(circle, var(--border) 0.8px, transparent 0.8px);
-      background-size: 24px 24px;
-      opacity: 0.18;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .section { position: relative; }
-    .section > * { position: relative; z-index: 1; }
-
-    /* ── Section wrapper ──────────────────────────────────────────── */
-    .section {
-      padding: 44px 24px;
-      max-width: var(--main-width);
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .section-head {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      margin-bottom: 22px;
-    }
-
-    .section-hash {
-      color: var(--section-color, var(--accent));
-      font-family: var(--mono);
-      font-size: 15px;
-      font-weight: 600;
-    }
-
-    .section-title {
-      color: var(--heading);
-      font-family: var(--display);
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    /* ── Per-section color identity ───────────────────────────────── */
-    #about    { --section-color: var(--accent); }
-    #certs    { --section-color: var(--teal);   }
-    #projects { --section-color: var(--orange); }
-    #blog     { --section-color: var(--teal);   }
-    #medium   { --section-color: var(--blue);   }
-    #recognition { --section-color: var(--purple); }
-    #press    { --section-color: var(--blue);   }
-    #training { --section-color: var(--orange); }
-    #contact  { --section-color: var(--accent); }
-
-    /* ── Card ─────────────────────────────────────────────────────── */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 20px;
-      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-                  border-color 0.25s ease,
-                  background 0.25s ease,
-                  box-shadow 0.25s ease;
-    }
-
-    a.card:hover,
-    .card.hoverable:hover {
-      border-color: var(--section-color, var(--accent));
-      background: var(--card-hover);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3),
-                  0 0 0 1px var(--section-color, var(--accent)),
-                  0 0 20px var(--glow-accent);
-    }
-
-    #projects a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--orange), 0 0 20px rgba(254,128,25,0.2); }
-    #blog a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--teal), 0 0 20px var(--glow-teal); }
-    #medium a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--blue), 0 0 20px var(--glow-blue); }
-    #recognition a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--purple), 0 0 20px var(--glow-purple); }
-    #press a.card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--blue), 0 0 20px var(--glow-blue); }
-
-    /* ── Grids ────────────────────────────────────────────────────── */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-    /* ── Tags ─────────────────────────────────────────────────────── */
-    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
-    .tag {
-      background: var(--bg-alt);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 5px 12px;
-      font-size: 12px;
-      border-radius: 999px;
-      font-family: var(--mono);
-    }
-
-    /* ── Buttons ──────────────────────────────────────────────────── */
-    .btn-primary, .btn-outline {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 20px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-      border-radius: var(--radius);
-      font-family: var(--sans);
-      cursor: pointer;
-      transition: all 0.18s ease;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--orange) 100%);
-      color: var(--bg);
-      border: 1px solid var(--accent);
-      box-shadow: 0 2px 12px rgba(216, 166, 87, 0.25);
-    }
-    .btn-primary:hover {
-      background: linear-gradient(135deg, var(--accent-h) 0%, #ff9030 100%);
-      border-color: var(--accent-h);
-      color: var(--bg);
-      box-shadow: 0 4px 20px rgba(216, 166, 87, 0.4);
-      transform: translateY(-1px);
-    }
-    .btn-outline {
-      border: 1px solid var(--border);
-      color: var(--heading);
-      background: transparent;
-    }
-    .btn-outline:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      box-shadow: 0 0 12px var(--glow-accent);
-    }
-
-    /* ── Navigation ───────────────────────────────────────────────── */
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(29, 32, 33, 0.82);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-inner {
-      max-width: 1024px;
-      margin: 0 auto;
-      padding: 14px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .nav-logo {
-      color: var(--heading);
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      font-size: 16px;
-      font-family: var(--mono);
-    }
-    .nav-logo .dot { color: var(--accent); }
-
-    .nav-links {
-      display: flex;
-      gap: 20px;
-      list-style: none;
-      flex-wrap: wrap;
-    }
-    .nav-links a {
-      color: var(--muted);
-      font-size: 14px;
-      transition: color 0.18s;
-    }
-    .nav-links a:hover,
-    .nav-links a.active { color: var(--accent); }
-
-    /* ── Hero ─────────────────────────────────────────────────────── */
-    .hero-wrap {
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-wrap::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 20% 40%, rgba(216,166,87,0.08) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 50% at 80% 30%, rgba(254,128,25,0.06) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .hero-wrap canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      opacity: 0.4;
-    }
-    .hero {
-      position: relative;
-      max-width: var(--main-width);
-      margin: 0 auto;
-      padding: 56px 24px 20px;
-    }
-    .hero-inner {
-      display: grid;
-      grid-template-columns: 1fr 150px;
-      gap: 36px;
-      align-items: center;
-    }
-    .hero-prompt {
-      color: var(--dim);
-      font-family: var(--mono);
-      font-size: 13px;
-      margin-bottom: 14px;
-      min-height: 18px;
-    }
-    .hero-name {
-      color: var(--heading);
-      font-family: var(--display);
-      font-size: 46px;
-      font-weight: 800;
-      letter-spacing: -1.5px;
-      line-height: 1.05;
-    }
-    .hero-name .certs {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--muted);
-      letter-spacing: 0;
-    }
-    .hero-subtitle {
-      background: linear-gradient(90deg, var(--accent), var(--orange), var(--accent));
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: shimmer 4s ease-in-out infinite;
-      font-family: var(--mono);
-      font-size: 13px;
-      letter-spacing: 1px;
-      margin: 12px 0 16px;
-    }
-    @keyframes shimmer {
-      0%, 100% { background-position: 0% center; }
-      50% { background-position: 200% center; }
-    }
-    .hero-tagline {
-      color: var(--text);
-      font-size: 15.5px;
-      line-height: 1.7;
-      max-width: 460px;
-    }
-    .hero-cta {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 26px;
-    }
-    .hero-photo {
-      width: 150px;
-      height: 150px;
-      border-radius: 16px;
-      border: 2px solid transparent;
-      background-image: linear-gradient(var(--card), var(--card)),
-                        linear-gradient(135deg, var(--accent), var(--orange));
-      background-origin: border-box;
-      background-clip: padding-box, border-box;
-      overflow: hidden;
-      flex-shrink: 0;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35),
-                  0 0 20px var(--glow-accent);
-    }
-    .hero-photo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center top;
-      display: block;
-    }
-
-    /* ── HTB Badge ────────────────────────────────────────────────── */
-    .htb-badge {
-      display: inline-block;
-      margin-top: 22px;
-      transition: opacity 0.18s ease;
-    }
-    .htb-badge:hover { opacity: 0.85; }
-    .htb-badge img { max-width: 100%; height: auto; }
-
-    /* ── Stats ────────────────────────────────────────────────────── */
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      max-width: var(--main-width);
-      margin: 34px auto 0;
-      padding: 0 24px;
-    }
-    .stat-label {
-      color: var(--dim);
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    .stat-value {
-      color: var(--heading);
-      font-size: 26px;
-      font-weight: 700;
-      margin: 6px 0 3px;
-      line-height: 1;
-    }
-    .stat-value.status { font-size: 16px; color: var(--accent); margin-top: 8px; }
-    .stat-desc { color: var(--muted); font-size: 12px; }
-    .dot-pulse { color: var(--accent); }
-
-    /* ── About ────────────────────────────────────────────────────── */
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 28px;
-    }
-    .about-bio { color: var(--text); font-size: 15px; line-height: 1.8; }
-    .skills-label {
-      color: var(--dim);
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    /* ── Certifications ──────────────────────────────────────────── */
-    .cert-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-    }
-    .cert-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 14px;
-      padding: 24px 16px;
-    }
-    .cert-badge {
-      width: 72px;
-      height: 72px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      overflow: hidden;
-      background: var(--bg-alt);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .cert-badge img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      filter: brightness(0.92) saturate(0.85);
-      transition: filter 0.3s ease;
-    }
-    .card.cert-card:hover .cert-badge img {
-      filter: brightness(1) saturate(1);
-    }
-    .cert-info { display: flex; flex-direction: column; gap: 4px; }
-    .cert-name {
-      color: var(--heading);
-      font-size: 15px;
-      font-weight: 700;
-    }
-    .cert-issuer {
-      color: var(--section-color, var(--teal));
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.5px;
-    }
-    .cert-desc {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-      margin-top: 2px;
-    }
-    #certs .card:hover {
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3),
-                  0 0 0 1px var(--teal),
-                  0 0 20px var(--glow-teal);
-    }
-
-    /* ── Projects ─────────────────────────────────────────────────── */
-    .project-card { display: flex; flex-direction: column; gap: 8px; }
-    .project-name { color: var(--heading); font-size: 16px; font-weight: 700; }
-    .project-type {
-      color: var(--dim);
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.5px;
-    }
-    .project-desc { color: var(--text); font-size: 14px; line-height: 1.6; flex: 1; }
-    .project-link { color: var(--section-color, var(--accent)); font-size: 13px; margin-top: 4px; font-family: var(--mono); }
-
-    /* ── Recognition ──────────────────────────────────────────────── */
-    .row-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-    }
-    .row-left { display: flex; align-items: center; gap: 14px; }
-    .row-icon {
-      color: var(--section-color, var(--accent));
-      font-size: 18px;
-      flex-shrink: 0;
-      line-height: 1;
-    }
-    .row-name { color: var(--heading); font-size: 15px; font-weight: 600; }
-    .row-desc { color: var(--muted); font-size: 12.5px; margin-top: 3px; }
-    .row-action {
-      color: var(--section-color, var(--accent));
-      font-size: 12px;
-      font-family: var(--mono);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    a.card:hover .row-action { color: var(--heading); }
-
-    /* ── Press / Blog stacked list ────────────────────────────────── */
-    .stack { display: flex; flex-direction: column; gap: 12px; }
-    .press-title { color: var(--text); font-size: 14.5px; }
-
-    /* ── Blog ─────────────────────────────────────────────────────── */
-    .blog-panel {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-    .blog-title { color: var(--heading); font-size: 15px; font-weight: 600; }
-    .blog-desc { color: var(--muted); font-size: 13px; margin-top: 4px; }
-    .blog-more { text-align: center; margin-top: 22px; }
-
-    /* ── Contact ──────────────────────────────────────────────────── */
-    .contact-label {
-      color: var(--dim);
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    .contact-value { color: var(--accent); font-size: 15px; margin-top: 8px; display: block; }
-    .contact-social { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px; }
-    .contact-social a { color: var(--heading); font-size: 14px; }
-    .contact-social a:hover { color: var(--accent); }
-
-    /* ── Footer ───────────────────────────────────────────────────── */
-    .footer {
-      border-top: 1px solid var(--border);
-      padding: 26px 24px;
-      text-align: center;
-      color: var(--dim);
-      font-size: 13px;
-      font-family: var(--mono);
-      max-width: var(--main-width);
-      margin: 20px auto 0;
-    }
-
-    /* ── Responsive ───────────────────────────────────────────────── */
-    @media (max-width: 640px) {
-      .nav-inner { padding: 12px 16px; flex-wrap: wrap; }
-      .nav-links { gap: 14px; }
-      .nav-links a { font-size: 13px; }
-      .section { padding: 34px 16px; }
-      .hero { padding: 40px 16px 12px; }
-      .stat-grid { padding: 0 16px; }
-      .grid-2 { grid-template-columns: 1fr; }
-      .hero-inner { grid-template-columns: 1fr; text-align: left; }
-      .hero-photo { display: none; }
-      .hero-name { font-size: 36px; }
-      .stat-grid { grid-template-columns: 1fr; }
-      .about-grid { grid-template-columns: 1fr; }
-      .cert-grid { grid-template-columns: 1fr; }
-      .cert-card { flex-direction: row; text-align: left; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ── Navigation ─────────────────────────────────────────────── -->
   <nav class="nav">
     <div class="nav-inner">
-      <span class="nav-logo">stillbigjosh<span class="dot">_</span></span>
+      <a href="index.html" class="nav-logo" style="text-decoration:none;">stillbigjosh<span class="dot">_</span></a>
       <ul class="nav-links">
-        <li><a href="#about">about</a></li>
-        <li><a href="#certs">certs</a></li>
-        <li><a href="#projects">projects</a></li>
-        <li><a href="#medium">medium</a></li>
-        <li><a href="#recognition">recognition</a></li>
-        <li><a href="#press">press</a></li>
-        <li><a href="#training">training</a></li>
-        <li><a href="#contact">contact</a></li>
+        <li><a href="index.html#about" class="active">about</a></li>
+        <li><a href="projects.html">projects</a></li>
+        <li><a href="writings.html">writings</a></li>
+        <li><a href="recognition.html">recognition</a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- ── Hero ───────────────────────────────────────────────────── -->
   <div class="hero-wrap">
     <canvas id="hero-particles"></canvas>
     <section class="hero" id="hero">
@@ -603,7 +35,7 @@
           <p class="hero-subtitle">OFFENSIVE SECURITY &middot; FOUNDER &middot; RESEARCHER</p>
 
           <div class="hero-cta">
-            <a href="#projects" class="btn-primary">View Projects</a>
+            <a href="projects.html" class="btn-primary">View Projects</a>
             <a href="#contact" class="btn-outline">Contact</a>
           </div>
         </div>
@@ -614,7 +46,6 @@
     </section>
   </div>
 
-  <!-- ── About ──────────────────────────────────────────────────── -->
   <section class="section" id="about">
     <div class="section-head reveal">
       <span class="section-hash">##</span>
@@ -622,7 +53,7 @@
     </div>
     <div class="about-grid reveal reveal-delay-1">
       <p class="about-bio">
-        Offensive security practitioner specialising in penetration testing, red team operations, offensive tooling development, and AI/ML adversarial assessments. 
+        Offensive security practitioner specialising in penetration testing, red team operations, offensive tooling development, and AI/ML adversarial assessments.
         My work spans the full offensive stack - from initial access and evasion to post-exploitation and lateral movement.
         Founder of Hercules Suite, Africa's first native BEC simulation platform.
       </p>
@@ -643,7 +74,6 @@
     </div>
   </section>
 
-  <!-- ── Certifications ─────────────────────────────────────────── -->
   <section class="section" id="certs">
     <div class="section-head reveal">
       <span class="section-hash">##</span>
@@ -690,191 +120,6 @@
     </div>
   </section>
 
-  <!-- ── Projects ───────────────────────────────────────────────── -->
-  <section class="section" id="projects">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Projects</h2>
-    </div>
-    <div class="grid-2">
-
-      <a href="https://herculessuite.io" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
-        <p class="project-name">Hercules Suite</p>
-        <p class="project-type">Enterprise BEC Simulation Platform</p>
-        <p class="project-desc">Africa's first native Business Email Compromise simulation platform for enterprise security teams.</p>
-        <span class="project-link">&rarr; herculessuite.io</span>
-      </a>
-
-      <a href="https://github.com/stillbigjosh/Neo" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
-        <p class="project-name">Neo C2</p>
-        <p class="project-type">Open-Source C2 Framework</p>
-        <p class="project-desc">Command and control framework for red team operations and adversary simulation.</p>
-        <span class="project-link">&rarr; view on github</span>
-      </a>
-
-      <a href="https://github.com/stillbigjosh/powershell_obfuscator" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
-        <p class="project-name">PowerShell Obfuscator</p>
-        <p class="project-type">Windows &middot; Evasion &middot; AV</p>
-        <p class="project-desc">Auxiliary utility for PowerShell scripts. Applies multiple layers of obfuscation while preserving their functionality.</p>
-        <span class="project-link">&rarr; view on github</span>
-      </a>
-
-      <a href="series.html?series=ad" class="card project-card reveal reveal-delay-2">
-        <p class="project-name">Active Directory Series</p>
-        <p class="project-type">Purple Team &middot; Active Directory &middot; Elastic</p>
-        <p class="project-desc">Building and attacking Active Directory environments with full defensive visibility, from deploying a multi-domain cyber range to structured detection scenarios.</p>
-        <span class="project-link">&rarr; view series (2 parts)</span>
-      </a>
-
-      <a href="series.html?series=adaptix" class="card project-card reveal reveal-delay-1">
-        <p class="project-name">Hardening Adaptix C2 Series</p>
-        <p class="project-type">Red Team &middot; C2 Infrastructure &middot; OPSEC</p>
-        <p class="project-desc">Multi-part series on hardening an Adaptix C2 deployment: setup, reducing infrastructure fingerprints, and modifying beacon source code to remove static detection signatures.</p>
-        <span class="project-link">&rarr; view series (4 parts)</span>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- ── Writings (standalone, not part of a series) ────────────── -->
-  <!--
-  <section class="section" id="blog">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Writings</h2>
-    </div>
-    <div class="grid-2">
-    </div>
-  </section>
-  -->
-
-  <!-- ── Medium ────────────────────────────────────────────────── -->
-  <section class="section" id="medium">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Medium</h2>
-    </div>
-    <div class="grid-2">
-      <a href="https://stillbigjosh.medium.com/experimental-study-on-multiple-machine-learning-algorithms-fe20164250a7" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
-        <p class="project-name">Experimental Study on Multiple Machine Learning Algorithms</p>
-        <p class="project-type">Machine Learning &middot; Research</p>
-        <p class="project-desc">A comparative experimental study across multiple machine learning algorithms.</p>
-        <span class="project-link">&rarr; read on medium</span>
-      </a>
-
-      <a href="https://stillbigjosh.medium.com/multinomial-naive-bayes-for-spam-detection-27bcb8d14da5" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
-        <p class="project-name">Multinomial Naive Bayes for Basic Spam Detection</p>
-        <p class="project-type">Machine Learning &middot; NLP</p>
-        <p class="project-desc">Implementing Multinomial Naive Bayes for basic spam classification and detection.</p>
-        <span class="project-link">&rarr; read on medium</span>
-      </a>
-
-      <a href="https://stillbigjosh.medium.com/bec-vs-email-security-5314e16d9514" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
-        <p class="project-name">SPF, DKIM & DMARC</p>
-        <p class="project-type">Vulnerability Assesment &middot; Email</p>
-        <p class="project-desc">Understanding email security controls and Preventing Email Spoofing.</p>
-        <span class="project-link">&rarr; read on medium</span>
-      </a>
-
-      <a href="https://stillbigjosh.medium.com/using-neo-c2-framework-to-run-bofs-assemblies-fb4392a6b81c" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
-        <p class="project-name">Using Neo C2 Framework to run BOFs, Assemblies &amp; PEs</p>
-        <p class="project-type">Red Team &middot; C2 &middot; Offensive Tooling</p>
-        <p class="project-desc">Walkthrough on executing BOFs, .NET assemblies and PEs through the Neo C2 framework.</p>
-        <span class="project-link">&rarr; read on medium</span>
-      </a>
-    </div>
-    <div class="blog-more">
-      <a href="https://stillbigjosh.medium.com" target="_blank" rel="noopener" class="btn-outline">Read other writeups on Medium &rarr;</a>
-    </div>
-  </section>
-
-  <!-- ── Recognition ────────────────────────────────────────────── -->
-  <section class="section" id="recognition">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Recognition / Hall of Fame</h2>
-    </div>
-    <div class="grid-2">
-
-      <a href="https://hackerone.com/stillbigjosh/badges?type=user" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
-        <div class="row-left">
-          <span class="row-icon">&#9632;</span>
-          <div>
-            <p class="row-name">HackerOne</p>
-            <p class="row-desc">Received 2x formal thanks from the UK Government Cyber Coordination Centre </p>
-          </div>
-        </div>
-        <span class="row-action">&rarr; VIEW</span>
-      </a>
-
-      <a href="https://www.openbugbounty.org/researchers/0xSkywalker/" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
-        <div class="row-left">
-          <span class="row-icon">&#9632;</span>
-          <div>
-            <p class="row-name">Open Bug Bounty</p>
-            <p class="row-desc">Security Researcher as 0xSkywalker(former handle) with 30+ responsible disclosures</p>
-          </div>
-        </div>
-        <span class="row-action">&rarr; VIEW</span>
-      </a>
-
-      <a href="https://ctf.hackthebox.com/user/profile/946643" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
-        <div class="row-left">
-          <span class="row-icon">&#9632;</span>
-          <div>
-            <p class="row-name">HTB CTF</p>
-            <p class="row-desc">Achieved top 4% of global teams at Cyber Apocalypse 2026 CTF competition</p>
-          </div>
-        </div>
-        <span class="row-action">&rarr; VIEW</span>
-      </a>
-
-      <a href="https://app.hackthebox.com/users/84052" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
-        <div class="row-left">
-          <span class="row-icon">&#9632;</span>
-          <div>
-            <p class="row-name">HTB Labs</p>
-            <p class="row-desc">Achieved number 1 ranking in Nigeria | 2019</p>
-          </div>
-        </div>
-        <span class="row-action">&rarr; VIEW</span>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- ── Press ──────────────────────────────────────────────────── -->
-  <section class="section" id="press">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Press / Media</h2>
-    </div>
-    <div class="stack">
-
-      <a href="https://ctoatncsc.substack.com/p/cto-at-ncsc-summary-week-ending-december-e1e" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
-        <span class="press-title">CTO at NCSC Summary: week ending December 7th</span>
-        <span class="row-action">&rarr; READ</span>
-      </a>
-
-      <a href="https://coinstats.app/news/72d4c7955fe79ab8922c9affa859ca8536bd545f86e760a5b1b8f5eb8a728860_Bitcoin-Future-at-Risk-Experts-Discuss-the-Biggest-Threats-Over-the-Next-510-Years/" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
-        <span class="press-title">Bitcoin Future at Risk</span>
-        <span class="row-action">&rarr; READ</span>
-      </a>
-
-      <a href="https://hackread.com/google-vp-boycotts-black-hat-2020-over-name/" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
-        <span class="press-title">Google VP Boycotts Black Hat 2020</span>
-        <span class="row-action">&rarr; READ</span>
-      </a>
-
-      <a href="https://www.twitch.tv/videos/776695446?tt_content=vod&tt_medium=mobile_web_share" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
-        <span class="press-title">#EndSARS Stream on Twitch</span>
-        <span class="row-action">&rarr; WATCH</span>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- ── Affiliate / Training ─────────────────────────────────────── -->
   <section class="section" id="training">
     <div class="section-head reveal">
       <span class="section-hash">##</span>
@@ -896,7 +141,6 @@
     </div>
   </section>
 
-  <!-- ── Contact ────────────────────────────────────────────────── -->
   <section class="section" id="contact">
     <div class="section-head reveal">
       <span class="section-hash">##</span>
@@ -922,18 +166,15 @@
     </div>
   </section>
 
-  <!-- ── Footer ─────────────────────────────────────────────────── -->
   <footer class="footer">
     stillbigjosh &copy; 2026 &middot; built with purpose
   </footer>
 
   <script>
-    // ── Typewriter effect on hero prompt ──────────────────────────
     (function () {
       const el = document.getElementById('hero-prompt');
       const text = 'root@stillbigjosh:~$ ./whoami';
       let i = 0;
-
       function type() {
         if (i <= text.length) {
           el.textContent = text.slice(0, i) + (i < text.length ? '▌' : '');
@@ -941,35 +182,9 @@
           setTimeout(type, i === text.length ? 0 : 60);
         }
       }
-
       setTimeout(type, 400);
     })();
 
-    // ── Active nav link via IntersectionObserver ──────────────────
-    (function () {
-      const sections = document.querySelectorAll('section[id]');
-      const navLinks = document.querySelectorAll('.nav-links a');
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              navLinks.forEach((link) => {
-                link.classList.toggle(
-                  'active',
-                  link.getAttribute('href') === '#' + entry.target.id
-                );
-              });
-            }
-          });
-        },
-        { rootMargin: '-40% 0px -55% 0px' }
-      );
-
-      sections.forEach((s) => observer.observe(s));
-    })();
-
-    // ── Scroll-reveal observer ───────────────────────────────────
     (function () {
       const reveals = document.querySelectorAll('.reveal');
       const ro = new IntersectionObserver(
@@ -986,7 +201,25 @@
       reveals.forEach((el) => ro.observe(el));
     })();
 
-    // ── Hero particle field ──────────────────────────────────────
+    (function () {
+      const sections = document.querySelectorAll('section[id]');
+      const navLinks = document.querySelectorAll('.nav-links a');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((link) => {
+                const href = link.getAttribute('href');
+                link.classList.toggle('active', href === '#' + entry.target.id || href === 'index.html#' + entry.target.id);
+              });
+            }
+          });
+        },
+        { rootMargin: '-40% 0px -55% 0px' }
+      );
+      sections.forEach((s) => observer.observe(s));
+    })();
+
     (function () {
       const canvas = document.getElementById('hero-particles');
       if (!canvas) return;
@@ -994,63 +227,45 @@
       let w, h, particles;
       const COUNT = 50;
       const MAX_DIST = 120;
-
       function resize() {
         const wrap = canvas.parentElement;
         w = canvas.width = wrap.offsetWidth;
         h = canvas.height = wrap.offsetHeight;
       }
-
       function init() {
         resize();
         particles = [];
         for (let i = 0; i < COUNT; i++) {
           particles.push({
-            x: Math.random() * w,
-            y: Math.random() * h,
-            vx: (Math.random() - 0.5) * 0.4,
-            vy: (Math.random() - 0.5) * 0.4,
+            x: Math.random() * w, y: Math.random() * h,
+            vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
             r: Math.random() * 1.8 + 0.6
           });
         }
       }
-
       function draw() {
         ctx.clearRect(0, 0, w, h);
         for (let i = 0; i < COUNT; i++) {
           const p = particles[i];
-          p.x += p.vx;
-          p.y += p.vy;
-          if (p.x < 0) p.x = w;
-          if (p.x > w) p.x = 0;
-          if (p.y < 0) p.y = h;
-          if (p.y > h) p.y = 0;
-
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(216, 166, 87, 0.5)';
-          ctx.fill();
-
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(216, 166, 87, 0.5)'; ctx.fill();
           for (let j = i + 1; j < COUNT; j++) {
             const q = particles[j];
-            const dx = p.x - q.x;
-            const dy = p.y - q.y;
+            const dx = p.x - q.x, dy = p.y - q.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < MAX_DIST) {
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(q.x, q.y);
+              ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
               ctx.strokeStyle = 'rgba(216, 166, 87, ' + (0.15 * (1 - dist / MAX_DIST)) + ')';
-              ctx.lineWidth = 0.5;
-              ctx.stroke();
+              ctx.lineWidth = 0.5; ctx.stroke();
             }
           }
         }
         requestAnimationFrame(draw);
       }
-
-      init();
-      draw();
+      init(); draw();
       window.addEventListener('resize', resize);
     })();
   </script>

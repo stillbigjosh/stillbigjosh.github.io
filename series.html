@@ -106,8 +106,32 @@
   }
   .nav-back:hover { color: var(--accent); }
 
+  /* ── Hero wrap (particle canvas) ─────────────────────────────── */
+  .hero-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 40%, rgba(216,166,87,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 80% 30%, rgba(254,128,25,0.09) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-wrap canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
   /* ── Hero ─────────────────────────────────────────────────────── */
   .series-hero {
+    position: relative;
     max-width: var(--main-width);
     margin: 0 auto;
     padding: 56px 24px 0;
@@ -293,6 +317,20 @@
     margin: 0 auto;
   }
 
+  /* ── Scroll reveal ──────────────────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.08s; }
+  .reveal-delay-2 { transition-delay: 0.16s; }
+
   /* ── Responsive ──────────────────────────────────────────────── */
   @media (max-width: 640px) {
     .nav-inner { padding: 12px 16px; }
@@ -309,11 +347,14 @@
   <nav class="nav">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">stillbigjosh<span class="dot">_</span></a>
-      <a href="index.html#projects" class="nav-back">&larr; back to projects</a>
+      <a href="projects.html" class="nav-back">&larr; back to projects</a>
     </div>
   </nav>
 
-  <header class="series-hero" id="hero"></header>
+  <div class="hero-wrap">
+    <canvas id="hero-particles"></canvas>
+    <header class="series-hero" id="hero"></header>
+  </div>
   <section class="parts">
     <p class="parts-label">Reading Order</p>
     <div class="parts-list" id="parts-list"></div>
@@ -442,7 +483,7 @@
       series.parts.forEach(function (part, i) {
         var a = document.createElement('a');
         a.href = 'writeup.html?file=' + encodeURIComponent(part.file);
-        a.className = 'part-card';
+        a.className = 'part-card reveal reveal-delay-' + ((i % 2) + 1);
 
         var numDiv = document.createElement('div');
         numDiv.className = 'part-num';
@@ -502,6 +543,41 @@
           }, 2000);
         });
       });
+
+    })();
+
+    (function () {
+      var reveals = document.querySelectorAll('.reveal');
+      var ro = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); }
+          });
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      );
+      reveals.forEach(function (el) { ro.observe(el); });
+    })();
+
+    (function () {
+      var canvas = document.getElementById('hero-particles');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var w, h, particles;
+      var COUNT = 50, MAX_DIST = 120;
+      function resize() { var wrap = canvas.parentElement; w = canvas.width = wrap.offsetWidth; h = canvas.height = wrap.offsetHeight; }
+      function init() { resize(); particles = []; for (var i = 0; i < COUNT; i++) particles.push({ x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4, r: Math.random()*1.8+0.6 }); }
+      function draw() {
+        ctx.clearRect(0,0,w,h);
+        for (var i = 0; i < COUNT; i++) {
+          var p = particles[i]; p.x += p.vx; p.y += p.vy;
+          if (p.x<0) p.x=w; if (p.x>w) p.x=0; if (p.y<0) p.y=h; if (p.y>h) p.y=0;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle='rgba(216,166,87,0.5)'; ctx.fill();
+          for (var j = i+1; j < COUNT; j++) { var q = particles[j], dx = p.x-q.x, dy = p.y-q.y, dist = Math.sqrt(dx*dx+dy*dy); if (dist<MAX_DIST) { ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.strokeStyle='rgba(216,166,87,'+(0.15*(1-dist/MAX_DIST))+')'; ctx.lineWidth=0.5; ctx.stroke(); } }
+        }
+        requestAnimationFrame(draw);
+      }
+      init(); draw(); window.addEventListener('resize', resize);
     })();
   </script>
 

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Projects — stillbigjosh">
+  <title>Projects — stillbigjosh</title>
+  <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo" style="text-decoration:none;">stillbigjosh<span class="dot">_</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">about</a></li>
+        <li><a href="projects.html" class="active">projects</a></li>
+        <li><a href="writings.html">writings</a></li>
+        <li><a href="recognition.html">recognition</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="hero-wrap">
+    <canvas id="hero-particles"></canvas>
+    <div class="page-header">
+      <h1>Projects</h1>
+      <p>Tools, platforms, and writeup series.</p>
+    </div>
+  </div>
+
+  <section class="section" id="projects">
+    <div class="grid-2">
+
+      <a href="https://herculessuite.io" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
+        <p class="project-name">Hercules Suite</p>
+        <p class="project-type">Enterprise BEC Simulation Platform</p>
+        <p class="project-desc">Africa's first native Business Email Compromise simulation platform for enterprise security teams.</p>
+        <span class="project-link">&rarr; herculessuite.io</span>
+      </a>
+
+      <a href="https://github.com/stillbigjosh/Neo" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
+        <p class="project-name">Neo C2</p>
+        <p class="project-type">Open-Source C2 Framework</p>
+        <p class="project-desc">Command and control framework for red team operations and adversary simulation.</p>
+        <span class="project-link">&rarr; view on github</span>
+      </a>
+
+      <a href="https://github.com/stillbigjosh/powershell_obfuscator" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
+        <p class="project-name">PowerShell Obfuscator</p>
+        <p class="project-type">Windows &middot; Evasion &middot; AV</p>
+        <p class="project-desc">Auxiliary utility for PowerShell scripts. Applies multiple layers of obfuscation while preserving their functionality.</p>
+        <span class="project-link">&rarr; view on github</span>
+      </a>
+
+      <a href="series.html?series=ad" class="card project-card reveal reveal-delay-2">
+        <p class="project-name">Active Directory Series</p>
+        <p class="project-type">Purple Team &middot; Active Directory &middot; Elastic</p>
+        <p class="project-desc">Building and attacking Active Directory environments with full defensive visibility, from deploying a multi-domain cyber range to structured detection scenarios.</p>
+        <span class="project-link">&rarr; view series (2 parts)</span>
+      </a>
+
+      <a href="series.html?series=adaptix" class="card project-card reveal reveal-delay-1">
+        <p class="project-name">Hardening Adaptix C2 Series</p>
+        <p class="project-type">Red Team &middot; C2 Infrastructure &middot; OPSEC</p>
+        <p class="project-desc">Multi-part series on hardening an Adaptix C2 deployment: setup, reducing infrastructure fingerprints, and modifying beacon source code to remove static detection signatures.</p>
+        <span class="project-link">&rarr; view series (4 parts)</span>
+      </a>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    stillbigjosh &copy; 2026 &middot; built with purpose
+  </footer>
+
+  <script>
+    (function () {
+      const reveals = document.querySelectorAll('.reveal');
+      const ro = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); }
+          });
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      );
+      reveals.forEach((el) => ro.observe(el));
+    })();
+
+    (function () {
+      const canvas = document.getElementById('hero-particles');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w, h, particles;
+      const COUNT = 50, MAX_DIST = 120;
+      function resize() { const wrap = canvas.parentElement; w = canvas.width = wrap.offsetWidth; h = canvas.height = wrap.offsetHeight; }
+      function init() { resize(); particles = []; for (let i = 0; i < COUNT; i++) particles.push({ x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4, r: Math.random()*1.8+0.6 }); }
+      function draw() {
+        ctx.clearRect(0,0,w,h);
+        for (let i = 0; i < COUNT; i++) {
+          const p = particles[i]; p.x += p.vx; p.y += p.vy;
+          if (p.x<0) p.x=w; if (p.x>w) p.x=0; if (p.y<0) p.y=h; if (p.y>h) p.y=0;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle='rgba(216,166,87,0.5)'; ctx.fill();
+          for (let j = i+1; j < COUNT; j++) { const q = particles[j], dx = p.x-q.x, dy = p.y-q.y, dist = Math.sqrt(dx*dx+dy*dy); if (dist<MAX_DIST) { ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.strokeStyle='rgba(216,166,87,'+(0.15*(1-dist/MAX_DIST))+')'; ctx.lineWidth=0.5; ctx.stroke(); } }
+        }
+        requestAnimationFrame(draw);
+      }
+      init(); draw(); window.addEventListener('resize', resize);
+    })();
+  </script>
+
+</body>
+</html>
