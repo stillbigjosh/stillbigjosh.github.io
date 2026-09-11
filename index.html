@@ -128,6 +128,7 @@
 
     /* ── Per-section color identity ───────────────────────────────── */
     #about    { --section-color: var(--accent); }
+    #certs    { --section-color: var(--teal);   }
     #projects { --section-color: var(--orange); }
     #blog     { --section-color: var(--teal);   }
     #medium   { --section-color: var(--blue);   }
@@ -417,6 +418,65 @@
       margin-bottom: 12px;
     }
 
+    /* ── Certifications ──────────────────────────────────────────── */
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .cert-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 14px;
+      padding: 24px 16px;
+    }
+    .cert-badge {
+      width: 72px;
+      height: 72px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--bg-alt);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cert-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: brightness(0.92) saturate(0.85);
+      transition: filter 0.3s ease;
+    }
+    .card.cert-card:hover .cert-badge img {
+      filter: brightness(1) saturate(1);
+    }
+    .cert-info { display: flex; flex-direction: column; gap: 4px; }
+    .cert-name {
+      color: var(--heading);
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .cert-issuer {
+      color: var(--section-color, var(--teal));
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    .cert-desc {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+    #certs .card:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3),
+                  0 0 0 1px var(--teal),
+                  0 0 20px var(--glow-teal);
+    }
+
     /* ── Projects ─────────────────────────────────────────────────── */
     .project-card { display: flex; flex-direction: column; gap: 8px; }
     .project-name { color: var(--heading); font-size: 16px; font-weight: 700; }
@@ -508,6 +568,8 @@
       .hero-name { font-size: 36px; }
       .stat-grid { grid-template-columns: 1fr; }
       .about-grid { grid-template-columns: 1fr; }
+      .cert-grid { grid-template-columns: 1fr; }
+      .cert-card { flex-direction: row; text-align: left; }
     }
   </style>
 </head>
@@ -519,6 +581,7 @@
       <span class="nav-logo">stillbigjosh<span class="dot">_</span></span>
       <ul class="nav-links">
         <li><a href="#about">about</a></li>
+        <li><a href="#certs">certs</a></li>
         <li><a href="#projects">projects</a></li>
         <li><a href="#medium">medium</a></li>
         <li><a href="#recognition">recognition</a></li>
@@ -536,7 +599,7 @@
       <div class="hero-inner">
         <div>
           <p class="hero-prompt" id="hero-prompt"></p>
-          <h1 class="hero-name">stillbigjosh <span class="certs">CRTO, CPTS, CRTA</span></h1>
+          <h1 class="hero-name">stillbigjosh</h1>
           <p class="hero-subtitle">OFFENSIVE SECURITY &middot; FOUNDER &middot; RESEARCHER</p>
 
           <div class="hero-cta">
@@ -577,6 +640,53 @@
           <span class="tag">Rust</span>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ── Certifications ─────────────────────────────────────────── -->
+  <section class="section" id="certs">
+    <div class="section-head reveal">
+      <span class="section-hash">##</span>
+      <h2 class="section-title">Certifications</h2>
+    </div>
+    <div class="cert-grid">
+
+      <div class="card cert-card hoverable reveal reveal-delay-1">
+        <div class="cert-badge">
+          <img src="image/crto-badge.png" alt="Certified Red Team Operator badge">
+        </div>
+        <div class="cert-info">
+          <p class="cert-name">Certified Red Team Operator</p>
+          <p class="cert-issuer">Zero-Point Security</p>
+          <p class="cert-desc">Red team operations, tradecraft, and adversary simulation using Cobalt Strike.</p>
+        </div>
+      </div>
+
+      <div class="card cert-card hoverable reveal reveal-delay-2">
+        <div class="cert-badge">
+          <img src="image/cpts-badge.png" alt="HTB Certified Penetration Testing Specialist badge">
+        </div>
+        <div class="cert-info">
+          <p class="cert-name">Certified Penetration Testing Specialist</p>
+          <p class="cert-issuer">Hack The Box</p>
+          <p class="cert-desc">Full-scope penetration testing across networks, Active Directory, and web applications.</p>
+        </div>
+      </div>
+
+      <div class="card cert-card hoverable reveal reveal-delay-3">
+        <div class="cert-badge">
+          <img src="image/crta-badge.png" alt="Certified Red Team Analyst badge">
+        </div>
+        <div class="cert-info">
+          <p class="cert-name">Certified Red Team Analyst</p>
+          <p class="cert-issuer">CyberWarfare Labs</p>
+          <p class="cert-desc">Penetration testing across Linux, Windows and Active Directory environments.</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="blog-more" style="margin-top:22px;">
+      <span class="btn-outline" style="cursor:default;">... and others</span>
     </div>
   </section>
 
