@@ -166,7 +166,6 @@ The rule also excludes specific known-good processes like Process Explorer, anti
 
 ### Opsec Considerations
 
-These are open-ended questions to drive your own testing, this is not a bypass guide.
 
 - What is the GrantedAccess value your tool uses? Look it up in the Sysmon Event ID 10 log. Compare it against the exclusion list in the rule definition. Research what the minimum access rights are to actually read LSASS memory.
 - Does the CallTrace field in the Sysmon event reveal which DLL performed the access? The **Potential Credential Access via LSASS Memory Dump** rule specifically looks for `dbghelp.dll` or `dbgcore.dll` in the CallTrace. Tools that use different DLLs for memory reading may evade that specific rule.
@@ -235,8 +234,6 @@ The **Potential Credential Access via Windows Utilities** rule matches process c
 The **LSASS Memory Dump Creation** rule takes a different approach. It monitors for file creation events where the file name matches known dump file patterns (such as `lsass*.dmp`, `dumpert.dmp`, `Andrew.dmp`, or `SQLDmpr*.mdmp`) written by processes that are not part of the expected crash-handling or diagnostics workflow.
 
 ### Opsec Considerations
-
-These are open-ended questions to drive your own testing, this is not a bypass guide.
 
 - The `comsvcs.dll` technique is well-documented and the command-line pattern is the primary detection anchor. Research what happens if you copy `comsvcs.dll` to a different name or location before invoking it. Does the rule check the DLL name in the command line, the DLL path, or something else?
 - The MiniDump export can be referenced by ordinal (`#24`) instead of by name. Test whether both forms produce the same detection outcome.
@@ -340,8 +337,6 @@ The rule explicitly excludes computer accounts (names ending with `$`) and Azure
 The **FirstTime Seen Account Performing DCSync** rule adds a behavioral layer on top. It uses a `new_terms` rule type that fires only when a user account is seen performing DCSync for the first time. If the same account has replicated before within the rule's lookback window, the rule does not fire again.
 
 ### Opsec Considerations
-
-These are open-ended questions to drive your own testing, this is not a bypass guide.
 
 - DCSync cannot be performed without triggering the replication GUIDs. The GUIDs are integral to the DRSUAPI protocol. There is no protocol-level alternative. The opsec question for DCSync is not "how do I avoid the event" but "is anyone watching for the event."
 - What happens when you target a single user (`-just-dc-user krbtgt`) versus the full domain? The detection fires on the first 4662 event regardless. But the total event count differs. Document the count for each.
@@ -617,8 +612,6 @@ Both conditions (suspicious executable **AND** suspicious path) must be met for 
 
 ### Opsec Considerations
 
-These are open-ended questions to drive your own testing, this is not a bypass guide.
-
 - The rule fires on task **execution**, not creation. This means the task must actually run for the detection to trigger. A task created but never executed will produce a 4698 event in Discover but no prebuilt alert. Research whether there is a prebuilt rule specifically for 4698 task creation events.
 - The rule checks `process.pe.original_file_name`, not `process.name`. This means renaming `cmd.exe` to `svchost.exe` will still trigger the rule because the PE header's original filename remains `Cmd.Exe`. Test this.
 - What happens if the scheduled task runs a custom binary (not a LOLBin) that is not in the rule's executable list? The rule is limited to a specific set of known-abused binaries. A compiled executable with a unique name would not match.
@@ -736,8 +729,6 @@ This is a critical distinction: Script Block Logging captures the **decoded cont
 
 ### Opsec Considerations
 
-These are open-ended questions to drive your own testing, this is not a bypass guide.
-
 - If Script Block Logging is enabled, encoding and obfuscation are transparent to the 4104 event. The decoded script block text contains the actual code. Research what layer of the detection stack obfuscation actually targets (hint: it targets signature-based file scanning and command-line logging, not runtime script logging).
 - Compare running `powershell.exe` versus `pwsh.exe` (PowerShell 7, if available). Some detection rules reference `powershell.exe` by name. Research whether the prebuilt rules also cover `pwsh.exe`.
 - What happens if you load the `System.Management.Automation` .NET assembly in a custom host process (not named `powershell.exe`)? The process creation rule would not match, but Script Block Logging still fires because it hooks the PowerShell engine, not the process name. Verify this in your lab.
@@ -812,8 +803,6 @@ The **Suspicious Service was Installed in the System** rule fires if `impacket-s
 Note that `impacket-secretsdump` can also operate **without** creating a service if the RemoteRegistry service is already running on the target. In that case, the service installation rule will **NOT** fire. The telemetry shifts to registry access events and network logon events, which may not have dedicated prebuilt rules.
 
 ### Opsec Considerations
-
-These are open-ended questions to drive your own testing, this is not a bypass guide.
 
 - Compare the detection footprint of secretsdump with and without the `-just-dc` flag. Without it: service creation + registry hive reads. With it: DCSync (Scenario 3). They are fundamentally different code paths with different detection surfaces.
 - Test whether the RemoteRegistry service is already running on your GOAD-Light hosts. If it is, secretsdump may skip the service creation step entirely. What telemetry remains?
