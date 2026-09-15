@@ -48,6 +48,20 @@ Most RBAC audit tools list permissions and flag things that look wrong. [kube-re
 
 It is a single Rust binary. You can drop it on a compromised pod, a worker node, or run it from your attack machine. It needs only a token and an API server address.
 
+### Reading Kubernetes Identity Strings
+
+Throughout this post, you will see identities written like `system:serviceaccount:development:code-server`. This is the standard Kubernetes format for service account identities. Here is how it breaks down:
+
+```
+system:serviceaccount:development:code-server
+│                     │           │
+│                     │           └─ ServiceAccount name
+│                     └─ Namespace
+└─ Identity type (serviceaccount, node, etc.)
+```
+
+So `system:serviceaccount:kube-system:bootstrap-signer` means: a ServiceAccount named `bootstrap-signer` in the `kube-system` namespace. User identities follow a simpler format like `kubernetes-admin` or `prod-debug-agent` with no namespace prefix.
+
 ---
 
 ## Scan 1: Foothold Reconnaissance
