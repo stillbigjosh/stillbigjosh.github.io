@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://stillbigjosh.com/sitemap.xml

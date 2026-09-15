@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://stillbigjosh.com/</loc></url>
+  <url><loc>https://stillbigjosh.com/projects.html</loc></url>
+  <url><loc>https://stillbigjosh.com/writings.html</loc></url>
+  <url><loc>https://stillbigjosh.com/recognition.html</loc></url>
+  <url><loc>https://stillbigjosh.com/series.html?series=kubernetes</loc></url>
+  <url><loc>https://stillbigjosh.com/series.html?series=ad</loc></url>
+  <url><loc>https://stillbigjosh.com/series.html?series=adaptix</loc></url>
+  <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/kube-reaper-breakout.md</loc></url>
+  <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/goad-writeup.md</loc></url>
+  <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/detection-scenarios.md</loc></url>
+  <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/adaptix-setup.md</loc></url>
+  <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/adaptix-hardening.md</loc></url>
+  <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/adaptix-beacon-mods.md</loc></url>
+  <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/adaptix-cipher-mods.md</loc></url>
+</urlset>
