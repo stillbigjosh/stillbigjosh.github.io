@@ -398,6 +398,20 @@
           }
         ]
       },
+      kubernetes: {
+        title: 'Kubernetes Security',
+        kicker: 'Kubernetes . RBAC Attack Paths . Privilege Escalation',
+        desc: 'Offensive Kubernetes security: mapping RBAC attack paths, breaking out of pods to nodes, stealing credentials from the kubelet filesystem, and pivoting across identities to cluster compromise.',
+        tags: 'Kubernetes . kube-reaper . RBAC . Pentesting',
+        parts: [
+          {
+            file: 'writeups/kube-reaper-breakout.md',
+            title: 'From Developer Pod to Cluster Admin using Kube-Reaper',
+            kicker: 'Kubernetes . RBAC Attack Paths . Privilege Escalation',
+            desc: 'Using kube-reaper to map RBAC attack paths in a Kubernetes cluster, then manually validating every finding: privileged pod breakout, credential theft, identity pivoting, and unconventional permission abuse.'
+          }
+        ]
+      },
       ad: {
         title: 'Active Directory',
         kicker: 'Purple Team . Active Directory . Elastic',

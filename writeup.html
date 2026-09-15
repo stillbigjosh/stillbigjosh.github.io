@@ -653,6 +653,16 @@
     // Groups define sidebar series folders. Ungrouped items appear at top level.
     var SIDEBAR = [
       {
+        group: 'Kubernetes Security series',
+        items: [
+          {
+            file: 'writeups/kube-reaper-breakout.md',
+            title: 'From Developer Pod to Cluster Admin using Kube-Reaper',
+            kicker: 'Kubernetes · RBAC Attack Paths'
+          }
+        ]
+      },
+      {
         group: 'Hardening Adaptix C2 series',
         items: [
           {
@@ -784,6 +794,11 @@
         // h2 -> prepend the "##" tag prefix
         div.querySelectorAll('h2').forEach(function (h) {
           h.innerHTML = '<span class="h-tag">##</span>' + h.innerHTML;
+        });
+
+        // external links -> open in new tab
+        div.querySelectorAll('a[href^="http"]').forEach(function (a) {
+          a.target = '_blank'; a.rel = 'noopener';
         });
 
         // code blocks -> dim comment lines (lines starting with #)

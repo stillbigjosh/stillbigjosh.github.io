@@ -1,0 +1,262 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 820" font-family="'Segoe UI', 'Inter', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="controlBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="workerBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0f3460"/>
+    </linearGradient>
+    <linearGradient id="nsBg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#16213e"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowStrong">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 z" fill="#4a9eff"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 z" fill="#ff4444"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="820" rx="12" fill="#0d1117"/>
+
+  <!-- Title -->
+  <text x="550" y="38" text-anchor="middle" fill="#e6edf3" font-size="20" font-weight="700" letter-spacing="0.5">Kubernetes Attack Lab Topology</text>
+  <text x="550" y="58" text-anchor="middle" fill="#7d8590" font-size="12">3 Nodes · 10 Namespaces · Calico CNI · v1.35.1</text>
+
+  <!-- Network backbone line -->
+  <line x1="120" y1="290" x2="980" y2="290" stroke="#30363d" stroke-width="3" stroke-dasharray="8,4"/>
+  <text x="550" y="283" text-anchor="middle" fill="#484f58" font-size="10" font-weight="600">CLUSTER NETWORK  10.3.10.0/24</text>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CONTROL PLANE NODE -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <rect x="330" y="80" width="440" height="190" rx="10" fill="url(#controlBg)" stroke="#30363d" stroke-width="1.5"/>
+
+  <!-- Node header -->
+  <rect x="330" y="80" width="440" height="32" rx="10" fill="#21262d"/>
+  <rect x="330" y="100" width="440" height="12" fill="#21262d"/>
+  <circle cx="348" cy="96" r="5" fill="#3fb950"/>
+  <text x="362" y="100" fill="#e6edf3" font-size="13" font-weight="700">k8s-control-plane-1</text>
+  <text x="730" y="100" fill="#7d8590" font-size="11" text-anchor="end">10.3.10.20</text>
+
+  <!-- Control plane pods -->
+  <rect x="345" y="122" width="120" height="28" rx="5" fill="#1c2128" stroke="#3fb950" stroke-width="1"/>
+  <text x="405" y="140" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="600">kube-apiserver</text>
+
+  <rect x="475" y="122" width="80" height="28" rx="5" fill="#1c2128" stroke="#3fb950" stroke-width="1"/>
+  <text x="515" y="140" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="600">etcd</text>
+
+  <rect x="565" y="122" width="95" height="28" rx="5" fill="#1c2128" stroke="#3fb950" stroke-width="1"/>
+  <text x="612" y="140" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="600">scheduler</text>
+
+  <rect x="670" y="122" width="85" height="28" rx="5" fill="#1c2128" stroke="#3fb950" stroke-width="1"/>
+  <text x="712" y="140" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="600">ctrl-mgr</text>
+
+  <rect x="345" y="158" width="100" height="28" rx="5" fill="#1c2128" stroke="#da3633" stroke-width="1.2"/>
+  <text x="395" y="176" text-anchor="middle" fill="#da3633" font-size="10" font-weight="600">calico-node</text>
+  <text x="395" y="186" text-anchor="middle" fill="#f85149" font-size="7">PRIVILEGED</text>
+
+  <rect x="455" y="158" width="85" height="28" rx="5" fill="#1c2128" stroke="#58a6ff" stroke-width="1"/>
+  <text x="497" y="176" text-anchor="middle" fill="#58a6ff" font-size="10" font-weight="600">coredns x2</text>
+
+  <!-- Roles label -->
+  <text x="345" y="210" fill="#484f58" font-size="9" font-weight="600">ROLES</text>
+  <text x="345" y="222" fill="#7d8590" font-size="9">control-plane, master</text>
+
+  <!-- admin.conf callout -->
+  <rect x="345" y="234" width="180" height="22" rx="4" fill="#1c2128" stroke="#f0883e" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="355" y="249" fill="#f0883e" font-size="9">🔑 /etc/kubernetes/admin.conf</text>
+
+  <!-- Vertical connector from control plane to backbone -->
+  <line x1="550" y1="270" x2="550" y2="290" stroke="#30363d" stroke-width="2"/>
+  <circle cx="550" cy="290" r="4" fill="#30363d"/>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- WORKER NODE 1 -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <rect x="50" y="320" width="320" height="160" rx="10" fill="url(#workerBg)" stroke="#30363d" stroke-width="1.5"/>
+
+  <rect x="50" y="320" width="320" height="32" rx="10" fill="#21262d"/>
+  <rect x="50" y="340" width="320" height="12" fill="#21262d"/>
+  <circle cx="68" cy="336" r="5" fill="#58a6ff"/>
+  <text x="82" y="340" fill="#e6edf3" font-size="13" font-weight="700">k8s-worker-1</text>
+  <text x="340" y="340" fill="#7d8590" font-size="11" text-anchor="end">10.3.10.30</text>
+
+  <rect x="65" y="362" width="100" height="28" rx="5" fill="#1c2128" stroke="#da3633" stroke-width="1.2"/>
+  <text x="115" y="380" text-anchor="middle" fill="#da3633" font-size="10" font-weight="600">calico-node</text>
+  <text x="115" y="390" text-anchor="middle" fill="#f85149" font-size="7">PRIVILEGED</text>
+
+  <rect x="175" y="362" width="100" height="28" rx="5" fill="#1c2128" stroke="#58a6ff" stroke-width="1"/>
+  <text x="225" y="380" text-anchor="middle" fill="#58a6ff" font-size="10" font-weight="600">calico-typha</text>
+
+  <rect x="285" y="362" width="70" height="28" rx="5" fill="#1c2128" stroke="#da3633" stroke-width="1"/>
+  <text x="320" y="380" text-anchor="middle" fill="#da3633" font-size="10" font-weight="600">kube-proxy</text>
+
+  <text x="65" y="420" fill="#484f58" font-size="9" font-weight="600">ROLES</text>
+  <text x="65" y="432" fill="#7d8590" font-size="9">worker</text>
+
+  <!-- Connector worker-1 -->
+  <line x1="210" y1="290" x2="210" y2="320" stroke="#30363d" stroke-width="2"/>
+  <circle cx="210" cy="290" r="4" fill="#30363d"/>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- WORKER NODE 2 -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <rect x="730" y="320" width="320" height="190" rx="10" fill="url(#workerBg)" stroke="#30363d" stroke-width="1.5"/>
+
+  <rect x="730" y="320" width="320" height="32" rx="10" fill="#21262d"/>
+  <rect x="730" y="340" width="320" height="12" fill="#21262d"/>
+  <circle cx="748" cy="336" r="5" fill="#58a6ff"/>
+  <text x="762" y="340" fill="#e6edf3" font-size="13" font-weight="700">k8s-worker-2</text>
+  <text x="1020" y="340" fill="#7d8590" font-size="11" text-anchor="end">10.3.10.31</text>
+
+  <rect x="745" y="362" width="100" height="28" rx="5" fill="#1c2128" stroke="#da3633" stroke-width="1.2"/>
+  <text x="795" y="380" text-anchor="middle" fill="#da3633" font-size="10" font-weight="600">calico-node</text>
+  <text x="795" y="390" text-anchor="middle" fill="#f85149" font-size="7">PRIVILEGED</text>
+
+  <!-- code-server pod (foothold) with glow -->
+  <rect x="855" y="362" width="180" height="38" rx="6" fill="#1c2128" stroke="#f0883e" stroke-width="2" filter="url(#glow)"/>
+  <text x="945" y="380" text-anchor="middle" fill="#f0883e" font-size="11" font-weight="700">code-server</text>
+  <text x="945" y="394" text-anchor="middle" fill="#d29922" font-size="8">SA: code-server · development</text>
+
+  <!-- YOU ARE HERE callout -->
+  <rect x="905" y="406" width="110" height="20" rx="10" fill="#f0883e" filter="url(#glowStrong)"/>
+  <text x="960" y="419" text-anchor="middle" fill="#0d1117" font-size="9" font-weight="800">⚡ FOOTHOLD</text>
+
+  <!-- prod-backend pod -->
+  <rect x="745" y="438" width="160" height="28" rx="5" fill="#1c2128" stroke="#8b949e" stroke-width="1"/>
+  <text x="825" y="456" text-anchor="middle" fill="#8b949e" font-size="10" font-weight="600">prod-backend</text>
+  <text x="825" y="466" text-anchor="middle" fill="#484f58" font-size="8">production</text>
+
+  <text x="745" y="492" fill="#484f58" font-size="9" font-weight="600">ROLES</text>
+  <text x="745" y="504" fill="#7d8590" font-size="9">worker</text>
+
+  <!-- Connector worker-2 -->
+  <line x1="890" y1="290" x2="890" y2="320" stroke="#30363d" stroke-width="2"/>
+  <circle cx="890" cy="290" r="4" fill="#30363d"/>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- NAMESPACE TABLE -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <rect x="50" y="540" width="530" height="260" rx="10" fill="#161b22" stroke="#21262d" stroke-width="1.5"/>
+
+  <!-- Header -->
+  <rect x="50" y="540" width="530" height="30" rx="10" fill="#21262d"/>
+  <rect x="50" y="558" width="530" height="12" fill="#21262d"/>
+  <text x="70" y="560" fill="#e6edf3" font-size="12" font-weight="700">Namespaces</text>
+  <text x="300" y="560" fill="#7d8590" font-size="11" font-weight="600">Workloads</text>
+  <text x="480" y="560" fill="#7d8590" font-size="11" font-weight="600">PSS</text>
+
+  <!-- Rows -->
+  <!-- development -->
+  <text x="70" y="590" fill="#58a6ff" font-size="11" font-weight="600">development</text>
+  <text x="300" y="590" fill="#c9d1d9" font-size="10">code-server, developer SA</text>
+  <rect x="475" y="578" width="65" height="17" rx="3" fill="#1f6feb33" stroke="#1f6feb" stroke-width="0.8"/>
+  <text x="507" y="590" text-anchor="middle" fill="#58a6ff" font-size="9" font-weight="600">baseline</text>
+
+  <!-- cicd -->
+  <text x="70" y="614" fill="#f85149" font-size="11" font-weight="700">cicd</text>
+  <text x="300" y="614" fill="#7d8590" font-size="10">empty</text>
+  <rect x="475" y="602" width="65" height="17" rx="3" fill="#da363333" stroke="#da3633" stroke-width="0.8"/>
+  <text x="507" y="614" text-anchor="middle" fill="#f85149" font-size="9" font-weight="700">NONE</text>
+
+  <!-- production -->
+  <text x="70" y="638" fill="#f0883e" font-size="11" font-weight="600">production</text>
+  <text x="300" y="638" fill="#c9d1d9" font-size="10">prod-backend</text>
+  <rect x="475" y="626" width="65" height="17" rx="3" fill="#da363333" stroke="#da3633" stroke-width="0.8"/>
+  <text x="507" y="638" text-anchor="middle" fill="#f85149" font-size="9" font-weight="700">NONE</text>
+
+  <!-- kube-system -->
+  <text x="70" y="662" fill="#e6edf3" font-size="11">kube-system</text>
+  <text x="300" y="662" fill="#c9d1d9" font-size="10">apiserver, etcd, scheduler ...</text>
+  <rect x="475" y="650" width="65" height="17" rx="3" fill="#da363333" stroke="#da3633" stroke-width="0.8"/>
+  <text x="507" y="662" text-anchor="middle" fill="#f85149" font-size="9" font-weight="700">NONE</text>
+
+  <!-- calico-system -->
+  <text x="70" y="686" fill="#e6edf3" font-size="11">calico-system</text>
+  <text x="300" y="686" fill="#c9d1d9" font-size="10">calico-node DaemonSet</text>
+  <rect x="475" y="674" width="80" height="17" rx="3" fill="#23862533" stroke="#238636" stroke-width="0.8"/>
+  <text x="515" y="686" text-anchor="middle" fill="#3fb950" font-size="9" font-weight="600">privileged</text>
+
+  <!-- default -->
+  <text x="70" y="710" fill="#7d8590" font-size="11">default</text>
+  <text x="300" y="710" fill="#7d8590" font-size="10">empty</text>
+  <rect x="475" y="698" width="65" height="17" rx="3" fill="#da363333" stroke="#da3633" stroke-width="0.8"/>
+  <text x="507" y="710" text-anchor="middle" fill="#f85149" font-size="9" font-weight="700">NONE</text>
+
+  <!-- other namespaces -->
+  <text x="70" y="734" fill="#484f58" font-size="10">kube-public, kube-node-lease, calico-apiserver, tigera-operator</text>
+
+  <!-- Legend note -->
+  <text x="70" y="770" fill="#da3633" font-size="9" font-weight="600">⬤</text>
+  <text x="82" y="770" fill="#7d8590" font-size="9">No PSS = any pod spec accepted (privileged, hostPath, hostPID, hostNetwork)</text>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- KEY IDENTITIES -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <rect x="610" y="540" width="440" height="260" rx="10" fill="#161b22" stroke="#21262d" stroke-width="1.5"/>
+
+  <rect x="610" y="540" width="440" height="30" rx="10" fill="#21262d"/>
+  <rect x="610" y="558" width="440" height="12" fill="#21262d"/>
+  <text x="630" y="560" fill="#e6edf3" font-size="12" font-weight="700">Key Identities</text>
+
+  <!-- code-server SA -->
+  <circle cx="635" cy="588" r="6" fill="#f0883e"/>
+  <text x="650" y="585" fill="#f0883e" font-size="11" font-weight="700">code-server</text>
+  <text x="760" y="585" fill="#484f58" font-size="10">ServiceAccount</text>
+  <text x="650" y="599" fill="#7d8590" font-size="9">pods, services, configmaps in development + cicd</text>
+
+  <!-- developer SA -->
+  <circle cx="635" cy="624" r="6" fill="#d29922"/>
+  <text x="650" y="621" fill="#d29922" font-size="11" font-weight="700">developer</text>
+  <text x="733" y="621" fill="#484f58" font-size="10">ServiceAccount</text>
+  <text x="650" y="635" fill="#7d8590" font-size="9">port-forward only · non-expiring token in secret</text>
+  <rect x="900" y="612" width="60" height="16" rx="3" fill="#da363333" stroke="#da3633" stroke-width="0.8"/>
+  <text x="930" y="624" text-anchor="middle" fill="#f85149" font-size="8" font-weight="600">TOKEN</text>
+
+  <!-- prod-debug-agent -->
+  <circle cx="635" cy="660" r="6" fill="#da3633"/>
+  <text x="650" y="657" fill="#da3633" font-size="11" font-weight="700">prod-debug-agent</text>
+  <text x="792" y="657" fill="#484f58" font-size="10">User</text>
+  <text x="650" y="671" fill="#7d8590" font-size="9">read secrets cluster-wide · create rolebindings in production</text>
+
+  <!-- kubernetes-admin -->
+  <circle cx="635" cy="696" r="6" fill="#f85149"/>
+  <text x="650" y="693" fill="#f85149" font-size="11" font-weight="700">kubernetes-admin</text>
+  <text x="793" y="693" fill="#484f58" font-size="10">User</text>
+  <text x="650" y="707" fill="#7d8590" font-size="9">cluster-admin · full control</text>
+
+  <!-- Attack path arrows -->
+  <text x="630" y="740" fill="#484f58" font-size="9" font-weight="600">ATTACK PATH</text>
+
+  <!-- Simplified path: code-server -> cicd breakout -> admin -->
+  <rect x="630" y="750" width="90" height="20" rx="4" fill="#1c2128" stroke="#f0883e" stroke-width="1"/>
+  <text x="675" y="764" text-anchor="middle" fill="#f0883e" font-size="8" font-weight="600">code-server</text>
+
+  <line x1="724" y1="760" x2="748" y2="760" stroke="#ff4444" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+
+  <rect x="752" y="750" width="80" height="20" rx="4" fill="#1c2128" stroke="#da3633" stroke-width="1"/>
+  <text x="792" y="764" text-anchor="middle" fill="#da3633" font-size="8" font-weight="600">cicd breakout</text>
+
+  <line x1="836" y1="760" x2="860" y2="760" stroke="#ff4444" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+
+  <rect x="864" y="750" width="75" height="20" rx="4" fill="#1c2128" stroke="#da3633" stroke-width="1"/>
+  <text x="901" y="764" text-anchor="middle" fill="#da3633" font-size="8" font-weight="600">node root</text>
+
+  <line x1="943" y1="760" x2="967" y2="760" stroke="#ff4444" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+
+  <rect x="971" y="750" width="62" height="20" rx="4" fill="#da363355" stroke="#f85149" stroke-width="1.2"/>
+  <text x="1002" y="764" text-anchor="middle" fill="#f85149" font-size="8" font-weight="700">admin</text>
+</svg>
