@@ -9,6 +9,8 @@ lead: "Using kube-reaper to map RBAC attack paths in a Kubernetes cluster, then 
 
 ![Lab Topology](image/kube-reaper-lab-topology.svg)
 
+*Lab cluster designed by [SpecterOps](https://specterops.io/), adapted to run in a Proxmox environment.*
+
 The cluster runs Kubernetes v1.35.1 on Ubuntu 24.04 with Calico CNI. Three nodes, one control plane and two workers. Our initial foothold is a Mythic C2 callback on worker-2 running as the `developer` SA. From there, we port-forwarded into the `code-server` pod in the `development` namespace, which has the RBAC permissions we will be exploring.
 
 **Nodes:**
@@ -737,3 +739,9 @@ What would have stopped this attack chain:
 6. **Monitor ReplicaSet creation.** Audit policies should catch direct ReplicaSet creation, not just Deployments.
 
 Run [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) against your own cluster. The output tells you exactly where the gaps are and how an attacker would use them.
+
+---
+
+## Credits
+
+The Kubernetes attack lab used in this post was designed by [SpecterOps](https://specterops.io/). I adapted it to run in a Proxmox virtualization environment.
