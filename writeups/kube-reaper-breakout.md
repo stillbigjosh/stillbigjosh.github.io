@@ -139,7 +139,7 @@ Chain #1 [CRITICAL] Privileged Pod Breakout via
   Attack: exec into privileged container -> full node access
 ```
 
-Someone already deployed a privileged pod in cicd with the host root filesystem mounted. This pod has everything an attacker needs: privileged security context, access to the host PID namespace, host networking, and the entire host filesystem at `/`.
+I had already deployed a privileged pod in cicd with the host root filesystem mounted. This pod has everything an attacker needs: privileged security context, access to the host PID namespace, host networking, and the entire host filesystem at `/`.
 
 ### Namespace Security Map
 
