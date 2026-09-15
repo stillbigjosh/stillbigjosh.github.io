@@ -50,7 +50,13 @@ It is a single Rust binary. You can drop it on a compromised pod, a worker node,
 
 ## Scan 1: Foothold Reconnaissance
 
-Our initial access to the cluster came through a Mythic C2 callback running as the `developer` service account. That SA has `pods/portforward` permissions, which we used to port-forward into the `code-server` pod and access its VS Code web interface. From there, we are operating as the `code-server` service account, which has a much broader set of RBAC permissions. This is where [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) picks up. The `$CS_TOKEN` variable holds the projected service account token from `/var/run/secrets/kubernetes.io/serviceaccount/token`. We point [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) at the API server with this token:
+Our initial access to the cluster came through a Mythic C2 callback running as the `developer` service account. That SA has `pods/portforward` permissions, which we used to port-forward into the `code-server` pod and access its VS Code web interface. From there, we are operating as the `code-server` service account, which has a much broader set of RBAC permissions. This is where [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) picks up. First, we grab the projected service account token and store it in a variable:
+
+```bash
+[code-server pod] $ export CS_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+```
+
+We point [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) at the API server with this token:
 
 ```bash
 [code-server pod] $ kube-reaper --token $CS_TOKEN --server https://10.3.10.20:6443 --output terminal
