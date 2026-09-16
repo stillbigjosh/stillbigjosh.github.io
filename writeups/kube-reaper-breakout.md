@@ -184,13 +184,11 @@ The `cicd` namespace is the weak link. No PSS enforcement **and** we can create 
 **MEDIUM (Unconventional):**
 - Create ReplicaSets directly. This lets us deploy pods without the deployment audit trail. Most defenders monitor deployment creation, not direct ReplicaSet creation.
 
----
-
-## Manual Validation: The Privileged Pod Breakout
+### Manual Validation: The Privileged Pod Breakout
 
 [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) told us we can break out through cicd. Let us prove it, end-to-end, using only the code-server SA identity.
 
-### Step 1: Confirm permissions
+#### Step 1: Confirm permissions
 
 All commands in this validation run from inside the code-server pod on worker-2. We use `/tmp/kubectl` (downloaded earlier) and `/tmp/cs-kubeconfig` (a clean kubeconfig with only the code-server SA token, no admin client certificates).
 
@@ -218,7 +216,7 @@ No output. No `pod-security.kubernetes.io/enforce` label. The namespace accepts 
 
 We can create pods but cannot exec into them. This means we cannot use `kubectl exec` to interact with the pod after it starts. We need to embed our commands directly in the container startup command. In a real engagement you would use a reverse shell or C2 callback. For this validation, the pod collects proof data on startup and serves it over HTTP using `hostNetwork`.
 
-### Step 2: Deploy the self-extracting breakout pod
+#### Step 2: Deploy the self-extracting breakout pod
 
 We create a pod with every host-level access flag enabled. The container command does the node breakout automatically: it runs `chroot` to get root on the host, reads `/etc/shadow`, lists the kubelet PKI certificates, finds all projected SA tokens on the node, copies the kubelet client certificate and cluster CA to `/tmp`, and then starts a Python HTTP server to serve everything.
 
@@ -260,7 +258,7 @@ NAME              READY   STATUS    RESTARTS   AGE   IP           NODE
 reaper-breakout   1/1     Running   0          17s   10.3.10.31   k8s-worker-2
 ```
 
-### Step 3: Read the proof without exec
+#### Step 3: Read the proof without exec
 
 The pod uses `hostNetwork`, so it shares the node's IP address. The Python HTTP server listens on port 8888 at `10.3.10.31`. We retrieve the proof file with a simple curl, no exec needed:
 
@@ -296,7 +294,7 @@ Line by line, this tells us:
 
 The code-server SA created a pod. The pod broke out of the container. We read the proof over the network. No `kubectl exec` was used at any point.
 
-### Step 4: Steal identities from the node
+#### Step 4: Steal identities from the node
 
 From the node filesystem, each projected token under `/var/lib/kubelet/pods/` belongs to a pod running on worker-2. In a real engagement, the breakout pod's startup command would exfiltrate these tokens (via the HTTP server, a reverse shell, or a DNS callback). Here we show what those tokens resolve to:
 
@@ -312,7 +310,7 @@ From the node filesystem, each projected token under `/var/lib/kubelet/pods/` be
 
 Seven identities, each with different permissions across the cluster.
 
-### Step 5: Pivot to the node identity
+#### Step 5: Pivot to the node identity
 
 The breakout pod also exfiltrated the kubelet client certificate from `/var/lib/kubelet/pki/` and the cluster CA. Both files are served on the HTTP server alongside the proof data. From the code-server pod, we download them:
 
@@ -460,9 +458,7 @@ The `developer-token` secret is CRITICAL because it contains a Kubernetes servic
 
 If an attacker gains permissions to modify Calico GlobalNetworkPolicies, they can disable all network segmentation in the cluster. Every pod would be able to talk to every other pod.
 
----
-
-## Manual Validation: Developer Token Secret
+### Manual Validation: Developer Token Secret
 
 [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) flagged `developer-token` as CRITICAL. Let us verify this.
 
@@ -508,15 +504,13 @@ pods               []                  []               [list get]
 
 The developer SA can list pods and create port-forwards. An attacker who steals this token gets persistent access to forward traffic from internal pods to their machine.
 
----
-
-## Manual Validation: prod-debug-agent Permissions
+### Manual Validation: prod-debug-agent Permissions
 
 [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) flagged `prod-debug-agent` as CRITICAL with a dangerous combination: list secrets cluster-wide plus create rolebindings in production.
 
 We validate these permissions on the control plane using `--as` impersonation (which requires admin access):
 
-### Can it list secrets?
+#### Can it list secrets?
 
 ```bash
 [k8s-control-plane-1] $ kubectl get secrets -n development --as=prod-debug-agent
@@ -532,7 +526,7 @@ prod-debug-certs   Opaque   3      46h
 
 Yes. It can list secrets in every namespace. It sees secret names and types.
 
-### Can it read secret data?
+#### Can it read secret data?
 
 ```bash
 [k8s-control-plane-1] $ kubectl get secret developer-token -n development -o yaml --as=prod-debug-agent
@@ -545,7 +539,7 @@ User "prod-debug-agent" cannot get resource "secrets"
 
 No. It can list but not get. It sees what secrets exist but cannot read their contents. This is still useful for reconnaissance because it tells the attacker exactly which secrets to target.
 
-### Can it create rolebindings?
+#### Can it create rolebindings?
 
 ```bash
 [k8s-control-plane-1] $ kubectl auth can-i create rolebindings -n production --as=prod-debug-agent
