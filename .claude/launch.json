@@ -3,9 +3,10 @@
   "configurations": [
     {
       "name": "site",
-      "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "cd /home/stillbigjosh/Downloads/stillbigjosh.github.io && python3 -m http.server 8080"],
-      "port": 8080
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "9090"],
+      "port": 9090,
+      "url": "http://localhost:9090"
     }
   ]
 }

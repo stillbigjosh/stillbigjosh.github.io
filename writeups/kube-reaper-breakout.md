@@ -289,7 +289,7 @@ Line by line, this tells us:
 - **`uid=0(root)`**: The container runs as root with full capabilities (privileged mode)
 - **`k8s-worker-2`**: `chroot /mnt hostname` resolved the host's hostname, not the container's. We broke out of the container
 - **`/etc/shadow`**: We read the node's shadow file. Full host filesystem access is confirmed
-- **`kubelet-client-*.pem`**: The kubelet's client certificates are accessible. These authenticate as `system:node:k8s-worker-2` to the API server
+- **`kubelet-client-*.pem`**: The kubelet's client certificates are accessible. These authenticate as `system:node:k8s-worker-2` to the API server. A kubelet client identity represents an entire infrastructure node, while a service account represents a specific software workload running inside the cluster
 - **7 SA token paths**: Every service account token projected into pods on this node is readable
 
 The code-server SA created a pod. The pod broke out of the container. We read the proof over the network. No `kubectl exec` was used at any point.
