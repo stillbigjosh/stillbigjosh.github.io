@@ -924,3 +924,14 @@ Low-privilege scans find the RBAC issues in their own namespace. The catalog-api
 **Lesson:** Run kube-reaper from every SA you encounter during a test. Low-privilege scans show what that specific identity can reach. High-privilege scans show the full attack surface. Both perspectives matter.
 
 **Important:** Always pass `-n <namespace>` when you scan a low-privilege SA. Without this flag, kube-reaper defaults to the `default` namespace and misses namespace-scoped permissions.
+
+---
+
+## Credits
+
+The source to the Kubernetes attack lab used in this post [can be found here](https://github.com/hac01/Owasp-top-10-k8s-2025). I adapted it to run in a Proxmox LXC virtualization environment.
+
+
+
+
+
