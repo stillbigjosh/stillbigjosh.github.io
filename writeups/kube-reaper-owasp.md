@@ -11,11 +11,11 @@ lead: "Using kube-reaper to detect OWASP Kubernetes Top 10 issues in a live clus
 
 *NimbusMart OWASP K8s Top 10 CTF lab running on k3s v1.36.4+k3s1 inside a Proxmox LXC container.*
 
-This note tests the OWASP Kubernetes Top 10 on a live cluster. We use [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) to find each issue. Then we validate each finding by hand.
+This note tests the OWASP Kubernetes Top 10 on a [live cluster](https://github.com/hac01/Owasp-top-10-k8s-2025). We use [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) to find each issue. Then we validate each finding by hand.
 
 We test from pod service account tokens, not the admin kubeconfig. This is realistic. An attacker lands inside a pod and uses the auto-mounted SA token. They do not have cluster admin access.
 
-**Target:** NimbusMart OWASP K8s Top 10 CTF lab on k3s v1.36.4+k3s1 (192.168.1.201)
+**Target:** [NimbusMart OWASP K8s Top 10 CTF lab](https://github.com/hac01/Owasp-top-10-k8s-2025) on k3s v1.36.4+k3s1 (192.168.1.201)
 **Tool:** [kube-reaper](https://github.com/stillbigjosh/kube-reaper.git) v0.1.0
 
 ---
