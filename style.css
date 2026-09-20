@@ -462,6 +462,11 @@ a.card:hover,
 .card.cert-card:hover .cert-badge img {
   filter: brightness(1) saturate(1);
 }
+.cert-grid-single {
+  grid-template-columns: 1fr;
+  max-width: 33.33%;
+  margin: 14px auto 0;
+}
 .cert-info { display: flex; flex-direction: column; gap: 4px; }
 .cert-name {
   color: var(--heading);
@@ -620,6 +625,7 @@ a.card:hover .row-action { color: var(--heading); }
   .about-grid { grid-template-columns: 1fr; }
   .services-grid { grid-template-columns: 1fr; }
   .cert-grid { grid-template-columns: 1fr; }
+  .cert-grid-single { max-width: 100%; }
   .cert-card { flex-direction: row; text-align: left; }
   .page-header { padding: 32px 16px 0; }
   .page-header h1 { font-size: 26px; }
