@@ -161,7 +161,7 @@ process where event.code == "10"
   and not process.name : ("procexp64.exe", "procmon.exe", ...)
 ```
 
-The key field is **GrantedAccess**. The rule fires when a process opens a handle to LSASS with an access mask that is NOT in the known-benign list. Access masks like `0x1fffff` (PROCESS_ALL_ACCESS), `0x1010` (PROCESS_QUERY_LIMITED_INFORMATION + PROCESS_VM_READ), and `0x120089` are commonly used by credential dumping tools and are not excluded.
+The key field is **GrantedAccess**. The rule fires when a process opens a handle to LSASS with an access mask that is NOT in the known list. 
 
 The rule also excludes specific known-good processes like Process Explorer, antivirus engines, and system processes by `process.name` and `process.executable`.
 
@@ -169,7 +169,6 @@ The rule also excludes specific known-good processes like Process Explorer, anti
 
 
 - What is the GrantedAccess value your tool uses? Look it up in the Sysmon Event ID 10 log. Compare it against the exclusion list in the rule definition. Research what the minimum access rights are to actually read LSASS memory.
-- Does the CallTrace field in the Sysmon event reveal which DLL performed the access? The **Potential Credential Access via LSASS Memory Dump** rule specifically looks for `dbghelp.dll` or `dbgcore.dll` in the CallTrace. Tools that use different DLLs for memory reading may evade that specific rule.
 - What happens if the attacking process is a signed Microsoft binary? Some rules exclude processes by code signature. Research whether using a LOLBin as the access process changes the detection outcome.
 - The **LSASS Memory Dump Handle Access** rule uses a `new_terms` rule type, meaning it fires only the first time a given process name accesses LSASS. A second access from the same process name in the same time window will not fire again. Test what happens when you run the same tool twice.
 
