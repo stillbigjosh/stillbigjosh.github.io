@@ -156,7 +156,7 @@ event.category:"network" AND destination.port:445 AND source.ip:"10.1.10.22"
 
 ![](image/red-team-workflow/20260921162237.png)
 
-The smartscan output is noisy. A quieter alternative: list the ARP table of castelblack to discover neighbors without network scan telemetry.
+The smartscan output shows its also relatively noisy. A quieter alternative: list the ARP table of castelblack to discover neighbors without network scan telemetry.
 
 ![](image/red-team-workflow/20260921162851.png)
 
