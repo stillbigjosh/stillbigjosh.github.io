@@ -60,6 +60,8 @@ samwell.tarly is a regular domain user with no local administrator privileges. A
 
 ### 1.2 - Agent Configuration
 
+**MITRE ATT&CK:** T1562.001 (Impair Defenses: Disable or Modify Tools), T1027 (Obfuscated Files or Information), T1134.004 (Parent PID Spoofing), T1036.005 (Masquerading: Match Legitimate Name or Location), T1106 (Native API)
+
 After the agent checks in, set the configuration to reduce detection surface. Run these commands from the castelblack agent session.
 
 **C2 Commands (run on the castelblack agent, repeat on each new agent as they check in):**
@@ -103,6 +105,8 @@ event.module:"endpoint" AND event.action:"Memory Threat Detection Alert"
 All enumeration in this section runs from the low-privilege samwell.tarly agent on castelblack (SRV02). This is the key difference from the pentest approach: instead of scanning from an external Kali host, every query originates from a domain-joined member server. The traffic blends with normal Active Directory operations. No local admin privileges are required for any of these actions.
 
 ### 2.1 - Host Discovery
+
+**MITRE ATT&CK:** T1046 (Network Service Discovery)
 
 **Pentest Command (from Kali):**
 
@@ -161,6 +165,8 @@ This avoids the detection signals and telemetry that smartscan generates.
 ---
 
 ### 2.2 - SMB User Enumeration
+
+**MITRE ATT&CK:** T1087.002 (Account Discovery: Domain Account)
 
 **Pentest Command (from Kali):**
 
@@ -268,6 +274,8 @@ event.code:"1644" AND (winlog.event_data.SearchFilter:*sAMAccountName* OR winlog
 
 ### 2.3 - Share Enumeration
 
+**MITRE ATT&CK:** T1135 (Network Share Discovery)
+
 **Pentest Command (from Kali):**
 
 ```bash
@@ -369,6 +377,8 @@ Parent process spoofing does not help if the command-line arguments are suspicio
 
 ### 2.4 - BloodHound Collection
 
+**MITRE ATT&CK:** T1087.002 (Account Discovery: Domain Account), T1069.002 (Permission Groups Discovery: Domain Groups), T1482 (Domain Trust Discovery)
+
 **Pentest Command (from Kali):**
 
 ```bash
@@ -444,6 +454,8 @@ No prebuilt rule fires. The inline BOF produces zero Sysmon network telemetry on
 
 ### 3.1 - AS-REP Roasting
 
+**MITRE ATT&CK:** T1558.004 (Steal or Forge Kerberos Tickets: AS-REP Roasting)
+
 **Pentest Command (from Kali):**
 
 ```bash
@@ -498,6 +510,8 @@ No prebuilt Elastic rule fires on AS-REP roasting in the current 152-rule set. T
 ---
 
 ### 3.2 - Kerberoasting
+
+**MITRE ATT&CK:** T1558.003 (Steal or Forge Kerberos Tickets: Kerberoasting)
 
 **Pentest Command (from Kali):**
 
@@ -568,6 +582,8 @@ This detects RC4 TGS requests for user accounts (not machine accounts). No prebu
 ---
 
 ### 3.3 - LSASS Credential Dumping (mimikatz / sekurlsa::logonpasswords)
+
+**MITRE ATT&CK:** T1003.001 (OS Credential Dumping: LSASS Memory), T1003.002 (Security Account Manager), T1003.004 (LSA Secrets), T1003.005 (Cached Domain Credentials)
 
 > After finding `jeor.mormont`'s password in `secret.ps1` on the NETLOGON share (accessed as `jon.snow`)
 
@@ -688,6 +704,8 @@ token impersonate 1
 
 ### 3.4 - DCSync
 
+**MITRE ATT&CK:** T1003.006 (OS Credential Dumping: DCSync)
+
 **Pentest Command (from Kali):**
 
 ```bash
@@ -776,6 +794,8 @@ The GUID `1131f6aa-9c07-11d1-f79f-00c04fc2dcd2` corresponds to `DS-Replication-G
 
 ### 4.1 - GPO Abuse (samwell.tarly GenericWrite on STARKWALLPAPER)
 
+**MITRE ATT&CK:** T1484.001 (Domain or Tenant Policy Modification: Group Policy Modification)
+
 **Pentest Command (from Kali):**
 
 ```bash
@@ -850,6 +870,8 @@ event.code:"1" AND process.name:"net.exe" AND process.command_line:*localgroup* 
 
 ### 4.2 - Local Privilege Escalation (to SYSTEM on castelblack)
 
+**MITRE ATT&CK:** T1134.001 (Access Token Manipulation: Token Impersonation/Theft), T1068 (Exploitation for Privilege Escalation)
+
 **Pentest approach:** Not needed in the pentest path. `evil-winrm` with admin credentials already runs as admin.
 
 **C2 Command (from castelblack agent, running as samwell.tarly or jeor.mormont):**
@@ -908,6 +930,8 @@ No prebuilt rule fired an alert for `getsystem token`.
 ## 5 - Lateral Movement
 
 ### 5.1 - WinRM (evil-winrm equivalent)
+
+**MITRE ATT&CK:** T1021.006 (Remote Services: Windows Remote Management)
 
 > This approach was not followed. An internal error occurred in the target WMI/WSMan subsystem.
 
@@ -974,6 +998,8 @@ rule.name:"Incoming Execution via PowerShell Remoting"
 ---
 
 ### 5.2 - PsExec (Service-based Lateral Movement)
+
+**MITRE ATT&CK:** T1021.002 (Remote Services: SMB/Windows Admin Shares), T1569.002 (System Services: Service Execution)
 
 **Pentest Command (from Kali):**
 
@@ -1054,6 +1080,8 @@ event.code:"17" AND winlog.event_data.PipeName:*svcctl*
 ---
 
 ### 5.3 - SCShell (Service Binary Path Modification, Recommended)
+
+**MITRE ATT&CK:** T1569.002 (System Services: Service Execution), T1543.003 (Create or Modify System Process: Windows Service)
 
 > This approach was not followed due to a bug in the [Kharon agent](https://github.com/entropy-z/Kharonto).
 
@@ -1136,6 +1164,8 @@ event.code:"7036" AND winlog.event_data.param1:("SensorService" OR "defragsvc" O
 
 ### 5.4 - RDP (Interactive Desktop Access)
 
+**MITRE ATT&CK:** T1021.001 (Remote Services: Remote Desktop Protocol)
+
 **Pentest Command (from Kali):**
 
 ```bash
@@ -1175,6 +1205,8 @@ event.code:"4624" AND winlog.event_data.LogonType:"10"
 ## 6 - Domain Escalation
 
 ### 6.1 - Constrained Delegation Abuse (jon.snow)
+
+**MITRE ATT&CK:** T1550.003 (Use Alternate Authentication Material: Pass the Ticket), T1558 (Steal or Forge Kerberos Tickets)
 
 **Pentest Command (from Kali):**
 
@@ -1274,6 +1306,8 @@ event.code:"4769" AND winlog.event_data.TransmittedServices:*
 ---
 
 ### 6.2 - ExtraSids / Golden Ticket (Child-to-Parent Domain)
+
+**MITRE ATT&CK:** T1558.001 (Steal or Forge Kerberos Tickets: Golden Ticket)
 
 **Pentest Command (from Kali):**
 
@@ -1409,6 +1443,8 @@ event.code:"4769" AND winlog.event_data.ServiceName:"krbtgt"
 
 ### 7.1 - File Operations
 
+**MITRE ATT&CK:** T1039 (Data from Network Shared Drive)
+
 **Pentest Command (downloading files from shares):**
 
 ```bash
@@ -1452,6 +1488,8 @@ No specific detection for file reads through SMB from an authenticated domain us
 
 ### 7.2 - NETLOGON Script Discovery
 
+**MITRE ATT&CK:** T1552.001 (Unsecured Credentials: Credentials in Files)
+
 **Pentest Command (from Kali):**
 
 ```bash
@@ -1479,6 +1517,8 @@ event.code:"5145" AND winlog.event_data.ShareName:*NETLOGON*
 ---
 
 ### 7.3 - Situational Awareness
+
+**MITRE ATT&CK:** T1033 (System Owner/User Discovery), T1016 (System Network Configuration Discovery), T1082 (System Information Discovery)
 
 **Pentest Commands (from compromised host):**
 
@@ -1556,6 +1596,8 @@ These rules detect `net.exe` or `whoami.exe` process creation. BOF-based equival
 
 ### 8.1 - CreateRemoteThread (Built-in Kharon Method)
 
+**MITRE ATT&CK:** T1055 (Process Injection)
+
 The Kharon `scinject` command and `kit_explicit_inject.cc` use VirtualAllocEx + WriteProcessMemory + VirtualProtectEx + CreateRemoteThread.
 
 **C2 Command:**
@@ -1607,6 +1649,8 @@ event.code:"8" AND NOT winlog.event_data.SourceImage:(*csrss.exe* OR *wininit.ex
 ---
 
 ### 8.2 - Extension-Kit Injection BOFs
+
+**MITRE ATT&CK:** T1055 (Process Injection)
 
 The Injection-BOF module provides four alternative injection methods.
 
