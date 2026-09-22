@@ -337,11 +337,11 @@ process create --command "cmd.exe /c net view \\10.1.10.22 /all" --pipe true
 **Enumerate the `all` share:**
 
 ```
-dir \\castelblack.north.sevenkingdoms.local\all
+fs ls \\10.1.10.22\all
+fs cat \\10.1.10.22\all\arya.txt
 ```
-![](image/red-team-workflow/20260921171316.png)
 
-![](image/red-team-workflow/20260921171509.png)
+![](image/red-team-workflow/20260922160926.png)
 
 `arya.stark` left a note that alludes to a sword named `Needle`. 
 
