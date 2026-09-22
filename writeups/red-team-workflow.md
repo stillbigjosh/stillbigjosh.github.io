@@ -23,7 +23,7 @@ This is Part 3 of an Active Directory series:
 - [Part 2 - Detection Scenarios for Active Directory](https://stillbigjosh.github.io/writeup.html?file=writeups/detection-scenarios.md) covers the pentest approach and what Elastic detects.
 - **Part 3 (this post)** runs the same attack chain through a C2 framework and compares the detection footprint against the pentest approach.
 
-The lab uses GOAD-Light (a multi-domain Active Directory environment with intentional misconfigurations) with Elastic Security as the SIEM/EDR layer. The topology is a standard forest with a parent domain, a child domain, two domain controllers, and a member server. Any AD lab with similar structure would produce the same results. The only addition for this post is an **Adaptix C2 server** (LXC container, 10.1.10.50). Adaptix is the C2 server. [Kharon](https://github.com/entropy-z/Kharon) is the agent that runs on target hosts.
+The lab uses GOAD-Light (a multi-domain Active Directory environment with intentional misconfigurations) with Elastic Security as the SIEM/EDR layer. The topology is a standard forest with a parent domain, a child domain, two domain controllers, and a member server. Any AD lab with similar structure would produce the same results. The only addition for this post is an **Adaptix C2 server** (LXC container, 10.1.10.50). Adaptix is the C2 server. Kharon is the agent that runs on target hosts.
 
 | Host | Role | IP | OS | Domain |
 |------|------|----|----|--------|
@@ -54,7 +54,7 @@ This workflow starts from a Kharon agent running as `samwell.tarly` on castelbla
 | IP | 10.1.10.22 |
 | User | NORTH\samwell.tarly |
 | Privilege | Low (standard domain user, no local admin) |
-| Agent | [Kharon](https://github.com/entropy-z/Kharon) HTTP |
+| Agent | Kharon HTTP |
 
 samwell.tarly is a regular domain user with no local administrator privileges. All reconnaissance, credential access, privilege escalation, and lateral movement begins from this low-privilege foothold. The engagement progresses from workstation to domain controller through escalation and lateral movement.
 
@@ -1055,7 +1055,7 @@ event.code:"17" AND winlog.event_data.PipeName:*svcctl*
 
 ### 5.3 - SCShell (Service Binary Path Modification, Recommended)
 
-> This approach was not followed due to a bug in the [Kharon](https://github.com/entropy-z/Kharon) agent.
+> This approach was not followed due to a bug in the Kharon agent.
 
 SCShell modifies an existing service binary path instead of creating a new service. This avoids Event ID 7045 (new service creation).
 
@@ -1339,7 +1339,7 @@ ticketConverter.py Administrator.ccache Administrator.kirbi
 base64 -w 0 Administrator.kirbi
 ```
 
-Back in the [Kharon](https://github.com/entropy-z/Kharon) agent:
+Back in the Kharon agent:
 
 ```
 kerbeus ptt /ticket:<base64_kirbi>
@@ -1554,9 +1554,9 @@ These rules detect `net.exe` or `whoami.exe` process creation. BOF-based equival
 
 ## 8 - Shellcode Injection (for New Beacon Deployment)
 
-### 8.1 - CreateRemoteThread (Built-in [Kharon](https://github.com/entropy-z/Kharon) Method)
+### 8.1 - CreateRemoteThread (Built-in Kharon Method)
 
-The [Kharon](https://github.com/entropy-z/Kharon) `scinject` command and `kit_explicit_inject.cc` use VirtualAllocEx + WriteProcessMemory + VirtualProtectEx + CreateRemoteThread.
+The Kharon `scinject` command and `kit_explicit_inject.cc` use VirtualAllocEx + WriteProcessMemory + VirtualProtectEx + CreateRemoteThread.
 
 **C2 Command:**
 
@@ -1727,7 +1727,7 @@ MITRE: T1069
 
 ### 10.1 - Path A
 
-Starting point: Low-privilege [Kharon](https://github.com/entropy-z/Kharon) agent on castelblack (SRV02) as samwell.tarly.
+Starting point: Low-privilege Kharon agent on castelblack (SRV02) as samwell.tarly.
 
 | Step | Phase | C2 Action | Pentest Equivalent | Detection |
 |------|-------|-----------|-------------------|-----------|
@@ -1749,7 +1749,7 @@ Starting point: Low-privilege [Kharon](https://github.com/entropy-z/Kharon) agen
 
 ### 10.2 - Path B
 
-Starting point: Low-privilege [Kharon](https://github.com/entropy-z/Kharon) agent on castelblack (SRV02) as samwell.tarly.
+Starting point: Low-privilege Kharon agent on castelblack (SRV02) as samwell.tarly.
 
 | Step | Phase | C2 Action | Pentest Equivalent | Detection |
 |------|-------|-----------|-------------------|-----------|
@@ -1895,7 +1895,7 @@ Starting point: Low-privilege [Kharon](https://github.com/entropy-z/Kharon) agen
 | `quser` | `quser [host]` | Query user sessions (BOF) |
 | `taskhound` | `taskhound <target> [user] [pass] [-save dir]` | Scheduled task enum (BOF) |
 
-### [Kharon](https://github.com/entropy-z/Kharon) Built-in Commands
+### Kharon Built-in Commands
 
 | Command | Syntax | Purpose |
 |---------|--------|---------|
@@ -1965,7 +1965,7 @@ Starting point: Low-privilege [Kharon](https://github.com/entropy-z/Kharon) agen
 
 ## Key Findings
 
-This exercise ran the same Active Directory attack chain twice against the same lab: once as a traditional pentest from Kali, and once through a C2 framework (Adaptix/[Kharon](https://github.com/entropy-z/Kharon)) from a compromised domain-joined host. Both paths achieved full domain compromise (castelblack to winterfell to kingslanding). The detection results are different.
+This exercise ran the same Active Directory attack chain twice against the same lab: once as a traditional pentest from Kali, and once through a C2 framework (Adaptix/Kharon) from a compromised domain-joined host. Both paths achieved full domain compromise (castelblack to winterfell to kingslanding). The detection results are different.
 
 **Detection coverage comparison:**
 
