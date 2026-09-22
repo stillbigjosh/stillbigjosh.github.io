@@ -7,7 +7,7 @@ lead: "A side-by-side comparison of pentest and C2-based red team approaches to 
 
 > This post maps common Active Directory attack techniques to their red team C2 equivalents and compares the detection footprint of each. Every section shows the pentest command, the C2 command, the OPSEC difference, and the Elastic query to detect the action. The techniques, detection queries, and OPSEC analysis apply to any Active Directory environment. GOAD-Light is the lab used to demonstrate them, not the subject of this post.
 >
-> All C2 commands run from an active Adaptix C2 [Kharon agent](https://github.com/entropy-z/Kharon) session. All Elastic queries run in Kibana Discover or the KQL bar.
+> All C2 commands run from an active Adaptix C2 [Kharon agent](https://github.com/entropy-z/Kharonto) session. All Elastic queries run in Kibana Discover or the KQL bar.
 >
 > **Extension-Kit BOFs referenced:** AD-BOF, Creds-BOF, Elevation-BOF, Execution-BOF, Injection-BOF, LateralMovement-BOF, SAL-BOF, SAR-BOF, Process-BOF, Postex-BOF
 >
@@ -42,7 +42,7 @@ The lab uses GOAD-Light (a multi-domain Active Directory environment with intent
 
 ### 1.1 - Starting Point
 
-This workflow starts from a Kharon agent running as `samwell.tarly` on castelblack (SRV02, 10.1.10.22). 
+This workflow starts from a [Kharon agent](https://github.com/entropy-z/Kharonto) running as `samwell.tarly` on castelblack (SRV02, 10.1.10.22). 
 
 
 
@@ -320,7 +320,7 @@ config ppid 716
 
 ![](writeups/images/red-team-workflow/20260921165526.png)
 
-Then run `process create` (this returned no output due to a bug in the Kharon agent, but you can substitute any command that achieves the same result):
+Then run `process create` (this returned no output due to a bug in the [Kharon agent](https://github.com/entropy-z/Kharonto), but you can substitute any command that achieves the same result):
 
 ```
 process create --command "cmd.exe /c net view \\10.1.10.22 /all" --pipe true
@@ -1055,7 +1055,7 @@ event.code:"17" AND winlog.event_data.PipeName:*svcctl*
 
 ### 5.3 - SCShell (Service Binary Path Modification, Recommended)
 
-> This approach was not followed due to a bug in the Kharon agent.
+> This approach was not followed due to a bug in the [Kharon agent](https://github.com/entropy-z/Kharonto).
 
 SCShell modifies an existing service binary path instead of creating a new service. This avoids Event ID 7045 (new service creation).
 
@@ -1339,7 +1339,7 @@ ticketConverter.py Administrator.ccache Administrator.kirbi
 base64 -w 0 Administrator.kirbi
 ```
 
-Back in the Kharon agent:
+Back in the [Kharon agent](https://github.com/entropy-z/Kharonto):
 
 ```
 kerbeus ptt /ticket:<base64_kirbi>
@@ -1727,7 +1727,7 @@ MITRE: T1069
 
 ### 10.1 - Path A
 
-Starting point: Low-privilege Kharon agent on castelblack (SRV02) as samwell.tarly.
+Starting point: Low-privilege [Kharon agent](https://github.com/entropy-z/Kharonto) on castelblack (SRV02) as samwell.tarly.
 
 | Step | Phase | C2 Action | Pentest Equivalent | Detection |
 |------|-------|-----------|-------------------|-----------|
@@ -1749,7 +1749,7 @@ Starting point: Low-privilege Kharon agent on castelblack (SRV02) as samwell.tar
 
 ### 10.2 - Path B
 
-Starting point: Low-privilege Kharon agent on castelblack (SRV02) as samwell.tarly.
+Starting point: Low-privilege [Kharon agent](https://github.com/entropy-z/Kharonto) on castelblack (SRV02) as samwell.tarly.
 
 | Step | Phase | C2 Action | Pentest Equivalent | Detection |
 |------|-------|-----------|-------------------|-----------|
