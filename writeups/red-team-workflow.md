@@ -645,6 +645,8 @@ hashdump
 
 **Option C running as SYSTEM - lsadump BOFs:**
 
+This reads secrets from the local registry and does not touch LSASS
+
 ```
 lsadump_secrets
 lsadump_cache
