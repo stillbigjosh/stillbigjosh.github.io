@@ -2,7 +2,7 @@
 title: "Custom Cipher, Hash Seed, and Structural Changes"
 kicker: "Red Team . Static Evasion . Source Modification"
 tags: "Adaptix C2 . OPSEC . Red Team . Static Evasion . Custom Cipher"
-lead: "The final part of the agent static signature modifications. Replacing RC4 with a custom stream cipher, changing the DJB2 hash seed, reordering functions, adding junk code, and stripping SEH metadata to change what the compiled beacon looks like without changing what it does."
+lead: "Replace RC4 with a custom cipher, change the hash seed, reorder functions, add junk code, and strip exception metadata. Change what the compiled beacon looks like without changing what it does."
 ---
 
 > This guide assumes a working Adaptix C2 deployment with the hardening from [Part 3: Beacon Source Modifications](writeup.html?file=writeups/adaptix-beacon-mods.md) already applied.
@@ -11,12 +11,12 @@ lead: "The final part of the agent static signature modifications. Replacing RC4
 
 ## What I Did in This Round
 
-Part 3 fixed specific byte patterns ThreatCheck pointed to. This round changes things at a broader level:
+Part 3 fixed specific byte patterns that ThreatCheck found. This round changes things at a broader level:
 
-1. **Replaced RC4 with a custom stream cipher.** RC4's initialization pattern is a well-known AV signature.
-2. **Changed the DJB2 hash seed** from 1572 to 7349, which changes all 200+ hash constants in `.rdata`.
-3. **Reordered functions, renamed variables, added junk code.** Shifts byte patterns and breaks cross-function signatures.
-4. **Stripped SEH metadata** (`.pdata`/`.xdata` sections) that ThreatCheck flagged at offset 0x18704.
+1. **Replaced RC4 with a custom cipher.** AV engines know the RC4 setup pattern and flag it on sight.
+2. **Changed the hash seed** from 1572 to 7349. This changes all 200+ stored hash values in the binary's read-only data.
+3. **Reordered functions, renamed variables, added junk code.** This shifts byte patterns and breaks multi-function signatures.
+4. **Stripped exception-handling metadata** (`.pdata`/`.xdata` sections) that ThreatCheck flagged at offset 0x18704.
 
 Same goal as Part 3: change what the compiled binary looks like without changing what it does.
 
@@ -24,7 +24,7 @@ Same goal as Part 3: change what the compiled binary looks like without changing
 
 ## How the Beacon Works
 
-The **agent plugin** and the **listener plugin** are two separate Go plugins. Both have their own copy of the encryption code. If you change the cipher in one but not the other, the beacon connects but never registers because the listener can't decrypt the heartbeat. See [The Listener Plugin Bug](#the-listener-plugin-bug).
+The **agent plugin** and the **listener plugin** are two separate Go plugins. Both have their own copy of the encryption code. If you change the cipher in one but not the other, the beacon connects but never registers. The listener cannot decrypt the heartbeat. See [The Listener Plugin Bug](#the-listener-plugin-bug).
 
 ---
 
@@ -44,7 +44,7 @@ Here is every file I touched, with the full path on the server and what I change
 | 6   | `ConnectorDNS.cpp`  | Ten calls: `EncryptRC4`/`DecryptRC4` renamed.         |
 | 7   | `ConnectorSMB.cpp`  | Two calls: `EncryptRC4`/`DecryptRC4` renamed.         |
 | 8   | `ConnectorTCP.cpp`  | Two calls: `EncryptRC4`/`DecryptRC4` renamed.         |
-| 9   | `ProcLoader.cpp`    | DJB2 seed changed to 7349, all variables renamed.     |
+| 9   | `ProcLoader.cpp`    | Hash seed changed to 7349, all variables renamed.     |
 | 10  | `MainAgent.cpp`     | Functions reordered, junk code added.                 |
 | 11  | `WaitMask.cpp`      | Functions reordered, junk code added.                 |
 | 12  | `Encoders.cpp`      | Functions reordered, variables renamed.               |
@@ -53,13 +53,13 @@ Here is every file I touched, with the full path on the server and what I change
 
 | #   | File       | What Changed                                                              |
 | --- | ---------- | ------------------------------------------------------------------------- |
-| 13  | `Makefile` | Added SEH metadata stripping with objcopy after compilation. |
+| 13  | `Makefile` | Added exception metadata stripping with objcopy after compilation. |
 
 **Hash Generator** (in `AdaptixServer/extenders/beacon_agent/src_beacon/files/`):
 
 | #   | File        | What Changed                                                 |
 | --- | ----------- | ------------------------------------------------------------ |
-| 14  | `hashes.py` | DJB2 seed to 7349, null byte fix, 4 missing functions added. |
+| 14  | `hashes.py` | Hash seed to 7349, null byte fix, 4 missing functions added. |
 
 **Go Agent Plugin** (in `AdaptixServer/extenders/beacon_agent/`):
 
@@ -67,7 +67,7 @@ Here is every file I touched, with the full path on the server and what I change
 | --- | ------------- | ------------------------------------------------------------------------------------ |
 | 15  | `pl_utils.go` | `RC4Crypt` function body replaced with custom cipher. Removed `"crypto/rc4"` import. |
 
-**Auto-Generated** (must regenerate after changing `hashes.py`):
+**Auto-Generated** (must regenerate after you change `hashes.py`):
 
 | #   | File           | How                                                                          |
 | --- | -------------- | ---------------------------------------------------------------------------- |
@@ -86,15 +86,15 @@ Here is every file I touched, with the full path on the server and what I change
 
 ---
 
-## Change 10: Replacing RC4 with a Custom Stream Cipher
+## Change 10: Replacing RC4 with a Custom Cipher
 
 ### Why RC4 Had to Go
 
-RC4 initializes a 256-byte state array with sequential values: `state[i] = i` (0x00, 0x01, 0x02, ... 0xFF). That pattern compiles into a very recognizable loop that AV engines have been signaturing for years. It doesn't matter that RC4 itself is cryptographically adequate for this use case. The problem is that the compiled initialization code is a known indicator of "this binary does RC4," and Defender flags it.
+RC4 fills a 256-byte array with sequential values: `state[i] = i` (0x00, 0x01, 0x02, ... 0xFF). That pattern compiles into a loop that AV engines have flagged for years. RC4 is strong enough for this use case. The problem is that the compiled setup code is a known indicator. Defender sees the pattern and flags the binary.
 
-The replacement is a custom stream cipher that works the same way (symmetric, XOR-based, same function encrypts and decrypts) but produces completely different compiled instructions. The initialization, key schedule, and stream generation all use different arithmetic, so the binary looks nothing like RC4 to a pattern scanner.
+The replacement is a custom cipher that works the same way: symmetric, XOR-based, same function to encrypt and decrypt. But it produces different compiled instructions. The setup, key schedule, and output generation all use different math. A pattern scanner sees no resemblance to RC4.
 
-This is not a cryptographic upgrade. It's a signature evasion change.
+This is not a cryptographic upgrade. It is a signature evasion change.
 
 ### Crypt.cpp (Full File)
 
@@ -172,9 +172,9 @@ void DecryptData(unsigned char* data, int dataLength, unsigned char* key, int ke
 
 **Server path:** `AdaptixServer/extenders/beacon_agent/pl_utils.go`
 
-The Go server needs the exact same cipher so it can decrypt what the beacon sends and encrypt what it sends back. The function is called `RC4Crypt` to keep the same name that the rest of the codebase calls, but the body is completely new.
+The Go server needs the exact same cipher. It must decrypt what the beacon sends and encrypt what it sends back. The function keeps the name `RC4Crypt` so the rest of the codebase does not need changes. The body is new.
 
-I also removed the `"crypto/rc4"` import from the top of `pl_utils.go` since it's no longer used.
+I also removed the `"crypto/rc4"` import from the top of `pl_utils.go`. It is no longer used.
 
 **The `RC4Crypt` function (at line 206 in `pl_utils.go`, replace the existing one):**
 
@@ -218,7 +218,7 @@ func RC4Crypt(data []byte, key []byte) ([]byte, error) {
 
 ### Updating the Encrypt/Decrypt Calls in Every Connector
 
-Renamed `EncryptRC4`/`DecryptRC4` to `EncryptData`/`DecryptData` in all six files that call them:
+Rename `EncryptRC4`/`DecryptRC4` to `EncryptData`/`DecryptData` in all six files that call them:
 
 **Agent.cpp** (`AdaptixServer/extenders/beacon_agent/src_beacon/beacon/Agent.cpp`, line 109):
 ```cpp
@@ -709,9 +709,9 @@ sed -i 's/EncryptRC4/EncryptData/g; s/DecryptRC4/DecryptData/g' ConnectorDNS.cpp
 
 ---
 
-## Change 11: DJB2 Hash Seed Change and Variable Renames in ProcLoader.cpp
+## Change 11: Hash Seed Change and Variable Renames in ProcLoader.cpp
 
-The beacon resolves API functions at runtime by hashing their names with DJB2 and comparing against precomputed constants in `ApiDefines.h`. Changing the seed from 1572 to 7349 changes all 200+ constants, making the `.rdata` section look completely different. Variables were also renamed throughout the file.
+The beacon finds Windows API functions at runtime by name. It hashes each name with the DJB2 algorithm and compares the result against precomputed values stored in `ApiDefines.h`. If you change the seed from 1572 to 7349, all 200+ stored values change. The read-only data section of the binary looks completely different. Variables were also renamed throughout the file.
 
 ### ProcLoader.cpp (Full File)
 
@@ -872,7 +872,7 @@ LPVOID GetSymbolAddress(HANDLE hMod, ULONG targetHash)
 
 **Server path:** `AdaptixServer/extenders/beacon_agent/src_beacon/files/hashes.py`
 
-The hash generator script. Seed changed from 1572 to 7349. Also fixed: null byte truncation in library names, four missing functions (`TryEnterCriticalSection`, `ResetEvent`, `CreateProcessWithTokenW`, `BeaconGetStopJobEvent`), and a missing `#if defined(DEBUG)` guard around the `printf` hash.
+The hash generator script. Seed changed from 1572 to 7349. Also fixed: null byte truncation in library names, four missing functions (`TryEnterCriticalSection`, `ResetEvent`, `CreateProcessWithTokenW`, `BeaconGetStopJobEvent`), and a `#if defined(DEBUG)` guard around the `printf` hash.
 
 ```python
 #!/usr/bin/env python3
@@ -1128,7 +1128,7 @@ for f in functions.split('\n'):
 
 ### Regenerating ApiDefines.h
 
-Run this **before** building, or the hash constants won't match the runtime seed:
+Run this **before** you build, or the hash values will not match the runtime seed:
 
 ```bash
 cd /opt/AdaptixC2/AdaptixServer/extenders/beacon_agent/src_beacon/files
@@ -1141,7 +1141,7 @@ python3 hashes.py > ../beacon/ApiDefines.h
 
 **Server path:** `AdaptixServer/extenders/beacon_agent/src_beacon/beacon/MainAgent.cpp`
 
-Functions reordered to shift their compiled positions. Added a volatile junk function (`AgentTickle`) that the compiler can't optimize away, inserting real instructions between functional code blocks.
+Functions moved to different positions in the file. This shifts where they land in the compiled binary. A volatile junk function (`AgentTickle`) adds real instructions between the functional code blocks. The compiler cannot remove it.
 
 ### MainAgent.cpp (Full File)
 
@@ -1280,9 +1280,9 @@ DWORD WINAPI AgentMain(LPVOID lpParam)
 ```
 
 **What changed:**
-- `AgentExit()` moved before `AgentMain()` (originally was after it)
+- `AgentExit()` moved before `AgentMain()` (it was after it before)
 - Added `volatile ULONG g_Entropy` and `AgentTickle()` XOR-shift function
-- `AgentTickle()` calls scattered at three points: start of `AgentMain`, after `ApiLoad()`, and before cleanup
+- `AgentTickle()` calls at three points: start of `AgentMain`, after `ApiLoad()`, and before cleanup
 - `packerOut` renamed to `pOut`
 
 ---
@@ -1291,7 +1291,7 @@ DWORD WINAPI AgentMain(LPVOID lpParam)
 
 **Server path:** `AdaptixServer/extenders/beacon_agent/src_beacon/beacon/WaitMask.cpp`
 
-Same approach as MainAgent.cpp. Functions reordered, volatile junk function added.
+Same approach as MainAgent.cpp. Functions moved to new positions. Volatile junk function added.
 
 ### WaitMask.cpp (Full File)
 
@@ -1535,11 +1535,11 @@ int b64_decode(const char* inp, unsigned char* out, int outCap)
 
 ---
 
-## Change 15: Stripping SEH Metadata (.pdata/.xdata)
+## Change 15: Stripping Exception-Handling Metadata (.pdata/.xdata)
 
-ThreatCheck found a detection at **offset 0x18704**. Ghidra showed this lands in the `.pdata`/`.xdata` sections, which contain SEH (Structured Exception Handling) metadata describing every function's stack layout. These form a unique fingerprint that AV can match even after code changes.
+ThreatCheck found a detection at **offset 0x18704**. Ghidra showed this lands in the `.pdata`/`.xdata` sections. These sections contain metadata that describes every function's stack layout for Windows error recovery. This metadata forms a unique fingerprint that AV can match even after code changes.
 
-The fix is to strip both sections from every compiled object file with `objcopy -R .pdata -R .xdata`. This is safe because the beacon is compiled with `-fno-exceptions` and `-fno-unwind-tables`, so it never needs this metadata.
+The fix: strip both sections from every compiled object file with `objcopy -R .pdata -R .xdata`. This is safe because the beacon compiles with `-fno-exceptions` and `-fno-unwind-tables`. It never needs this metadata.
 
 The Makefile runs the strip automatically after compilation for both x64 and x86 targets. See the full Makefile below.
 
@@ -1649,7 +1649,7 @@ x64: $(HTTP_OBJECTS_X64) $(SMB_OBJECTS_X64) $(TCP_OBJECTS_X64) $(DNS_OBJECTS_X64
 	@$(CXX_X64) -c $(COMMON_FLAGS) $(BEACON_DIR)/main.cpp -D_WIN32_WINNT=0x0600 -D BEACON_DNS -D BUILD_DLL -o $(DNS_DIST_DIR)/main_dll.x64.o
 	@$(CXX_X64) -c $(COMMON_FLAGS) $(BEACON_DIR)/main.cpp -D BEACON_DNS -D BUILD_SHELLCODE -o $(DNS_DIST_DIR)/main_shellcode.x64.o
 	@rm -f $(DNS_DIST_DIR)/ConnectorHTTP.x64.o $(DNS_DIST_DIR)/ConnectorSMB.x64.o $(DNS_DIST_DIR)/ConnectorTCP.x64.o
-	@ # strip SEH metadata (.pdata/.xdata) to remove UNWIND_INFO fingerprint
+	@ # strip exception metadata (.pdata/.xdata) to remove stack-layout fingerprint
 	@for f in $(HTTP_DIST_DIR)/*.x64.o $(SMB_DIST_DIR)/*.x64.o $(TCP_DIST_DIR)/*.x64.o $(DNS_DIST_DIR)/*.x64.o; do \
 		x86_64-w64-mingw32-objcopy -R .pdata -R .xdata "$$f" 2>/dev/null || true; \
 	done
@@ -1675,7 +1675,7 @@ x86: $(HTTP_OBJECTS_X86) $(SMB_OBJECTS_X86) $(TCP_OBJECTS_X86) $(DNS_OBJECTS_X86
 	@$(CXX_X86) -c $(COMMON_FLAGS) $(BEACON_DIR)/main.cpp -D_WIN32_WINNT=0x0600 -D BEACON_DNS -D BUILD_DLL -o $(DNS_DIST_DIR)/main_dll.x86.o
 	@$(CXX_X86) -c $(COMMON_FLAGS) $(BEACON_DIR)/main.cpp -D BEACON_DNS -D BUILD_SHELLCODE -o $(DNS_DIST_DIR)/main_shellcode.x86.o
 	@rm -f $(DNS_DIST_DIR)/ConnectorHTTP.x86.o $(DNS_DIST_DIR)/ConnectorSMB.x86.o $(DNS_DIST_DIR)/ConnectorTCP.x86.o
-	@ # strip SEH metadata (.pdata/.xdata) to remove UNWIND_INFO fingerprint
+	@ # strip exception metadata (.pdata/.xdata) to remove stack-layout fingerprint
 	@for f in $(HTTP_DIST_DIR)/*.x86.o $(SMB_DIST_DIR)/*.x86.o $(TCP_DIST_DIR)/*.x86.o $(DNS_DIST_DIR)/*.x86.o; do \
 		i686-w64-mingw32-objcopy -R .pdata -R .xdata "$$f" 2>/dev/null || true; \
 	done
@@ -1743,18 +1743,18 @@ $(DNS_DIST_DIR)/miniz.x86.o: beacon/miniz.cpp
 
 ### What Happened
 
-After rebuilding everything, the beacon ran fine on target. `tcpdump` confirmed TLS traffic was flowing. But the agent never appeared in the teamserver UI.
+After the rebuild, the beacon ran fine on target. `tcpdump` confirmed TLS traffic was flowing. But the agent never appeared in the teamserver UI.
 
 ### Finding the Root Cause
 
-I had updated the **agent plugin** cipher but forgot the **listener plugin**. The listener decrypts the first heartbeat to register the agent. It was still using `crypto/rc4`, so it got garbage, couldn't parse the agent info, and silently returned a 404. The beacon retried forever.
+I had updated the cipher in the **agent plugin** but forgot the **listener plugin**. The listener decrypts the first heartbeat to register the agent. It still used the standard `crypto/rc4` library. It got garbage output, could not parse the agent info, and returned a 404. The beacon kept retrying forever.
 
 ### The Fix
 
-Added `streamCipherCrypt` to all four listener plugins and replaced their `crypto/rc4` calls. In each plugin:
-- Removed `"crypto/rc4"` from the import block
-- Added the `streamCipherCrypt` function
-- Replaced `rc4.NewCipher()`/`XORKeyStream()` with `streamCipherCrypt()`
+Add `streamCipherCrypt` to all four listener plugins. Replace their `crypto/rc4` calls. In each plugin:
+- Remove `"crypto/rc4"` from the import block.
+- Add the `streamCipherCrypt` function.
+- Replace `rc4.NewCipher()`/`XORKeyStream()` with `streamCipherCrypt()`.
 
 The files and where the cipher code lives:
 - **HTTP**: `beacon_listener_http/pl_transport.go` (heartbeat decrypt in `AgentHandler`)
@@ -1766,13 +1766,13 @@ The `streamCipherCrypt` function is identical in all four plugins (same as the o
 
 ### The GOEXPERIMENT Build Flag Problem
 
-After rebuilding the listener plugins, the teamserver refused to load them:
+After the listener plugin rebuild, the teamserver refused to load them:
 
 ```
 failed to open plugin listener_beacon_http.so: plugin was built with a different version of package internal/goexperiment
 ```
 
-Go plugins must be built with the exact same `GOEXPERIMENT` flags as the binary that loads them. Check what the server needs with `go version /opt/AdaptixC2/dist/adaptixserver` and export those flags before every `go build`.
+Go plugins must build with the exact same `GOEXPERIMENT` flags as the binary that loads them. Check what the server needs with `go version /opt/AdaptixC2/dist/adaptixserver`. Export those flags before every `go build`.
 
 ---
 
@@ -1780,17 +1780,17 @@ Go plugins must be built with the exact same `GOEXPERIMENT` flags as the binary 
 
 ### Understanding What Gets Built
 
-Three things need rebuilding when the cipher changes:
+Three things need a rebuild when the cipher changes:
 
-1. **C++ beacon objects** (`.o` files) - cross-compiled with MinGW, linked into beacons at generation time
-2. **Go agent plugin** (`agent_beacon.so`) - encrypts profiles, decrypts beacon traffic
-3. **Go listener plugins** (HTTP, SMB, TCP, DNS `.so` files) - decrypt heartbeats to register agents
+1. **C++ beacon objects** (`.o` files). Cross-compiled with MinGW. Linked into beacons at generation time.
+2. **Go agent plugin** (`agent_beacon.so`). Encrypts profiles and decrypts beacon traffic.
+3. **Go listener plugins** (HTTP, SMB, TCP, DNS `.so` files). Decrypt heartbeats to register agents.
 
-If you only rebuild some of these, you get a cipher mismatch and the beacon silently fails.
+If you only rebuild some of these, you get a cipher mismatch. The beacon will fail without any error message.
 
 ### Edit All Source Files on the Server
 
-Apply all changes from this post to the files under `/opt/AdaptixC2/`. How you transfer them is up to you (`scp`, `rsync`, git, direct editing, etc.). See the [Files I Modified](#files-i-modified) table for the full list.
+Apply all changes from this post to the files under `/opt/AdaptixC2/`. How you transfer them is up to you (`scp`, `rsync`, git, direct edit, etc.). See the [Files I Modified](#files-i-modified) table for the full list.
 
 ### Regenerate the Hash Constants
 
@@ -1818,7 +1818,7 @@ cp objects_dns/* /opt/AdaptixC2/dist/extenders/beacon_agent/objects_dns/
 
 ### Rebuild the Agent Plugin
 
-**Do NOT run `make` from the `beacon_agent/` Makefile.** It does `rm -rf dist` and wipes your runtime directory.
+**Do NOT run `make` from the `beacon_agent/` Makefile.** It runs `rm -rf dist` and wipes your runtime directory.
 
 First, check what `GOEXPERIMENT` flags the server binary needs:
 
@@ -1838,7 +1838,7 @@ go build -buildmode=plugin -ldflags="-s -w" \
 
 ### Rebuild All Listener Plugins
 
-Same `GOEXPERIMENT` value as above:
+Use the same `GOEXPERIMENT` value as above:
 
 ```bash
 export GOEXPERIMENT=jsonv2,greenteagc
@@ -1871,11 +1871,11 @@ sleep 3
 cat /tmp/adaptix.log
 ```
 
-You should see your listeners starting and "The AdaptixC2 server is ready" with no plugin errors. If you get a `goexperiment` version mismatch, re-check your `GOEXPERIMENT` export.
+You should see your listeners start and "The AdaptixC2 server is ready" with no plugin errors. If you get a `goexperiment` version mismatch, check your `GOEXPERIMENT` export again.
 
 ### Generate and Test
 
-Generate a fresh beacon from the UI (old beacons use old objects), transfer it to the target, and execute. If the agent doesn't appear, check [The Listener Plugin Bug](#the-listener-plugin-bug) and [The GOEXPERIMENT Build Flag Problem](#the-goexperiment-build-flag-problem).
+Generate a fresh beacon from the UI. Old beacons use old objects. Transfer the new beacon to the target and execute. If the agent does not appear, check [The Listener Plugin Bug](#the-listener-plugin-bug) and [The GOEXPERIMENT Build Flag Problem](#the-goexperiment-build-flag-problem).
 
 ---
 
@@ -1883,15 +1883,15 @@ Generate a fresh beacon from the UI (old beacons use old objects), transfer it t
 
 | Change | Files | What It Does |
 |--------|-------|-------------|
-| Custom stream cipher | `Crypt.cpp`, `Crypt.h`, `Agent.cpp`, `AgentConfig.cpp`, all 4 `Connector*.cpp`, `pl_utils.go` | Gets rid of the RC4 byte signature in the compiled code |
-| DJB2 seed 1572 to 7349 | `ProcLoader.cpp`, `hashes.py`, `ApiDefines.h` | Changes all 200+ hash constants in the data section |
+| Custom cipher | `Crypt.cpp`, `Crypt.h`, `Agent.cpp`, `AgentConfig.cpp`, all 4 `Connector*.cpp`, `pl_utils.go` | Removes the RC4 byte pattern from the compiled code |
+| Hash seed 1572 to 7349 | `ProcLoader.cpp`, `hashes.py`, `ApiDefines.h` | Changes all 200+ hash values in the data section |
 | hashes.py null byte fix | `hashes.py` | Library define names now generate correctly |
 | 4 missing function hashes | `hashes.py` | Added TryEnterCriticalSection, ResetEvent, CreateProcessWithTokenW, BeaconGetStopJobEvent |
-| printf DEBUG guard | `hashes.py` | printf hash only shows up in debug builds |
+| printf DEBUG guard | `hashes.py` | printf hash only appears in debug builds |
 | Variable renames | `ProcLoader.cpp`, `Encoders.cpp` | May change which CPU registers the compiler picks |
 | Function reordering | `MainAgent.cpp`, `WaitMask.cpp`, `Encoders.cpp` | Shifts function positions in the compiled binary |
 | Junk code | `MainAgent.cpp`, `WaitMask.cpp` | Adds real instructions between functional code blocks |
-| SEH metadata stripping | `Makefile` | Removes .pdata/.xdata UNWIND_INFO fingerprint from all .o files |
+| Exception metadata stripping | `Makefile` | Removes .pdata/.xdata stack-layout fingerprint from all .o files |
 | Listener plugin cipher fix | `pl_transport.go` (HTTP, DNS), `pl_main.go` (SMB, TCP) | Fixes the silent heartbeat decryption failure |
 
 All C++ beacon source paths are under: `AdaptixServer/extenders/beacon_agent/src_beacon/`
