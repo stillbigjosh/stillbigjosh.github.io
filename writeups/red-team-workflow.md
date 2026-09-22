@@ -20,10 +20,10 @@ lead: "A side-by-side comparison of pentest and C2-based red team approaches to 
 This is Part 3 of an Active Directory series:
 
 - [Part 1 - Building a Active Directory Cyber Range with Elastic on Ludus](https://stillbigjosh.github.io/writeup.html?file=writeups/goad-writeup.md) covers the lab build.
-- [Part 2 - Detection Scenarios for Active Directory](https://stillbigjosh.github.io/writeup.html?file=writeups/detection-scenarios.md) covers the pentest approach and what Elastic detects.
+- [Part 2 - Detection Scenarios for Active Directory](https://stillbigjosh.github.io/writeup.html?file=writeups/detection-scenarios.md) covers some detection scenarios using Elastic.
 - **Part 3 (this post)** runs the same attack chain through a C2 framework and compares the detection footprint against the pentest approach.
 
-The lab uses GOAD-Light (a multi-domain Active Directory environment with intentional misconfigurations) with Elastic Security as the SIEM/EDR layer. The topology is a standard forest with a parent domain, a child domain, two domain controllers, and a member server. Any AD lab with similar structure would produce the same results. The only addition for this post is an **Adaptix C2 server** (LXC container, 10.1.10.50). Adaptix is the C2 server. Kharon is the agent that runs on target hosts.
+The lab uses GOAD-Light (a multi-domain Active Directory environment with intentional misconfigurations) with Elastic Security as the SIEM/EDR layer. The topology is a standard forest with a parent domain, a child domain, two domain controllers, and a member server. Any AD lab with similar structure would produce the same results. The only addition for this post is an **Adaptix C2 server** (LXC container, 10.1.10.50). Adaptix is the C2 server. [Kharon](https://github.com/entropy-z/Kharon) is the agent that runs on target hosts.
 
 | Host | Role | IP | OS | Domain |
 |------|------|----|----|--------|
