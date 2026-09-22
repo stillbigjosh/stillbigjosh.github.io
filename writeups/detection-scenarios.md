@@ -317,17 +317,7 @@ event.code:"4624" AND winlog.event_data.LogonType:"3" AND winlog.logon.id:<logon
 The **Potential Credential Access via DCSync** rule uses this KQL query:
 
 ```kql
-host.os.type:"windows" AND event.code:"4662"
-  AND winlog.event_data.Properties:(
-    *DS-Replication-Get-Changes*
-    OR *DS-Replication-Get-Changes-All*
-    OR *DS-Replication-Get-Changes-In-Filtered-Set*
-    OR *1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*
-    OR *1131f6aa-9c07-11d1-f79f-00c04fc2dcd2*
-    OR *89e95b76-444d-4c62-991a-0facbeda640c*
-  )
-  AND winlog.event_data.AccessMask:"0x100"
-  AND NOT winlog.event_data.SubjectUserName:(*$ OR MSOL_*)
+host.os.type:"windows" AND event.code:"4662" AND winlog.event_data.Properties:(*DS-Replication-Get-Changes* OR *DS-Replication-Get-Changes-All* OR *DS-Replication-Get-Changes-In-Filtered-Set* OR *1131f6ad-9c07-11d1-f79f-00c04fc2dcd2* OR *1131f6aa-9c07-11d1-f79f-00c04fc2dcd2* OR *89e95b76-444d-4c62-991a-0facbeda640c*) AND winlog.event_data.AccessMask:"0x100" AND NOT winlog.event_data.SubjectUserName:(*$ OR MSOL_*)
 ```
 
 The three GUIDs correspond to:
@@ -922,4 +912,4 @@ This lab gives you a repeatable, fully monitored environment to practice exactly
 
 ---
 
-**Previous:** [Part 1: Active Directory Cyber-range with Elastic Stack](writeup.html?file=writeups/goad-writeup.md)
+**Next in series:** [Part 3: Red Team vs Pentest: Active Directory Attack Workflow](writeup.html?file=writeups/red-team-workflow.md)
