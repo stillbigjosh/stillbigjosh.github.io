@@ -6,9 +6,11 @@
 <meta name="description" content="stillbigjosh writeup">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="stillbigjosh">
+<meta property="og:title" content="">
 <meta property="og:description" content="">
 <meta property="og:url" content="">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="">
 <meta name="twitter:description" content="">
 <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1155,7 +1157,8 @@
           var parsed = parseFrontmatter(raw);
           render(parsed.meta, parsed.body);
         })
-        .catch(function () {
+        .catch(function (err) {
+          console.error('Writeup load error:', err);
           var errP = document.createElement('p');
           var errCode = document.createElement('code');
           errCode.textContent = file;
