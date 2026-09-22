@@ -1240,11 +1240,10 @@ Browse to `https://10.1.20.2:5601`; the login page should appear. Log in with `e
 
 ---
 
-## What Was Learned
+## Questions
 
 Some questions worth answering if you deployed this cyber range just like this build did:
 
-- What was the peak RAM usage during ingestion? Did Elasticsearch OOM at any point? What was the fix?
 - Which attacks fired detections immediately, and which needed rule tuning? Which required Sysmon specifically vs. what Windows Security Events already catches?
 - What is the smallest attack chain that produces the highest number of Kibana alerts? What is the biggest chain that produces zero?
 
