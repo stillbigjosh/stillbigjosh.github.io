@@ -3,7 +3,7 @@ title: "Detection scenarios for Active Directory"
 kicker: "Purple Team · Active Directory · Elastic"
 tags: "Purple Team · Active Directory · Elastic SIEM/EDR · GOAD"
 lead: "Turn AD attack techniques into structured detection practice. Learn what defenders see. Learn to operate against a monitored environment."
-toc_extra: "Part 3 - Red Team vs Pentest: AD Attack Workflow with C2|https://stillbigjosh.github.io/writeup.html?file=writeups/red-team-workflow.md"
+toc_extra: "Part 3 - Red Team vs Pentest: AD Attack Workflow|https://stillbigjosh.github.io/writeup.html?file=writeups/red-team-workflow.md"
 ---
 
 ![Ludus Active Directory Topology](https://cdn-images-1.medium.com/max/800/1*rygwFpdxirdKUZQUm58Jwg.png)
