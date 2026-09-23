@@ -811,7 +811,7 @@ python3 pygpoabuse.py 'north.sevenkingdoms.local/samwell.tarly:Heartsbane' \
 
 **C2 Command (from castelblack agent):**
 
-Run pygpoabuse through the SOCKS proxy. No Extension-Kit BOF exists for GPO manipulation.
+Run pygpoabuse through the SOCKS proxy. No Extension-Kit BOF exists for GPO manipulation(best approach). We could have used the SharpGPOAbuse .NET binary instead and run it via inline execute.assembly, but we want to avoid permanently loading the CLR into our agent process and also avoid fork and run. 
 
 ```
 token revert
