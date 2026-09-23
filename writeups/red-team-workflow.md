@@ -927,7 +927,6 @@ rule.name:"Privilege Escalation via Named Pipe Impersonation" OR rule.name:"Priv
 rule.name:"Process Created with an Elevated Token"
 ```
 
-No prebuilt rule fired an alert for `getsystem token`.
 
 ---
 
