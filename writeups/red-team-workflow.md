@@ -1296,8 +1296,6 @@ event.code:"17" AND winlog.event_data.PipeName:*svcctl*
 
 **MITRE ATT&CK:** T1569.002 (System Services: Service Execution), T1543.003 (Create or Modify System Process: Windows Service)
 
-> This approach was not followed due to a bug in the [Kharon agent](https://github.com/entropy-z/Kharon).
-
 SCShell modifies an existing service binary path instead of creating a new service. This avoids Event ID 7045 (new service creation).
 
 **Pentest equivalent:** No direct equivalent. Impacket's `smbexec.py` uses a similar technique.
