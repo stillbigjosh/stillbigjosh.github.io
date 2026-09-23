@@ -350,7 +350,7 @@ fs cat \\10.1.10.22\all\arya.txt
 
 **OPSEC Comparison:**
 
-| Factor | Pentest (nxc/smbclient) | Red Team (SOCKS + nxc / cmd net view) | Using Built-in commands |
+| Factor | Pentest (nxc/smbclient) | SOCKS + nxc / cmd net view | Using Built-in commands |
 |--------|--------------------------|--------------------------------------|---------------------------|
 | Traffic origin | External Kali IP | Internal SRV02 IP | Internal SRV02 IP |
 | Authentication | NTLM (password on wire) | Kerberos (via impersonated token) or NTLM through SOCKS | Impersonated token |
