@@ -292,6 +292,8 @@ First, make a token for samwell.tarly if not already impersonating:
 token make -d north.sevenkingdoms.local -u samwell.tarly -p Heartsbane
 ```
 
+**Option A - SOCKS + nxc / cmd net view:**
+
 Then use the SOCKS proxy and proxychains from Kali:
 
 ```
@@ -334,7 +336,7 @@ Then run `process create` (this returned no output due to a bug in the [Kharon a
 process create --command "cmd.exe /c net view \\10.1.10.22 /all" --pipe true
 ```
 
-**Enumerate the `all` share:**
+**Option B - Using Built-in commands:**
 
 ```
 fs ls \\10.1.10.22\all
@@ -348,11 +350,11 @@ fs cat \\10.1.10.22\all\arya.txt
 
 **OPSEC Comparison:**
 
-| Factor | Pentest (nxc/smbclient) | Red Team (SOCKS + nxc / cmd net view) |
-|--------|--------------------------|--------------------------------------|
-| Traffic origin | External Kali IP | Internal SRV02 IP |
-| Authentication | NTLM (password on wire) | Kerberos (via impersonated token) or NTLM through SOCKS |
-| Process artifact | None on target | cmd.exe child process if using `process create` |
+| Factor | Pentest (nxc/smbclient) | Red Team (SOCKS + nxc / cmd net view) | Using Built-in commands |
+|--------|--------------------------|--------------------------------------|---------------------------|
+| Traffic origin | External Kali IP | Internal SRV02 IP | Internal SRV02 IP |
+| Authentication | NTLM (password on wire) | Kerberos (via impersonated token) or NTLM through SOCKS | Impersonated token |
+| Process artifact | None on target | cmd.exe child process if using `process create` | None |
 
 **Elastic Query - Detect Share Enumeration:**
 
