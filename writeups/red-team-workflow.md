@@ -372,7 +372,7 @@ event.code:"1" AND process.name:"net.exe" AND process.command_line:*view*
 
 ![](image/red-team-workflow/20260921171757.png)
 
-Parent process spoofing does not help if the command-line arguments are suspicious. The `netshare` BOF from the Situational Awareness suite would avoid this detection entirely. However, `netshare` was not part of our Adaptix Extension-Kit.
+Parent process spoofing does not help if the command-line arguments are suspicious. The `netshare` BOF from the Situational Awareness suite would avoid this detection entirely. However, `netshare` was not part of our Adaptix Extension-Kit. The usage of Built-in commands also avoid this detection entirely, but it requires prior knowledge of the exact share name. 
 
 
 ---
