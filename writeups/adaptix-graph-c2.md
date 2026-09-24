@@ -117,10 +117,10 @@ The script runs all steps automatically. It patches the beacon agent source (8 a
 ![Install script output showing patches being applied to the source tree](image/adaptix-graph-c2/bbbb.png)
 *Patches applied to the beacon agent source tree*
 
-The build takes a few minutes depending on your hardware. Make sure your server has at least 2 CPU cores and 2 GB of RAM. Go compilation is memory-intensive. If you run the server in an LXC container:
+The build takes a few minutes depending on your hardware. Make sure your server has at least 2 CPU cores and 2 GB of RAM. Go compilation is memory-intensive. You can check available resources with:
 
 ```bash
-pct set <container-id> -cores 4 -memory 2048
+nproc && free -h
 ```
 
 When the script finishes, you see "Installation complete!" and the service is running.
@@ -129,14 +129,6 @@ When the script finishes, you see "Installation complete!" and the service is ru
 *Build complete: 58 object files compiled, listener installed, service restarted*
 
 The script is idempotent. It skips patches that are already applied, so you can run it again safely after updates.
-
-**If you run Adaptix in an LXC container**, copy the project into the container first:
-
-```bash
-tar czf /tmp/adaptix-graph-c2.tar.gz -C /path/to adaptix-graph-c2
-cat /tmp/adaptix-graph-c2.tar.gz | pct exec <id> -- tar xzf - -C /opt/
-pct exec <id> -- bash /opt/adaptix-graph-c2/scripts/install.sh /opt/AdaptixC2
-```
 
 ---
 
@@ -324,11 +316,7 @@ The SAS token signature does not match. The SAS string-to-sign must use Azure St
 
 ### Build is slow or gets killed (OOM)
 
-The server does not have enough resources for Go compilation. Use at least 2 CPU cores and 2 GB of RAM. For LXC containers:
-
-```bash
-pct set <id> -cores 4 -memory 2048
-```
+The server does not have enough resources for Go compilation. Use at least 2 CPU cores and 2 GB of RAM. Verify with `nproc` and `free -h`. If you are running in a container, increase the resource allocation from the host before rebuilding.
 
 ---
 
