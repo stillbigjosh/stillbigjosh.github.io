@@ -97,7 +97,44 @@ The beacon never receives the raw access key. The listener generates a scoped SA
 
 ---
 
-## 3 - Install the Plugin
+## 3 - OneDrive Setup (Alternative)
+
+If you want to use OneDrive instead of Blob Storage, you need an Azure AD App Registration instead of a Storage Account. The beacon traffic goes to `graph.microsoft.com` instead of `blob.core.windows.net`.
+
+Go to the Azure Portal. Go to **Azure Active Directory > App registrations > New registration**.
+
+1. Set a name (e.g., `graph-sync`). Keep it generic.
+2. Set **Supported account types** to "Accounts in this organizational directory only".
+3. Click **Register**.
+
+From the app's overview page, copy these values:
+- **Application (client) ID**
+- **Directory (tenant) ID**
+
+Go to **Certificates & secrets > New client secret**. Set a description and expiry. Copy the **Value** (not the Secret ID). This is your **Client Secret**. It is only shown once.
+
+Go to **API permissions > Add a permission > Microsoft Graph > Application permissions**. Add `Files.ReadWrite.All`. Click **Grant admin consent**.
+
+You also need the **User ID** of the OneDrive account that will hold the relay files. Find it under **Azure Active Directory > Users > [select user] > Object ID**.
+
+You now have the four values you need for the listener:
+
+| Field | What to Enter |
+|-------|---------------|
+| Storage Backend | `onedrive` |
+| Tenant ID (OneDrive) | Your Directory (tenant) ID |
+| Client ID (OneDrive) | Your Application (client) ID |
+| Client Secret (OneDrive) | Your client secret value |
+| User ID (OneDrive) | The target user's Object ID |
+| Folder Path | Folder in OneDrive for relay files (e.g., `.sync/data`) |
+
+The same OPSEC principles apply. The beacon's traffic goes to `graph.microsoft.com`, a Microsoft IP range used by Outlook, Teams, SharePoint, and every M365-integrated application. A defender sees standard Graph API calls, indistinguishable from normal M365 activity.
+
+The tradeoff: OneDrive requires an App Registration with admin-consented permissions, which leaves more audit trail in Azure AD than a standalone Storage Account. For a burner tenant this does not matter. For a client-owned tenant, Blob Storage is cleaner.
+
+---
+
+## 4 - Install the Plugin
 
 You need Adaptix C2 v1.2 installed on your server. Clone the plugin repository:
 
@@ -132,7 +169,7 @@ The script is idempotent. It skips patches that are already applied, so you can 
 
 ---
 
-## 4 - Create the Listener
+## 5 - Create the Listener
 
 Open the Adaptix Client and connect to your server.
 
@@ -181,7 +218,7 @@ For long-haul implants where low-and-slow is the priority, increase the beacon's
 
 ---
 
-## 5 - Generate a Beacon
+## 6 - Generate a Beacon
 
 Go to **Generate Agent**. Select the graph listener. Set the architecture to **x64** and the format to **Exe**. Click **Build**.
 
@@ -194,7 +231,7 @@ Download the beacon file to your workstation.
 
 ---
 
-## 6 - Deploy and Verify
+## 7 - Deploy and Verify
 
 Transfer the beacon file to a Windows target. Run it.
 
@@ -243,7 +280,7 @@ The output comes back through the same dead-drop mechanism: the listener uploads
 
 ---
 
-## 7 - Post-Operation Cleanup
+## 8 - Post-Operation Cleanup
 
 When the engagement ends, the storage account and everything in it needs to go. The beacon binary contains the storage endpoint FQDN and a SAS token. If a defender recovers the binary and extracts those values, you do not want them pointing at a live account with readable activity logs.
 
