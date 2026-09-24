@@ -100,8 +100,6 @@ event.module:"endpoint" AND event.action:"Memory Threat Detection Alert"
 
 ---
 
----
-
 ## 2 - Reconnaissance (from castelblack foothold)
 
 All enumeration in this section runs from the low-privilege samwell.tarly agent on castelblack (SRV02). This is the key difference from the pentest approach: instead of scanning from an external Kali host, every query originates from a domain-joined member server. The traffic blends with normal Active Directory operations. No local admin privileges are required for any of these actions.
@@ -375,7 +373,6 @@ event.code:"1" AND process.name:"net.exe" AND process.command_line:*view*
 ![](image/red-team-workflow/20260921171757.png)
 
 Parent process spoofing does not help if the command-line arguments are suspicious. The `netshare` BOF from the Situational Awareness suite would avoid this detection entirely. However, `netshare` was not part of our Adaptix Extension-Kit. The usage of Built-in commands also avoid this detection entirely, but it requires prior knowledge of the exact share name. 
-
 
 ---
 
@@ -796,8 +793,6 @@ The GUID `1131f6aa-9c07-11d1-f79f-00c04fc2dcd2` corresponds to `DS-Replication-G
 
 ---
 
----
-
 ## 4 - Privilege Escalation
 
 ### 4.1 - GPO Abuse (samwell.tarly GenericWrite on STARKWALLPAPER)
@@ -930,9 +925,6 @@ rule.name:"Privilege Escalation via Named Pipe Impersonation" OR rule.name:"Priv
 ```
 rule.name:"Process Created with an Elevated Token"
 ```
-
-
----
 
 ---
 
@@ -1433,8 +1425,6 @@ event.code:"4624" AND winlog.event_data.LogonType:"10"
 
 ---
 
----
-
 ## 7 - Domain Escalation
 
 ### 7.1 - Constrained Delegation Abuse (jon.snow)
@@ -1889,7 +1879,6 @@ event.code:"8" AND NOT winlog.event_data.SourceImage:(*csrss.exe* OR *wininit.ex
 ```
 
 ![](image/red-team-workflow/20260922163943.png)
-
 
 ---
 
