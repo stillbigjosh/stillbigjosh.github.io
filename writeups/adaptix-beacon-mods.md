@@ -587,4 +587,4 @@ Everything described here targets static signatures: specific byte patterns and 
 
 ---
 
-**Previous:** [Part 2: Reducing Infrastructure and Agent Fingerprints](writeup.html?file=writeups/adaptix-hardening.md) | **Next:** [Part 4: Custom Cipher, Hash Seed, and Structural Changes](writeup.html?file=writeups/adaptix-cipher-mods.md)
+**Previous:** [Part 2: Reducing Infrastructure and Agent Fingerprints](writeup.html?file=writeups/adaptix-hardening.md) | **Next:** [Part 4: Cloud Dead-Drop with Azure Blob Storage](writeup.html?file=writeups/adaptix-graph-c2.md)
