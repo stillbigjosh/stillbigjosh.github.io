@@ -38,26 +38,28 @@ BEACON   <--[poll for r_{nonce}.dat] Azure Blob Storage
 
 The beacon gets a pre-signed SAS (Shared Access Signature) token embedded in its profile at build time. This token gives scoped access to the storage container for 90 days. The beacon never sees the raw storage key.
 
-### Why This Matters for OPSEC
+### Why It Matters for OPSEC
 
 **Your C2 server disappears from the network.** The listener makes outbound HTTPS calls to Azure from wherever it runs, your homelab, a VPS, a container behind NAT. It does not need a public IP. It does not need open ports. It does not need a domain. There is nothing for Censys or Shodan to scan, because there is nothing listening.
 
-**The beacon's traffic blends with legitimate cloud activity.** A defender inspecting the wire sees TLS handshakes to `{account}.blob.core.windows.net`, a Microsoft IP range that thousands of legitimate applications connect to every day. The SNI, the certificate chain, and the destination IP all belong to Microsoft. There is no custom domain to investigate, no unusual certificate to fingerprint, and no JARM hash to catalogue.
+**The beacon's traffic blends with legitimate cloud activity.** A defender inspecting the wire sees TLS handshakes to `{account}.blob.core.windows.net` or `graph.microsoft.com`, a Microsoft IP range that thousands of legitimate applications connect to every day. The SNI, the certificate chain, and the destination IP all belong to Microsoft. There is no custom domain to investigate, no unusual certificate to fingerprint, and no JARM hash to catalogue.
 
 **The infrastructure is disposable.** If the storage account gets flagged, you create a new one in minutes. No server migration, no DNS changes, no certificate reissuance. Generate a new beacon with the new account details and redeploy.
 
 **There is no server to take down.** In a traditional setup, if the blue team identifies and blocks your C2 IP, every beacon on every compromised host goes dark simultaneously. With the dead-drop model, the server IP is not in the beacon at all. The blue team would need to block the Azure Storage endpoint, which would break legitimate Azure-dependent applications across the organization.
 
+**Threat Emulation** Multiple APT groups have been observed using Microsoft Graph API and cloud storage services as C2 channels in real intrusions. APT28 (Fancy Bear), Cozy Bear (APT29), and groups tracked under Storm-0324 and Storm-0558 have all leveraged Microsoft cloud services to relay commands and exfiltrate data. 
+
 ---
 
 ## 1 - Create an Azure Storage Account
 
-Go to the Azure Portal. Go to **Storage accounts > Create**.
+Go to the Azure Portal. Go to **Create a resource > Marketplace > Storage accounts > Create**.
 
 ![Azure Portal create storage account form](image/adaptix-graph-c2/01.png)
 *The Create Storage Account form in the Azure Portal*
 
-Fill in the form. The storage account name must be globally unique and lowercase. Set Performance to **Standard** and Redundancy to **LRS** (locally redundant storage). LRS is the cheapest tier and more than sufficient for a C2 relay.
+Fill in the form. The storage account name must be globally unique and lowercase. Set Performance to **Standard** and Redundancy to **LRS** (locally redundant storage). LRS is the cheapest tier and enough for a C2 relay.
 
 ![Storage account form filled in with name, region, performance, and redundancy](image/adaptix-graph-c2/02.png)
 *Storage account `msgraphtest` configured with Standard performance and LRS redundancy*
@@ -74,7 +76,7 @@ Wait for the deployment to finish. Click **Go to resource**.
 
 ### A Note on Account Naming
 
-The storage account name becomes part of the FQDN that the beacon connects to: `{name}.blob.core.windows.net`. A name like `c2-exfil-prod` is self-documenting in exactly the wrong way. Choose something that looks like a routine internal tool or dev environment: `apptelemetry`, `logsync2026`, `devresources`. If a defender ever pulls the beacon config and extracts the storage endpoint, the account name should not raise questions by itself.
+The storage account name becomes part of the FQDN that the beacon connects to: `{name}.blob.core.windows.net`. A name like `c2-exfil-prod` isn't stealth. Choose something that looks like a routine internal tool or dev environment: `apptelemetry`, `logsync2026`, `devresources`. If a defender ever pulls the beacon config and extracts the storage endpoint, the account name should not raise questions by itself.
 
 ---
 
