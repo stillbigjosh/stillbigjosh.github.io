@@ -525,16 +525,16 @@ Same situation as the HTTP agent. The `api-ms-win-`, `ext-ms-`, and `\\.\pipe\%0
 
 The bad bytes offset also shifted down from the original `0x14016` (before Changes 8 and 9) to `0x13FE5` (after). This confirms the string removals worked. The binary shrank slightly because the `api-ms-win-`, `ext-ms-`, and pipe format strings are no longer stored in the `.rdata` section. ThreatCheck is now landing on config filler instead.
 
-### What This Means
+### Moving On
 
 This is the limit of what source-level signature removal can achieve. The specific strings and code patterns that ThreatCheck could identify and isolate have been eliminated. Both the HTTP and SMB agents now converge on structural data (PE padding, config filler) that cannot be addressed through source edits.
 
 However, Defender still detects both payloads. The "Threat found, splitting" messages in the binary search confirm this. The next steps to investigate would be:
 
-- **PE header modifications** - Rich header removal, timestamp zeroing, section name changes, debug directory stripping. These are structural fingerprints that exist outside the code.
-- **Shellcode output instead of exe** (if the Adaptix client supports it), loaded through a custom stager. This removes the PE structure entirely.
-- **Packing or encryption** - wrapping the payload so the raw bytes never touch disk in the clear.
-- **Runtime evasion** - sleep obfuscation, syscall unhooking, AMSI/ETW patching, which address behavioral detection rather than static detection.
+- PE header modifications - Rich header removal, timestamp zeroing, section name changes, debug directory stripping. These are structural fingerprints that exist outside the code.
+- Shellcode output instead of exe (if the Adaptix client supports it), loaded through a custom stager. This removes the PE structure entirely.
+- Packing or encryption - wrapping the payload so the raw bytes never touch disk in the clear.
+- Runtime evasion - sleep obfuscation, syscall unhooking, AMSI/ETW patching, which address behavioral detection rather than static detection.
 
 ---
 
@@ -567,23 +567,21 @@ The teamserver links the `.o` files into a final payload each time you generate 
 
 After generating a new payload, verify the changes worked:
 
-1. **ThreatCheck:** Run it against the new payload. The previously flagged regions (alloc-loop-free patterns, Base64 table, RTTI strings, API-set strings, pipe format string) should no longer trigger. ThreatCheck may still flag blocks of null bytes that come from PE section padding. These are structural to how Windows executables are laid out and cannot be removed.
+1. Run ThreatCheck against the new payload. The previously flagged regions (alloc-loop-free patterns, Base64 table, RTTI strings, API-set strings, pipe format string) should no longer trigger. ThreatCheck may still flag blocks of null bytes that come from PE section padding. These are structural to how Windows executables are laid out and cannot be removed.
 
-2. **Ghidra:** Open the new payload and check the modified functions. The WinMain entry point should show an indirect call through a variable (not a direct named function call). The resize functions should show a single conditional HeapReAlloc/HeapAlloc call with no copy loop. The destroy functions should show memset followed by HeapDestroy with no HeapFree.
-
-3. **Strings:** Run `strings` on the binary and confirm that `__cxxabiv1` type names, `api-ms-win-`, `ext-ms-`, and `\\.\pipe\%08lx` no longer appear as readable strings.
+2. Run `strings` on the binary and confirm that `__cxxabiv1` type names, `api-ms-win-`, `ext-ms-`, and `\\.\pipe\%08lx` no longer appear as readable strings.
 
 ---
 
 ## What These Changes Do Not Address
 
-Everything described here targets static signatures: specific byte patterns and readable strings that exist in the file on disk. These are the easiest type of detection to address because you can directly see and modify what triggers them. However, there are other detection methods that these changes do not help with:
+Everything described here targets static signatures: specific byte patterns and readable strings that exist in the file on disk. They are the easiest type of detection to address because you can directly see and modify what triggers them. However, there are other detection methods that these changes do not help with:
 
-- **PE header metadata** - The Rich header, section names, section characteristics, and import hash (imphash) are all part of the executable structure and can be fingerprinted independently of the code content.
-- **Behavioral detection** - What the agent does at runtime (the sequence of API calls it makes, how it allocates memory, how it communicates) can be detected by EDR even if the on-disk binary looks clean.
-- **Heuristic/ML classification** - Machine learning models used by endpoint protection can classify binaries based on structural features that go beyond simple byte matching.
-- **Code signing** - The binary is unsigned, which is itself a signal to security tools.
-- **Delivery method** - How the payload gets onto the target and how it is executed are separate detection surfaces.
+- PE header metadata - The Rich header, section names, section characteristics, and import hash (imphash) are all part of the executable structure and can be fingerprinted independently of the code content.
+- Behavioral detection - What the agent does at runtime (the sequence of API calls it makes, how it allocates memory, how it communicates) can be detected by EDR even if the on-disk binary looks clean.
+- Heuristic/ML classification - Machine learning models used by endpoint protection can classify binaries based on structural features that go beyond simple byte matching.
+- Code signing - The binary is unsigned, which is itself a signal to security tools.
+- Delivery method - How the payload gets onto the target and how it is executed are separate detection surfaces.
 
 ---
 
