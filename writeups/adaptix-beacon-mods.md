@@ -573,7 +573,7 @@ After generating a new payload, verify the changes worked:
 
 ---
 
-## What These Changes Do Not Address
+## What Our Changes Do Not Address
 
 Everything described here targets static signatures: specific byte patterns and readable strings that exist in the file on disk. They are the easiest type of detection to address because you can directly see and modify what triggers them. However, there are other detection methods that these changes do not help with:
 
