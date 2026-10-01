@@ -167,16 +167,9 @@ The rule also skips known-good processes by `process.name` and `process.executab
 
 ### Opsec Considerations
 
-> These are just open-ended questions
+> These are just open-ended questions and what I would do differently
 
-- Find the GrantedAccess value (the permission flags) that your tool uses. Look it up in the Sysmon Event ID 10 log. Compare it against the exclusion list in the rule definition. Research the minimum permissions needed to read LSASS memory.
-- Check the CallTrace field in the Sysmon event. Does it show which DLL did the access? The **Potential Credential Access via LSASS Memory Dump** rule looks for `dbghelp.dll` or `dbgcore.dll` in the CallTrace. Tools that use different DLLs to read memory may evade that rule.
 - What happens if the process that opens LSASS is a signed Microsoft binary? Some rules skip processes by code signature. Research whether a LOLBin as the caller changes the detection outcome.
-- The **LSASS Memory Dump Handle Access** rule uses a `new_terms` rule type. It fires only the first time a given process name accesses LSASS. A second access from the same process name in the same time window does not fire again. Test what happens when you run the same tool twice.
-
-### Iteration Prompt
-
-Run this scenario. Open the Sysmon Event ID 10 entry for your LSASS access. Document the GrantedAccess, CallTrace, and SourceImage fields. Then open the prebuilt rule definition and map each field to a condition in the rule query. Can you identify which single field change would cause the rule to stop firing?
 
 ---
 
@@ -237,16 +230,11 @@ The **LSASS Memory Dump Creation** rule takes a different approach. It watches f
 
 ### Opsec Considerations
 
-> These are just open-ended questions
+> These are just open-ended questions and what I would do differently
 
 - The `comsvcs.dll` technique is well-documented. The command-line pattern is the primary trigger. Research what happens if you copy `comsvcs.dll` to a different name or location before you call it. Does the rule check the DLL name in the command line, the DLL path, or something else?
 - You can call the MiniDump function by number (`#24`) instead of by name. Test whether both forms produce the same detection outcome.
 - What happens if you rename the output file to something other than `.dmp`? The **LSASS Memory Dump Creation** rule matches on file name patterns. Research the specific patterns it checks.
-- Consider the parent process chain. Does the detection outcome change if `rundll32.exe` is started by `services.exe` versus `cmd.exe` versus `explorer.exe`?
-
-### Iteration Prompt
-
-Run this scenario twice: once with the standard `MiniDump` syntax, once with ordinal `#24`. Compare the alerts and raw Sysmon events. Then read the rule definition for **Potential Credential Access via Windows Utilities**. Identify every string pattern it matches in the command line.
 
 ---
 
@@ -332,16 +320,9 @@ The **FirstTime Seen Account Performing DCSync** rule adds a behavior-based chec
 
 ### Opsec Considerations
 
-> These are just open-ended questions
+> These are just open-ended questions and what I would do differently
 
-- DCSync cannot operate without the replication GUIDs. These GUIDs are baked into the replication protocol. There is no alternative. The real opsec question for DCSync is not "how do I avoid the event" but "is anyone watching for it."
-- What happens when you target a single user (`-just-dc-user krbtgt`) versus the full domain? The detection fires on the first 4662 event. But the total event count differs. Document the count for each.
-- Correlate the 4662 event with the 4624 logon event through the logon ID. This correlation shows the source IP of the replication request. In your lab, this will be your WireGuard peer IP (198.51.100.3). In a real environment, a replication request from a non-DC IP is the critical indicator.
 - Research whether there is an alternative way to get the krbtgt hash or domain credentials without DCSync. Techniques such as NTDS.dit extraction through Volume Shadow Copy leave different evidence. Compare the two.
-
-### Iteration Prompt
-
-Run DCSync. Measure the time between when `impacket-secretsdump` starts and when the alert appears in Kibana. This is your detection delay. Then verify: does the prebuilt rule fire on DC01, DC02, or both? Only the DC that receives the replication request generates the 4662 event.
 
 ---
 
@@ -442,16 +423,10 @@ The **Suspicious Service was Installed in the System** rule monitors Event IDs 7
 
 ### Opsec Considerations
 
-> These are just open-ended questions
+> These are just open-ended questions and what I would do differently
 
-- `impacket-psexec` creates a service with a random name. Its ImagePath contains `cmd.exe /Q /c echo ... > \\127.0.0.1\...`. This command-line pattern is what the service installation rule matches. Research the exact substring that fires the match.
 - Compare the alert output for all four impacket tools. `impacket-wmiexec` does not create a service. It uses WMI to start processes. This produces a `wmiprvse.exe > cmd.exe` parent-child chain. Does Elastic have a prebuilt rule for that process chain?
-- `impacket-atexec` creates a scheduled task instead of a service. This overlaps with Scenario 6. Compare what it triggers against psexec.
 - Check the NTLM versus Kerberos authentication method in the 4624 logon event. When you use `impacket-psexec` with a password from Linux, the logon typically uses NTLM. In environments where Kerberos is the norm, an NTLM network logon from an unexpected source stands out. Search Discover for `event.code:"4624" AND winlog.event_data.AuthenticationPackageName:"NTLM"` and compare against the baseline.
-
-### Iteration Prompt
-
-Rank the four impacket lateral movement tools by total alert count. For the tool that produced the fewest alerts, identify the remaining events it left in Discover. Then, for the tool that produced the most alerts, read each rule definition. Identify the minimum set of command-line changes that would avoid each detection.
 
 ---
 
@@ -531,19 +506,9 @@ The rule also uses a regex to flag services whose binary path is a single execut
 
 ### Opsec Considerations
 
-> These are just open-ended questions
-
-The goal is to drive your own tests. This is not a bypass guide.
+> These are just open-ended questions and what I would do differently
 
 - Event ID 7045 fires on new service creation. It does **NOT** fire when you modify an existing service ImagePath through the registry or `sc config`. Test the registry modification approach. Verify that 7045 is absent. Then check whether Sysmon Event ID 13 (registry value set) captures the ImagePath change.
-- Does the rule fire if the service runs a malicious PowerShell command instead of a service binary?
-- Does the rule check the service binary digital signature, or only the path string? Research whether a signed binary in a suspicious path fires the same alert as an unsigned binary.
-- What if the service binary path points to a legitimate executable with no suspicious command-line arguments? The rule does pattern-matching on the ImagePath string. A service that runs `C:\Windows\System32\svchost.exe -k netsvcs` looks different from one that runs `cmd.exe /c echo`.
-- Create a service whose binary path is a full UNC path to an SMB share. Does the rule fire? Check whether `\\` patterns in the ImagePath are covered.
-
-### Iteration Prompt
-
-Create three services: one with a cmd.exe payload, one that points to a binary in `C:\Users\Public\`, and one that modifies an existing service ImagePath. Document which of the three fires the prebuilt rule and which does not. For any that are missed, write the KQL query that would catch them.
 
 ---
 
@@ -614,14 +579,9 @@ Both conditions must be met for the rule to fire: a suspicious executable AND a 
 
 > These are just open-ended questions
 
-- The rule fires on task **execution**, not creation. The task must run for the detection to fire. A task that is created but never executed produces a 4698 event in Discover but no prebuilt alert. Research whether a prebuilt rule exists for 4698 task creation events.
-- The rule checks the original filename embedded inside the binary, not the file name on disk. If you rename `cmd.exe` to `svchost.exe`, the rule still fires. The original name inside the executable stays `Cmd.Exe`. Test this.
 - What happens if the scheduled task runs a custom binary (not a LOLBin) that is not in the rule executable list? The rule covers only a specific set of known-abused binaries. A compiled executable with a unique name would not match.
 - Compare task creation through `schtasks.exe` (which logs a process creation event for `schtasks.exe` itself) versus task creation through the Task Scheduler API from PowerShell or C#. The API approach avoids the `schtasks.exe` process creation event. Does the execution-phase detection still fire?
 
-### Iteration Prompt
-
-Create two scheduled tasks: one that runs `powershell.exe` from `C:\Users\Public\`, and one that runs a custom-named binary from `C:\Windows\System32\`. Run both. Document which one fires the prebuilt rule and why. Then check Discover for the 4698 creation events for both. Write a custom KQL query that would catch both.
 
 ---
 
@@ -731,16 +691,9 @@ This is a critical distinction. Script Block Logging captures the **decoded cont
 
 ### Opsec Considerations
 
-> These are just open-ended questions
+> These are just open-ended questions and what I would do differently
 
 - If Script Block Logging is enabled, encoding and obfuscation do not hide anything from the 4104 event. The decoded script text contains the actual code. Research which layer of detection obfuscation actually targets. Hint: it targets file scanning and command-line logging, not runtime script logging.
-- Compare `powershell.exe` versus `pwsh.exe` (PowerShell 7, if available). Some detection rules reference `powershell.exe` by name. Research whether the prebuilt rules also cover `pwsh.exe`.
-- What happens if you run the PowerShell engine inside a custom program (not named `powershell.exe`)? The process creation rule would not match. But Script Block Logging still fires because it hooks the PowerShell engine itself, not the process name. Verify this in your lab.
-- Understand the difference between `process.args` (the raw command-line text) and `powershell.file.script_block_text` (the decoded script content at run time). A rule that matches on `process.args` can be evaded if you move the suspicious content out of the command line (into a file, a download, or a variable). A rule that matches on script block text cannot be evaded that way.
-
-### Iteration Prompt
-
-Run three variants: (1) an encoded command with a download cradle, (2) the same download cradle written directly on the command line without encoding, and (3) the download cradle in a `.ps1` file that you run with `powershell -File script.ps1`. For each variant, document which rules fire and which Discover queries return results. Map the difference to the data source each rule uses (process creation versus Script Block Logging).
 
 ---
 
@@ -811,13 +764,7 @@ Note: `impacket-secretsdump` can also operate **without** a new service if the R
 > These are just open-ended questions
 
 - Compare what secretsdump triggers with and without the `-just-dc` flag. Without it: service creation + registry hive reads. With it: DCSync (Scenario 3). These are different code paths that leave different traces.
-- Test whether the RemoteRegistry service already runs on your GOAD-Light hosts. If it does, secretsdump may skip the service creation step. What evidence remains?
-- The registry hive reads (SAM, SYSTEM, SECURITY) are the core action. Research whether any Elastic prebuilt rule monitors for remote registry hive reads. If none exists, this is a detection gap. Fill it with a custom rule.
-- `impacket-secretsdump` supports the `-exec-method` flag. This flag controls how the temporary service is created (smbexec, wmiexec, mmcexec). Test different exec methods and compare the service installation events.
 
-### Iteration Prompt
-
-Run secretsdump with default settings. Note every alert that fires. Then run it again after you manually start the RemoteRegistry service on the target (`sc start RemoteRegistry`). Compare the two alert sets. Document what is missing in the second run. Write a KQL query to catch the gap.
 
 ---
 
