@@ -365,7 +365,7 @@ rule.name:"Windows Network Enumeration"
 rule.name:"Svchost spawning cmd"
 ```
 
-![](images/red-team-workflow/svchost.png)
+![](image/red-team-workflow/svchost.png)
 
 
 KQL Query - For `net view` process creation:
