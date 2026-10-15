@@ -1509,6 +1509,7 @@ kerbeus s4u /ticket:BASE64 /service:SPN /impersonateuser:USER [/domain:DOMAIN] [
 **Elastic Queries - Detect Delegation Abuse:**
 
 ```
+rule.name:"Kerberos Traffic from Unusual Process "
 rule.name:"Sensitive Privilege SeEnableDelegationPrivilege assigned to a User"
 ```
 
