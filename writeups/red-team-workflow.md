@@ -306,7 +306,7 @@ From Kali (run from the Kali terminal):
 proxychains -q nxc smb 10.1.10.22 -u samwell.tarly -p Heartsbane --shares
 ```
 
-Or use `process create` with `net view` (no SOCKS needed, but creates a child process):
+Or use `process create` with `net view` (no SOCKS needed, but creates a child process and will trigger the Elastic pre-built rule "Svchost spawning cmd" rule):
 
 ```
 process create --command "cmd.exe /c net view \\10.1.10.22 /all" --pipe true
@@ -362,7 +362,11 @@ Prebuilt rule:
 
 ```
 rule.name:"Windows Network Enumeration"
+rule.name:"Svchost spawning cmd"
 ```
+
+![](image/red-team-workflow/svchost.png)
+
 
 KQL Query - For `net view` process creation:
 
