@@ -780,6 +780,7 @@ lsadump_secrets
 Prebuilt rule:
 
 ```
+rule.name:"Interactive Logon by an Unusual Process"
 rule.name:"Potential Credential Access via DCSync" OR rule.name:"FirstTime Seen Account Performing DCSync"
 ```
 
@@ -1418,6 +1419,7 @@ RDP is the same protocol either way. The SOCKS proxy only changes the source IP 
 **Elastic Query - Detect RDP:**
 
 ```
+rule.name:"Interactive Logon by an Unusual Process"
 rule.name:"Potential Remote Desktop Tunneling Detected"
 ```
 
