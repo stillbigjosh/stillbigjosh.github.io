@@ -50,8 +50,8 @@
             'Courier New', monospace;
 
     --main-width: 760px;
-    --sidebar-width: 260px;
-    --toc-rail-width: 220px;
+    --sidebar-width: 280px;
+    --toc-rail-width: 240px;
   }
 
   html {
@@ -665,38 +665,49 @@
       height: auto;
       border-right: none;
       border-bottom: 1px solid var(--border);
-      padding: 16px 0;
+      padding: 10px 0;
     }
-    .sidebar-nav {
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 0;
-      padding: 0 12px;
+    /* Collapsible "Writeups" menu on mobile */
+    .sidebar-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      margin-bottom: 0;
+      cursor: pointer;
+      user-select: none;
     }
-    .sidebar-nav a {
-      border-left: none;
-      border-bottom: 3px solid transparent;
-      padding: 8px 12px;
-      font-size: 12.5px;
+    .sidebar-label::after {
+      content: '▾';
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--accent);
+      transition: transform 0.2s ease;
     }
-    .sidebar-nav a:hover,
-    .sidebar-nav a.active {
-      border-left-color: transparent;
-      border-bottom-color: var(--accent);
-    }
-    .sidebar-nav .nav-kicker { display: none; }
-    .sidebar-label { padding: 0 16px; margin-bottom: 8px; }
-    .sidebar-divider { margin: 8px 16px; }
-    .sidebar-home { padding: 8px 16px; }
+    .sidebar-label.open::after { transform: rotate(180deg); }
+    #sidebar-nav { display: none; padding: 6px 0 2px; }
+    #sidebar-nav.open { display: flex; }
+    .sidebar-divider { display: none; }
+    .sidebar-home { padding: 10px 16px 4px; }
     .main { padding: 0 16px; }
-    .article-hero { padding: 36px 0 0; }
+    .article-hero { padding: 32px 0 0; }
     .article-title { font-size: 27px; }
   }
 
   @media (max-width: 640px) {
     .nav-inner { padding: 12px 16px; }
+    .nav-back { font-size: 12.5px; }
+    .article-hero { padding: 26px 0 0; }
+    .article-title { font-size: 24px; }
+    .lead { font-size: 15.5px; }
+    .content p, .content ul, .content ol { font-size: 15px; }
     .content h2 { font-size: 20px; }
+    .content h3 { font-size: 16.5px; }
+    .content pre code { font-size: 12.5px; }
+    .content code { white-space: normal; word-break: break-word; }
     .kv-table { font-size: 12.5px; }
+    .share-bar, .share-bar-footer { flex-wrap: wrap; }
+    .toc-card { padding: 18px 16px; }
   }
 </style>
 </head>
@@ -1173,6 +1184,25 @@
         });
     })();
 
+  </script>
+
+  <!-- ── Mobile sidebar toggle ─────────────────────────────────── -->
+  <script>
+    (function () {
+      var label = document.querySelector('.sidebar-label');
+      var nav = document.getElementById('sidebar-nav');
+      if (!label || !nav) return;
+      label.setAttribute('role', 'button');
+      label.setAttribute('tabindex', '0');
+      function toggle() {
+        label.classList.toggle('open');
+        nav.classList.toggle('open');
+      }
+      label.addEventListener('click', toggle);
+      label.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+      });
+    })();
   </script>
 
   <!-- ── Lightbox ──────────────────────────────────────────────── -->

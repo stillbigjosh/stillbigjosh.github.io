@@ -57,6 +57,8 @@ a:hover { color: var(--accent-h); }
 
 /* ── App shell: left sidebar + center + right sidebar ────────── */
 .app-layout {
+  max-width: 1440px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr var(--sidebar-r-w);
   min-height: 100vh;
@@ -64,10 +66,9 @@ a:hover { color: var(--accent-h); }
 
 /* ── Sidebar ─────────────────────────────────────────────────── */
 .sidebar {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  width: var(--sidebar-w);
+  align-self: start;
   height: 100vh;
   overflow-y: auto;
   background: var(--bg-alt);
@@ -231,10 +232,9 @@ a:hover { color: var(--accent-h); }
 
 /* ── Right sidebar ───────────────────────────────────────────── */
 .sidebar-right {
-  position: fixed;
+  position: sticky;
   top: 0;
-  right: 0;
-  width: var(--sidebar-r-w);
+  align-self: start;
   height: 100vh;
   overflow-y: auto;
   background: var(--bg-alt);
@@ -803,10 +803,12 @@ a.card:hover .row-action { color: var(--heading); }
 @media (max-width: 960px) {
   .grid-2 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr; }
-  .section { padding: 32px 24px; }
-  .hero-banner { padding: 36px 24px 28px; }
+  .main { padding: 0 24px; }
+  .section { padding: 32px 0; }
+  .hero-banner { margin-left: -24px; margin-right: -24px; padding: 36px 24px 28px; }
+  .hero-banner-inner { transform: none; }
   .hero-name { font-size: 32px; }
-  .footer { padding: 20px 24px; }
+  .footer { padding: 20px 0; }
 }
 
 @media (max-width: 1200px) {
@@ -840,12 +842,23 @@ a.card:hover .row-action { color: var(--heading); }
     display: block;
   }
   .sidebar-right { display: none; }
-  .section { padding: 28px 16px; }
-  .hero-banner { padding: 60px 16px 24px; }
+  .main { padding: 0 16px; }
+  .section { padding: 28px 0; }
+  .hero-banner { margin-left: -16px; margin-right: -16px; padding: 60px 16px 24px; }
+  .hero-banner-inner { transform: none; max-width: 100%; }
   .hero-name { font-size: 28px; }
-  .footer { padding: 18px 16px; }
+  .hero-tagline { font-size: 14px; }
+  .footer { padding: 18px 0; }
   .page-header { padding: 60px 16px 16px; }
   .cert-grid { grid-template-columns: 1fr; }
   .cert-grid-single { max-width: 100%; }
   .cert-card { flex-direction: row; text-align: left; }
+}
+
+@media (max-width: 420px) {
+  .sidebar { width: 86vw; }
+  .hero-name { font-size: 25px; }
+  .hero-cta { gap: 8px; }
+  .hero-cta .btn-primary,
+  .hero-cta .btn-outline { padding: 9px 14px; font-size: 12.5px; }
 }

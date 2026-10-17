@@ -263,6 +263,7 @@
   .share-bar {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
     margin-top: 22px;
   }
@@ -334,11 +335,21 @@
   /* ── Responsive ──────────────────────────────────────────────── */
   @media (max-width: 640px) {
     .nav-inner { padding: 12px 16px; }
+    .nav-back { font-size: 12.5px; }
     .series-hero { padding: 40px 16px 0; }
     .series-title { font-size: 26px; }
+    .series-desc { font-size: 15px; margin-top: 14px; }
     .parts { padding: 32px 16px 48px; }
-    .part-card { grid-template-columns: 36px 1fr; gap: 14px; padding: 18px 16px; }
-    .part-num { font-size: 22px; }
+    .part-card { grid-template-columns: 32px 1fr; gap: 12px; padding: 18px 16px; }
+    .part-num { font-size: 20px; }
+    .part-title { font-size: 16px; }
+    .part-desc { font-size: 14px; }
+  }
+
+  @media (max-width: 400px) {
+    .series-title { font-size: 23px; }
+    .nav-back span, .nav-back .back-text { display: none; }
+    .share-btn { padding: 6px 11px; }
   }
 </style>
 </head>
