@@ -13,309 +13,269 @@
 </head>
 <body>
 
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-logo" style="text-decoration:none;">stillbigjosh<span class="dot">_</span></a>
-      <ul class="nav-links">
-        <li><a href="index.html#about" class="active">about</a></li>
-        <li><a href="projects.html">projects</a></li>
-        <li><a href="writings.html">writings</a></li>
-      </ul>
-    </div>
-  </nav>
+  <button class="sb-toggle" id="sb-toggle" aria-label="Toggle sidebar">&#9776;</button>
+  <div class="sb-overlay" id="sb-overlay"></div>
 
-  <div class="hero-wrap">
-    <canvas id="hero-particles"></canvas>
-    <section class="hero" id="hero">
-      <div class="hero-inner">
-        <div>
+  <div class="app-layout">
+
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sb-photo">
+        <img src="image/IMG_7853.jpg" alt="stillbigjosh">
+      </div>
+
+      <div>
+        <p class="sb-name">stillbigjosh<span class="dot">_</span></p>
+        <p class="sb-subtitle">OFFENSIVE SECURITY &middot; FOUNDER</p>
+      </div>
+
+      <p class="sb-bio">
+        Offensive security practitioner specialising in penetration testing, red team operations, tooling development, and AI/ML adversarial assessments.
+        Founder of <a href="https://herculessuite.io" target="_blank" rel="noopener noreferrer">Hercules Suite</a>.
+      </p>
+
+      <hr class="sb-divider">
+
+      <div>
+        <p class="sb-label">Skills</p>
+        <div class="sb-tags">
+          <span class="sb-tag">Penetration Testing</span>
+          <span class="sb-tag">Red Team Ops</span>
+          <span class="sb-tag">Active Directory</span>
+          <span class="sb-tag">Tooling Dev</span>
+          <span class="sb-tag">Security Research</span>
+          <span class="sb-tag">ML/AI Adversarial</span>
+          <span class="sb-tag">CTF</span>
+          <span class="sb-tag">Python</span>
+          <span class="sb-tag">Rust</span>
+        </div>
+      </div>
+
+      <hr class="sb-divider">
+
+      <div>
+        <p class="sb-label">Certifications</p>
+        <div class="sb-cert-list">
+          <div class="sb-cert">
+            <div class="sb-cert-badge"><img src="image/crto-badge.png" alt="CRTO"></div>
+            <div>
+              <p class="sb-cert-name">Certified Red Team Operator</p>
+              <p class="sb-cert-issuer">Zero-Point Security</p>
+            </div>
+          </div>
+          <div class="sb-cert">
+            <div class="sb-cert-badge"><img src="image/cpts-badge.png" alt="CPTS"></div>
+            <div>
+              <p class="sb-cert-name">Certified Penetration Testing Specialist</p>
+              <p class="sb-cert-issuer">Hack The Box</p>
+            </div>
+          </div>
+          <div class="sb-cert">
+            <div class="sb-cert-badge"><img src="image/crta-badge.png" alt="CRTA"></div>
+            <div>
+              <p class="sb-cert-name">Certified Red Team Analyst</p>
+              <p class="sb-cert-issuer">CyberWarfare Labs</p>
+            </div>
+          </div>
+          <div class="sb-cert">
+            <div class="sb-cert-badge"><img src="image/krt-badge.png" alt="KRT"></div>
+            <div>
+              <p class="sb-cert-name">Kubernetes for Red Teamers</p>
+              <p class="sb-cert-issuer">SpecterOps Tradecraft Academy</p>
+            </div>
+          </div>
+          <p class="sb-cert-more">... and others</p>
+        </div>
+      </div>
+
+      <div class="sb-social">
+        <a href="https://github.com/stillbigjosh" target="_blank" rel="noopener" aria-label="GitHub"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+        <a href="https://www.linkedin.com/in/stillbigjosh/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+        <a href="https://x.com/stillbigjosh" target="_blank" rel="noopener" aria-label="X"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        <a href="https://app.hackthebox.com/users/84052" target="_blank" rel="noopener" aria-label="Hack The Box"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.996 0a.841.841 0 0 0-.422.113L3.064 5.063a.846.846 0 0 0-.422.731v10.412c0 .3.161.578.422.731l8.51 4.95a.841.841 0 0 0 .844 0l8.51-4.95a.846.846 0 0 0 .422-.731V5.794a.846.846 0 0 0-.422-.731L12.418.113A.841.841 0 0 0 11.996 0zm0 1.684l7.129 4.147v2.457l-3.553-2.07a.841.841 0 0 0-.844 0L11.996 7.8 9.264 6.218a.841.841 0 0 0-.844 0L4.867 8.288V5.831l7.129-4.147zm0 7.594l2.732 1.59v3.18l-2.732 1.59-2.732-1.59v-3.18l2.732-1.59zm-3.975 0l-3.154 1.837v3.673l3.154 1.837V13.34a.846.846 0 0 0-.422-.731l-2.732-1.59 2.732-1.59.422-.245v.094zm7.95 0l.422.245 2.732 1.59-2.732 1.59a.846.846 0 0 0-.422.731v3.285l3.154-1.837v-3.673l-3.154-1.837v-.094zM4.867 15.919l3.154 1.837 2.732-1.59v.094a.846.846 0 0 0 .422.731l.821.478v3.18l-7.129-4.147v-.583zm14.258 0v.583l-7.129 4.147v-3.18l.821-.478a.846.846 0 0 0 .422-.731v-.094l2.732 1.59 3.154-1.837z"/></svg></a>
+        <a href="mailto:contact@stillbigjosh.com" aria-label="Email"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>
+      </div>
+
+    </aside>
+
+    <main class="main">
+
+      <div class="hero-banner">
+        <canvas id="hero-particles"></canvas>
+        <div class="hero-banner-inner">
           <p class="hero-prompt" id="hero-prompt"></p>
           <h1 class="hero-name">stillbigjosh</h1>
-          <p class="hero-subtitle">OFFENSIVE SECURITY &middot; FOUNDER &middot; RESEARCHER</p>
-
+          <p class="hero-tagline">
+            Proven track record hardening unicorn fintech payment infrastructure processing billions in transactions.
+            My work spans the full offensive stack, from initial access and evasion to post-exploitation and lateral movement.
+          </p>
           <div class="hero-cta">
-            <a href="projects.html" class="btn-primary">View Projects</a>
-            <a href="#contact" class="btn-outline">Contact</a>
+            <a href="#tools" class="btn-primary">View Projects</a>
+            <a href="#research" class="btn-outline">Research Series</a>
+            <a href="https://stillbigjosh.medium.com" target="_blank" rel="noopener" class="btn-outline">Medium</a>
           </div>
         </div>
-        <div class="hero-photo">
-          <img src="image/IMG_7853.jpg" alt="stillbigjosh — offensive security practitioner">
+      </div>
+
+      <div class="main-inner">
+      <section class="section" id="tools">
+        <div class="section-head reveal">
+          <span class="section-hash">//</span>
+          <h2 class="section-title">Tools</h2>
+        </div>
+        <div class="grid-2">
+          <a href="https://github.com/stillbigjosh/Neo" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
+            <p class="project-name">Neo C2</p>
+            <p class="project-type">Open-Source C2 Framework</p>
+            <p class="project-desc">Command and control framework for red team operations and adversary simulation.</p>
+            <span class="project-link">&rarr; view on github</span>
+          </a>
+          <a href="https://github.com/stillbigjosh/kube-reaper" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
+            <p class="project-name">kube-reaper</p>
+            <p class="project-type">Kubernetes RBAC Attack Path Mapper</p>
+            <p class="project-desc">Scans Kubernetes clusters from any identity, flags dangerous permissions, and chains them into multi-step escalation paths to cluster compromise.</p>
+            <span class="project-link">&rarr; view on github</span>
+          </a>
+          <a href="https://github.com/stillbigjosh/adaptix-graph-c2" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
+            <p class="project-name">adaptix-graph-c2</p>
+            <p class="project-type">Cloud dead-drop plugin for Adaptix C2</p>
+            <p class="project-desc">Beacons communicate through Azure cloud storage or OneDrive instead of direct HTTP callbacks. All traffic is outbound HTTPS to Microsoft endpoints.</p>
+            <span class="project-link">&rarr; view on github</span>
+          </a>
+          <a href="https://github.com/stillbigjosh/adaptix-serverless-c2" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-2">
+            <p class="project-name">adaptix-serverless-c2</p>
+            <p class="project-type">Serverless plugin for AdaptixC2</p>
+            <p class="project-desc">Serverless C2 transport plugin for AdaptixC2 v1.2 using AWS Lambda + DynamoDB as the relay infrastructure.</p>
+            <span class="project-link">&rarr; view on github</span>
+          </a>
+          <a href="https://github.com/stillbigjosh/powershell_obfuscator" target="_blank" rel="noopener" class="card project-card reveal reveal-delay-1">
+            <p class="project-name">PowerShell Obfuscator</p>
+            <p class="project-type">Windows &middot; Evasion &middot; AV</p>
+            <p class="project-desc">Auxiliary utility for PowerShell scripts. Applies multiple layers of obfuscation while preserving their functionality.</p>
+            <span class="project-link">&rarr; view on github</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="section" id="research">
+        <div class="section-head reveal">
+          <span class="section-hash">//</span>
+          <h2 class="section-title">Research Series</h2>
+        </div>
+        <div class="grid-2">
+          <a href="series.html?series=kubernetes" class="card project-card reveal reveal-delay-1">
+            <p class="project-name">Kubernetes Security Series</p>
+            <p class="project-type">Kubernetes &middot; RBAC Attack Paths &middot; Privilege Escalation</p>
+            <p class="project-desc">Offensive Kubernetes security: mapping RBAC attack paths, breaking out of pods to nodes, stealing credentials, and pivoting across identities to cluster compromise.</p>
+            <span class="project-link">&rarr; view series (2 parts)</span>
+          </a>
+          <a href="series.html?series=ad" class="card project-card reveal reveal-delay-2">
+            <p class="project-name">Active Directory Series</p>
+            <p class="project-type">Purple Team &middot; Active Directory &middot; Elastic</p>
+            <p class="project-desc">Building and attacking Active Directory environments with full defensive visibility, from deploying a multi-domain cyber range to structured detection scenarios.</p>
+            <span class="project-link">&rarr; view series (3 parts)</span>
+          </a>
+          <a href="series.html?series=adaptix" class="card project-card reveal reveal-delay-1">
+            <p class="project-name">Hardening Adaptix C2 Series</p>
+            <p class="project-type">Red Team &middot; C2 Infrastructure &middot; OPSEC</p>
+            <p class="project-desc">Multi-part series on hardening an Adaptix C2 deployment: setup, reducing infrastructure fingerprints, and modifying beacon source code to remove static detection signatures.</p>
+            <span class="project-link">&rarr; view series (4 parts)</span>
+          </a>
+        </div>
+      </section>
+
+      <footer class="footer">
+        stillbigjosh &copy; 2026 &middot; built with purpose
+      </footer>
+
+      </div>
+    </main>
+
+    <aside class="sidebar-right" id="sidebar-right">
+
+      <div class="sr-section">
+        <p class="sr-label">Hall of Fame</p>
+        <a href="https://hackerone.com/stillbigjosh/badges?type=user" target="_blank" rel="noopener" class="sr-item">
+          <span class="sr-item-text">HackerOne - 2x thanks from UK Gov Cyber Centre</span>
+          <span class="sr-item-action">&rarr;</span>
+        </a>
+        <a href="https://www.openbugbounty.org/researchers/0xSkywalker/" target="_blank" rel="noopener" class="sr-item">
+          <span class="sr-item-text">Open Bug Bounty - 30+ disclosures</span>
+          <span class="sr-item-action">&rarr;</span>
+        </a>
+        <a href="https://ctf.hackthebox.com/user/profile/946643" target="_blank" rel="noopener" class="sr-item">
+          <span class="sr-item-text">HTB CTF - Top 4% globally, Cyber Apocalypse 2026</span>
+          <span class="sr-item-action">&rarr;</span>
+        </a>
+        <a href="https://app.hackthebox.com/users/84052" target="_blank" rel="noopener" class="sr-item">
+          <span class="sr-item-text">HTB Labs - #1 Nigeria | 2019</span>
+          <span class="sr-item-action">&rarr;</span>
+        </a>
+      </div>
+
+      <hr class="sr-divider">
+
+      <div class="sr-section">
+        <p class="sr-label">Press / Media</p>
+        <a href="https://ctoatncsc.substack.com/p/cto-at-ncsc-summary-week-ending-december-e1e" target="_blank" rel="noopener" class="sr-item">
+          <span class="sr-item-text">CTO at NCSC Summary</span>
+          <span class="sr-item-action">READ</span>
+        </a>
+        <a href="https://coinstats.app/news/72d4c7955fe79ab8922c9affa859ca8536bd545f86e760a5b1b8f5eb8a728860_Bitcoin-Future-at-Risk-Experts-Discuss-the-Biggest-Threats-Over-the-Next-510-Years/" target="_blank" rel="noopener" class="sr-item">
+          <span class="sr-item-text">Bitcoin Future at Risk</span>
+          <span class="sr-item-action">READ</span>
+        </a>
+        <a href="https://hackread.com/google-vp-boycotts-black-hat-2020-over-name/" target="_blank" rel="noopener" class="sr-item">
+          <span class="sr-item-text">Google VP Boycotts Black Hat 2020</span>
+          <span class="sr-item-action">READ</span>
+        </a>
+        <a href="https://www.twitch.tv/videos/776695446?tt_content=vod&tt_medium=mobile_web_share" target="_blank" rel="noopener" class="sr-item">
+          <span class="sr-item-text">#EndSARS Stream on Twitch</span>
+          <span class="sr-item-action">WATCH</span>
+        </a>
+      </div>
+
+      <hr class="sr-divider">
+
+      <div class="sr-section">
+        <p class="sr-label">Training</p>
+        <a href="https://www.zeropointsecurity.co.uk/link/wh9RPJ" target="_blank" rel="noopener" class="sr-training">
+          <p class="sr-training-name">Zero-Point Security</p>
+          <p class="sr-training-desc">Industry-leading red team and offensive security courses. RTO, RTO II &amp; more.</p>
+          <span class="sr-training-action">&rarr; ENROLL</span>
+        </a>
+      </div>
+
+      <hr class="sr-divider">
+
+      <div class="sr-section">
+        <p class="sr-label">Contact</p>
+        <div class="sr-contact-row">
+          <a href="mailto:contact@stillbigjosh.com" class="sr-contact-email">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            contact@stillbigjosh.com
+          </a>
+          <div class="sr-contact-social">
+            <a href="https://github.com/stillbigjosh" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://www.linkedin.com/in/stillbigjosh/" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="https://x.com/stillbigjosh" target="_blank" rel="noopener">X</a>
+            <a href="https://app.hackthebox.com/users/84052" target="_blank" rel="noopener">HTB</a>
+          </div>
         </div>
       </div>
-    </section>
+
+      <div class="sr-section" style="margin-top:auto;">
+        <a href="https://stillbigjosh.medium.com" target="_blank" rel="noopener" class="sr-item" style="justify-content:center;">
+          <span class="sr-item-text" style="text-align:center;color:var(--accent);font-family:var(--mono);font-size:11px;">Medium &rarr;</span>
+        </a>
+      </div>
+
+    </aside>
+
   </div>
 
-  <section class="section" id="about">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">About</h2>
-    </div>
-    <div class="about-grid reveal reveal-delay-1">
-      <p class="about-bio">
-        Offensive security practitioner specialising in penetration testing, red team operations, offensive tooling development, and AI/ML adversarial assessments.
-        Proven track record hardening unicorn fintech payment infrastructure processing billions in transactions.
-        My work spans the full offensive stack - from initial access and evasion to post-exploitation and lateral movement.
-        Founder of <a href="https://herculessuite.io" target="_blank" rel="noopener noreferrer">Hercules Suite</a>, Africa's first native BEC simulation platform.
-      </p>
-      <div>
-        <p class="skills-label">Skills</p>
-        <div class="tags">
-          <span class="tag">Penetration Testing</span>
-          <span class="tag">Red Team Operations</span>
-          <span class="tag">Active Directory</span>
-          <span class="tag">Tooling Development</span>
-          <span class="tag">Security Research</span>
-          <span class="tag">ML/AI Adversarial Research</span>
-          <span class="tag">Capture The Flag</span>
-          <span class="tag">Python</span>
-          <span class="tag">Rust</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!--
-  <section class="section" id="services">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Services</h2>
-    </div>
-    <p class="services-intro reveal">Independent offensive security consulting. Rigorous, research-driven assessments tailored to your environment.</p>
-    <div class="services-grid">
-
-      <div class="card service-card hoverable reveal reveal-delay-1">
-        <div class="service-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9.5 13l2 2 4-4"/></svg>
-        </div>
-        <p class="service-name">Red Teaming</p>
-        <p class="service-desc">Full-scope adversary simulation/emulation mapped to MITRE ATT&CK - testing your detection, response, against realistic attack chains.</p>
-      </div>
-
-      <div class="card service-card hoverable reveal reveal-delay-2">
-        <div class="service-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1"/></svg>
-        </div>
-        <p class="service-name">Penetration Testing</p>
-        <p class="service-desc">Systematic identification and exploitation of vulnerabilities across networks, applications, and infrastructure.</p>
-      </div>
-
-      <div class="card service-card hoverable reveal reveal-delay-1">
-        <div class="service-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>
-        </div>
-        <p class="service-name">ML/AI Security Testing</p>
-        <p class="service-desc">Adversarial assessments across the AI stack: model robustness, training data integrity, application logic, and system-level security.</p>
-      </div>
-
-    </div>
-    <div class="services-cta reveal">
-      <a href="https://calendly.com/stillbigjosh" target="_blank" rel="noopener" class="btn-primary">Get a Quote / Book a Session &rarr;</a>
-    </div>
-  </section>
-  -->
-
-
-  <section class="section" id="certs">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Certifications</h2>
-    </div>
-    <div class="cert-grid">
-
-      <div class="card cert-card hoverable reveal reveal-delay-1">
-        <div class="cert-badge">
-          <img src="image/crto-badge.png" alt="Certified Red Team Operator badge">
-        </div>
-        <div class="cert-info">
-          <p class="cert-name">Certified Red Team Operator</p>
-          <p class="cert-issuer">Zero-Point Security</p>
-          <p class="cert-desc">Red team operations, tradecraft, and adversary simulation using Cobalt Strike.</p>
-        </div>
-      </div>
-
-      <div class="card cert-card hoverable reveal reveal-delay-2">
-        <div class="cert-badge">
-          <img src="image/cpts-badge.png" alt="HTB Certified Penetration Testing Specialist badge">
-        </div>
-        <div class="cert-info">
-          <p class="cert-name">Certified Penetration Testing Specialist</p>
-          <p class="cert-issuer">Hack The Box</p>
-          <p class="cert-desc">Full-scope penetration testing across networks, Active Directory, and web applications.</p>
-        </div>
-      </div>
-
-      <div class="card cert-card hoverable reveal reveal-delay-3">
-        <div class="cert-badge">
-          <img src="image/crta-badge.png" alt="Certified Red Team Analyst badge">
-        </div>
-        <div class="cert-info">
-          <p class="cert-name">Certified Red Team Analyst</p>
-          <p class="cert-issuer">CyberWarfare Labs</p>
-          <p class="cert-desc">Penetration testing across Linux, Windows and Active Directory environments.</p>
-        </div>
-      </div>
-
-
-
-      <!--
-      <div class="card cert-card hoverable reveal reveal-delay-1">
-        <div class="cert-badge">
-          <img src="image/dante-badge.png" alt="Dante Pro Lab badge">
-        </div>
-        <div class="cert-info">
-          <p class="cert-name">Dante Pro Lab</p>
-          <p class="cert-issuer">Hack The Box · RTO Level I</p>
-          <p class="cert-desc">Network penetration testing across Linux and Windows. Enumeration, exploit development, lateral movement, and privilege escalation.</p>
-        </div>
-      </div>
-
-      <div class="card cert-card hoverable reveal reveal-delay-2">
-        <div class="cert-badge">
-          <img src="image/zephyr-badge.gif" alt="Zephyr Pro Lab badge">
-        </div>
-        <div class="cert-info">
-          <p class="cert-name">Zephyr Pro Lab</p>
-          <p class="cert-issuer">Hack The Box · RTO Level II</p>
-          <p class="cert-desc">Active Directory exploitation, relay attacks, lateral movement across trust boundaries, pivoting, and web application attacks.</p>
-        </div>
-      </div>
-            -->
-      
-
-    </div>
-
-    <div class="cert-grid cert-grid-single">
-      <div class="card cert-card hoverable reveal reveal-delay-1">
-        <div class="cert-badge">
-          <img src="image/krt-badge.png" alt="Kubernetes for Red Teamers badge">
-        </div>
-        <div class="cert-info">
-          <p class="cert-name">Kubernetes for Red Teamers</p>
-          <p class="cert-issuer">SpecterOps Tradecraft Academy</p>
-          <p class="cert-desc">Guided offensive path through Kubernetes. Container escapes, cluster compromise, and cloud-native attack chains.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="blog-more" style="margin-top:22px;">
-      <span class="btn-outline" style="cursor:default;">... and others</span>
-    </div>
-  </section>
-
-
-  <section class="section" id="training">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Recommended Training</h2>
-    </div>
-    <div class="stack">
-
-      <a href="https://www.zeropointsecurity.co.uk/link/wh9RPJ" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
-        <div class="row-left">
-          <span class="row-icon">&#9632;</span>
-          <div>
-            <p class="row-name">Zero-Point Security</p>
-            <p class="row-desc">Industry-leading red team and offensive security courses. RTO, RTO II &amp; more. Sign up through my affiliate link to get started.</p>
-          </div>
-        </div>
-        <span class="row-action">&rarr; ENROLL</span>
-      </a>
-
-    </div>
-  </section>
-
-  <section class="section" id="recognition">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Hall of Fame</h2>
-    </div>
-    <div class="stack">
-
-      <a href="https://hackerone.com/stillbigjosh/badges?type=user" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
-        <span class="press-title">HackerOne — 2x formal thanks from UK Government Cyber Coordination Centre</span>
-        <span class="row-action">&rarr; VIEW</span>
-      </a>
-
-      <a href="https://www.openbugbounty.org/researchers/0xSkywalker/" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
-        <span class="press-title">Open Bug Bounty — 30+ responsible disclosures as 0xSkywalker</span>
-        <span class="row-action">&rarr; VIEW</span>
-      </a>
-
-      <a href="https://ctf.hackthebox.com/user/profile/946643" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
-        <span class="press-title">HTB CTF — Top 4% of global teams at Cyber Apocalypse 2026</span>
-        <span class="row-action">&rarr; VIEW</span>
-      </a>
-
-      <a href="https://app.hackthebox.com/users/84052" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
-        <span class="press-title">HTB Labs — #1 ranking in Nigeria | 2019</span>
-        <span class="row-action">&rarr; VIEW</span>
-      </a>
-
-    </div>
-  </section>
-
-  <section class="section" id="press">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Press / Media</h2>
-    </div>
-    <div class="stack">
-
-      <a href="https://ctoatncsc.substack.com/p/cto-at-ncsc-summary-week-ending-december-e1e" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
-        <span class="press-title">CTO at NCSC Summary: week ending December 7th</span>
-        <span class="row-action">&rarr; READ</span>
-      </a>
-
-      <a href="https://coinstats.app/news/72d4c7955fe79ab8922c9affa859ca8536bd545f86e760a5b1b8f5eb8a728860_Bitcoin-Future-at-Risk-Experts-Discuss-the-Biggest-Threats-Over-the-Next-510-Years/" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
-        <span class="press-title">Bitcoin Future at Risk</span>
-        <span class="row-action">&rarr; READ</span>
-      </a>
-
-      <a href="https://hackread.com/google-vp-boycotts-black-hat-2020-over-name/" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-1">
-        <span class="press-title">Google VP Boycotts Black Hat 2020</span>
-        <span class="row-action">&rarr; READ</span>
-      </a>
-
-      <a href="https://www.twitch.tv/videos/776695446?tt_content=vod&tt_medium=mobile_web_share" target="_blank" rel="noopener" class="card row-item reveal reveal-delay-2">
-        <span class="press-title">#EndSARS Stream on Twitch</span>
-        <span class="row-action">&rarr; WATCH</span>
-      </a>
-
-    </div>
-  </section>
-
-  <section class="section" id="contact">
-    <div class="section-head reveal">
-      <span class="section-hash">##</span>
-      <h2 class="section-title">Contact</h2>
-    </div>
-    <div class="grid-2">
-
-      <div class="card reveal reveal-delay-1">
-        <p class="contact-label">Email</p>
-        <a href="mailto:contact@stillbigjosh.com" class="contact-value"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:6px"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>contact@stillbigjosh.com</a>
-      </div>
-
-      <div class="card reveal reveal-delay-2">
-        <p class="contact-label">Social</p>
-        <div class="contact-social">
-          <a href="https://github.com/stillbigjosh" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub</a>
-          <a href="https://www.linkedin.com/in/stillbigjosh/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>LinkedIn</a>
-          <a href="https://x.com/stillbigjosh" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X</a>
-          <a href="https://app.hackthebox.com/users/84052" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M11.996 0a.841.841 0 0 0-.422.113L3.064 5.063a.846.846 0 0 0-.422.731v10.412c0 .3.161.578.422.731l8.51 4.95a.841.841 0 0 0 .844 0l8.51-4.95a.846.846 0 0 0 .422-.731V5.794a.846.846 0 0 0-.422-.731L12.418.113A.841.841 0 0 0 11.996 0zm0 1.684l7.129 4.147v2.457l-3.553-2.07a.841.841 0 0 0-.844 0L11.996 7.8 9.264 6.218a.841.841 0 0 0-.844 0L4.867 8.288V5.831l7.129-4.147zm0 7.594l2.732 1.59v3.18l-2.732 1.59-2.732-1.59v-3.18l2.732-1.59zm-3.975 0l-3.154 1.837v3.673l3.154 1.837V13.34a.846.846 0 0 0-.422-.731l-2.732-1.59 2.732-1.59.422-.245v.094zm7.95 0l.422.245 2.732 1.59-2.732 1.59a.846.846 0 0 0-.422.731v3.285l3.154-1.837v-3.673l-3.154-1.837v-.094zM4.867 15.919l3.154 1.837 2.732-1.59v.094a.846.846 0 0 0 .422.731l.821.478v3.18l-7.129-4.147v-.583zm14.258 0v.583l-7.129 4.147v-3.18l.821-.478a.846.846 0 0 0 .422-.731v-.094l2.732 1.59 3.154-1.837z"/></svg>HTB</a>
-
-
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <footer class="footer">
-    stillbigjosh &copy; 2026 &middot; built with purpose
-  </footer>
-
   <script>
+    // Typing animation
     (function () {
       const el = document.getElementById('hero-prompt');
       const text = 'root@stillbigjosh:~$ ./whoami';
@@ -330,6 +290,7 @@
       setTimeout(type, 400);
     })();
 
+    // Scroll reveal
     (function () {
       const reveals = document.querySelectorAll('.reveal');
       const ro = new IntersectionObserver(
@@ -346,32 +307,14 @@
       reveals.forEach((el) => ro.observe(el));
     })();
 
-    (function () {
-      const sections = document.querySelectorAll('section[id]');
-      const navLinks = document.querySelectorAll('.nav-links a');
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              navLinks.forEach((link) => {
-                const href = link.getAttribute('href');
-                link.classList.toggle('active', href === '#' + entry.target.id || href === 'index.html#' + entry.target.id);
-              });
-            }
-          });
-        },
-        { rootMargin: '-40% 0px -55% 0px' }
-      );
-      sections.forEach((s) => observer.observe(s));
-    })();
-
+    // Particle canvas
     (function () {
       const canvas = document.getElementById('hero-particles');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       let w, h, particles;
-      const COUNT = 50;
-      const MAX_DIST = 120;
+      const COUNT = 40;
+      const MAX_DIST = 110;
       function resize() {
         const wrap = canvas.parentElement;
         w = canvas.width = wrap.offsetWidth;
@@ -383,8 +326,8 @@
         for (let i = 0; i < COUNT; i++) {
           particles.push({
             x: Math.random() * w, y: Math.random() * h,
-            vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
-            r: Math.random() * 1.8 + 0.6
+            vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35,
+            r: Math.random() * 1.6 + 0.5
           });
         }
       }
@@ -412,6 +355,19 @@
       }
       init(); draw();
       window.addEventListener('resize', resize);
+    })();
+
+    // Mobile sidebar toggle
+    (function () {
+      const toggle = document.getElementById('sb-toggle');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sb-overlay');
+      function open() { sidebar.classList.add('open'); overlay.classList.add('open'); }
+      function close() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+      toggle.addEventListener('click', function () {
+        sidebar.classList.contains('open') ? close() : open();
+      });
+      overlay.addEventListener('click', close);
     })();
   </script>
 
