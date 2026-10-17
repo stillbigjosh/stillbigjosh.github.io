@@ -2,7 +2,7 @@
 title: "Loader Evasion: Let the OS Do the Dirty Work"
 kicker: "Evasion Engineering . Custom . Static Evasion"
 tags: "Evasion Engineering . C2 Development . AV Bypass . Static Analysis"
-lead: "How we made a custom Beacon loader invisible to static analysis by removing all decryption code from the binary and delegating cryptographic operations to Windows itself. Four cipher implementations failed. One design change solved everything."
+lead: "How I made a custom Beacon loader invisible to static analysis by removing all decryption code from the binary and delegating cryptographic operations to Windows itself. Four cipher implementations failed. One design change solved everything."
 ---
 
 > This is the first post in the Evasion Engineering series. Each post covers a specific evasion problem encountered while experimenting in a homelab, the failed approaches, and the solution that worked. This post covers static evasion for the Beacon loader component.
@@ -19,25 +19,25 @@ The beacon never exists in plaintext on disk. The loader carries it encrypted, d
 
 ## Cleaning Up the Binary
 
-Before tackling the encryption problem, we had to remove the low-hanging fruits that AV uses for quick classification.
+Before tackling the encryption problem, I had to remove the low-hanging fruits that AV uses for quick classification.
 
-**CRT removal.** A normal C++ binary links the C Runtime Library, which drags in hundreds of function names like `malloc`, `memcpy`, and `__security_cookie`. A tiny PE with CRT strings and no real application logic is a textbook shellcode loader signature. We compiled with `-nostdlib` and a full set of `-fno-*` flags to strip all of it.
+**CRT removal.** A normal C++ binary links the C Runtime Library, which drags in hundreds of function names like `malloc`, `memcpy`, and `__security_cookie`. A tiny PE with CRT strings and no real application logic is a textbook shellcode loader signature. I compiled with `-nostdlib` and a full set of `-fno-*` flags to strip all of it.
 
 ![CRT strings visible in the binary before removal](writeups/images/loader-evasion/crt-strings.png)
 
-**Import table cleanup.** The loader needs `VirtualAlloc` and `VirtualProtect`. If those names appear in the PE import table, AV sees a small binary that imports memory management APIs and nothing else. Strong signal. We replaced static imports with PEB walking: at runtime, the loader reads the Process Environment Block to find `kernel32.dll`, then manually parses its export table using hashed function names. No API names appear in the binary.
+**Import table cleanup.** The loader needs `VirtualAlloc` and `VirtualProtect`. If those names appear in the PE import table, AV sees a small binary that imports memory management APIs and nothing else. Strong signal. I replaced static imports with PEB walking: at runtime, the loader reads the Process Environment Block to find `kernel32.dll`, then manually parses its export table using hashed function names. No API names appear in the binary.
 
 **Polymorphic generation.** Every build produces a unique C++ source file. Variable names, function names, namespace names, hash constants, encryption keys, junk code, and entry point names are all randomized. AV vendors cannot write one signature to detect all payloads because no two payloads share the same code layout.
 
 **PE metadata stripping.** After compilation, the builder zeros the PE timestamp, zeros the checksum, fills the Rich header with random bytes, clears the debug directory, and normalizes section names. These fields leak toolchain information that heuristic engines use for classification.
 
-Each of these layers hid a detection underneath. We fixed them bottom-up, running ThreatCheck after every change. ThreatCheck splits the binary, tests each half against Defender, and narrows down to the exact byte offset that triggers a detection. That offset tells you what to fix next.
+Each of these layers hid a detection underneath. I fixed them bottom-up, running ThreatCheck after every change. ThreatCheck splits the binary, tests each half against Defender, and narrows down to the exact byte offset that triggers a detection. That offset tells you what to fix next.
 
 ---
 
 ## Four Ciphers, Four Failures
 
-With the binary structure cleaned up, ThreatCheck pointed at one area: the encrypted beacon data and the code that decrypts it. This is where the real problem started. We tried four different encryption approaches. All four were detected.
+With the binary structure cleaned up, ThreatCheck pointed at one area: the encrypted beacon data and the code that decrypts it. This is where the real problem started. I tried four different encryption approaches. All four were detected.
 
 ### XOR
 
@@ -49,9 +49,9 @@ The problem: XOR with a short key creates visible patterns. If the beacon has a 
 
 ### RC4
 
-We replaced XOR with RC4. RC4 generates a unique keystream byte for every position, so the encrypted output has no repeating pattern. The beacon blob now looked like random noise.
+I replaced XOR with RC4. RC4 generates a unique keystream byte for every position, so the encrypted output has no repeating pattern. The beacon blob now looked like random noise.
 
-ThreatCheck stopped flagging the data. But the detection moved to a new offset. When we opened that offset in Ghidra, the flagged code was the RC4 algorithm itself: a 256-byte array allocation, a sequential initialization loop, and a series of swap operations. AV does not need to understand RC4. It just needs to see "256-byte array + sequential init + swap loop." That pattern means "stream cipher," and a stream cipher inside a tiny binary that allocates executable memory means "shellcode loader."
+ThreatCheck stopped flagging the data. But the detection moved to a new offset. When I opened that offset in Ghidra, the flagged code was the RC4 algorithm itself: a 256-byte array allocation, a sequential initialization loop, and a series of swap operations. AV does not need to understand RC4. It just needs to see "256-byte array + sequential init + swap loop." That pattern means "stream cipher," and a stream cipher inside a tiny binary that allocates executable memory means "shellcode loader."
 
 ![RC4 S-box structure in Ghidra](writeups/images/loader-evasion/rc4-sbox-1.png)
 
@@ -59,13 +59,13 @@ ThreatCheck stopped flagging the data. But the detection moved to a new offset. 
 
 ### Custom S-Box Cipher
 
-We replaced RC4 with a custom cipher. Same 256-byte array, but with a scrambled initialization (`s[i] = (i * MULT) ^ CONST` instead of `s[i] = i`) and bit rotation instead of swaps.
+I replaced RC4 with a custom cipher. Same 256-byte array, but with a scrambled initialization (`s[i] = (i * MULT) ^ CONST` instead of `s[i] = i`) and bit rotation instead of swaps.
 
 ThreatCheck still flagged a nearby offset. The lesson: AV does not care which algorithm you use. It cares about the shape. Any code that allocates a 256-byte array, fills it in a loop, and swaps entries based on indices looks like a cipher S-box. Sequential or scrambled initialization, swaps or rotations. The structure itself is the signature.
 
 ### Counter-Mode Arithmetic
 
-We eliminated the S-box entirely. The counter-mode cipher computes each output byte using only arithmetic on the position index, the key, and four random constants:
+I eliminated the S-box entirely. The counter-mode cipher computes each output byte using only arithmetic on the position index, the key, and four random constants:
 
 ```c
 unsigned int h = SEED ^ (unsigned int)key[i % keylen];
@@ -84,7 +84,7 @@ ThreatCheck detected at a slightly different offset.
 
 ![Counter-mode arithmetic in Ghidra decompiler](writeups/images/loader-evasion/counter-mode-ghidra-1.png)
 
-We opened the binary in Ghidra and looked at what was flagged. The flagged region was not the cipher math. It was the entire block: a loop (any loop) that reads from the encrypted blob, writes to allocated memory, then calls VirtualProtect and jumps. The AV was detecting the **shape of a shellcode loader**, not the specific cipher.
+I opened the binary in Ghidra and looked at what was flagged. The flagged region was not the cipher math. It was the entire block: a loop (any loop) that reads from the encrypted blob, writes to allocated memory, then calls VirtualProtect and jumps. The AV was detecting the **shape of a shellcode loader**, not the specific cipher.
 
 ![Ghidra showing the loader shape: the AV detects the pattern, not the cipher](writeups/images/loader-evasion/ghidra-loader-shape.png)
 
@@ -106,7 +106,7 @@ indirect call     (jump to the decrypted code)
 
 That is the textbook pattern for a shellcode loader: unpack code, make it executable, run it. The cipher is irrelevant. XOR, RC4, AES, or counter-mode arithmetic. The shape is the signature. As long as the binary contains any decryption code at all, AV can match the loader pattern.
 
-We could not fix this by writing a "better" cipher. We tried four different ones. Each was detected. The only way to break the pattern was to remove all decryption code from the binary entirely.
+I could not fix this by writing a "better" cipher. I tried four different ones. Each was detected. The only way to break the pattern was to remove all decryption code from the binary entirely.
 
 ---
 
@@ -187,7 +187,7 @@ On modern Windows (10 and 11), `advapi32.dll` does not contain the code for Syst
 
 When the PEB resolver reads advapi32's export table and finds the entry for SystemFunction032, the address it gets does not point to machine code. It points to the ASCII text `"cryptsp.SystemFunction032"`. If you call that address as a function, you jump into a text string. Instant crash.
 
-`GetProcAddress` handles forwarded exports correctly. It sees the forwarding entry, loads cryptsp.dll, finds the real function there, and returns the actual code address. We resolve `GetProcAddress` itself from kernel32 using the PEB resolver (GetProcAddress is never forwarded), then use it for SystemFunction032.
+`GetProcAddress` handles forwarded exports correctly. It sees the forwarding entry, loads cryptsp.dll, finds the real function there, and returns the actual code address. I resolve `GetProcAddress` itself from kernel32 using the PEB resolver (GetProcAddress is never forwarded), then use it for SystemFunction032.
 
 ### Key Must Be Writable
 
@@ -201,7 +201,7 @@ This bug was subtle. The payload ran for about 1-2 seconds during setup, then cr
 
 If you write `LoadLibraryA("advapi32.dll")` in C++, the compiler stores `"advapi32.dll"` in the `.rdata` section. Anyone who runs `strings` on the binary can see it.
 
-The obvious fix is a char array initializer: `char s[] = {'a','d','v',...,0};`. In theory, the compiler turns this into `mov byte` instructions that build the string at runtime. In practice, clang with `-Os` optimizes the initializer back into a constant. It sees that emitting 13 individual `mov byte` instructions is larger than one copy from `.rdata`, so it folds the array into the data section. We verified this:
+The obvious fix is a char array initializer: `char s[] = {'a','d','v',...,0};`. In theory, the compiler turns this into `mov byte` instructions that build the string at runtime. In practice, clang with `-Os` optimizes the initializer back into a constant. It sees that emitting 13 individual `mov byte` instructions is larger than one copy from `.rdata`, so it folds the array into the data section. I then verified this:
 
 ```
 $ strings -t x payload.exe | grep -i advapi
