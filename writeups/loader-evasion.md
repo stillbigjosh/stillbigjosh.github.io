@@ -40,9 +40,22 @@ Before tackling the encryption problem, I had to remove the low-hanging fruits t
 
 **Import table cleanup.** The loader needs `VirtualAlloc` and `VirtualProtect`. If those names appear in the PE import table, AV sees a small binary that imports memory management APIs and nothing else. Strong signal. I replaced static imports with PEB walking: at runtime, the loader reads the Process Environment Block to find `kernel32.dll`, then manually parses its export table using hashed function names. No API names appear in the binary.
 
-**Polymorphic generation.** Every build produces a unique C++ source file. Variable names, function names, namespace names, hash constants, encryption keys, junk code, and entry point names are all randomized. AV vendors cannot write one signature to detect all payloads because no two payloads share the same code layout.
+**Polymorphic generation.** Every build produces a unique C++ source file. Variable names, function names, namespace names, hash constants, encryption keys, junk code, and entry point names are all randomized. AV vendors cannot write one signature to detect all payloads because no two payloads share the same code layout. Added some junk code - Between every real operation in the loader, the generator inserts 1 to 3 lines of random arithmetic. These lines operate on volatile variables. The volatile keyword is important: it tells the compiler "do not optimize this away." Without it, the compiler would see that the junk variables are never used for anything real and would delete the code entirely.
 
-**PE metadata stripping.** After compilation, the builder zeros the PE timestamp, zeros the checksum, fills the Rich header with random bytes, clears the debug directory, and normalizes section names. These fields leak toolchain information that heuristic engines use for classification.
+```
+volatile unsigned int _rk2 = 0x8a3f1bc0;
+// ... a real operation like VirtualAlloc ...
+_rk2 = _rk2 ^ 0x4f2c1a8b;
+// ... another real operation ...
+_rk2 = _rk2 + 0xde91bc37;
+```
+
+**PE metadata stripping.** After compilation, the builder zeros the PE timestamp, zeros the checksum, fills the Rich header with random bytes, clears the debug directory, and normalizes section names. These fields leak toolchain information that heuristic engines use for classification. We fill with random bytes, not zeros. Zeros would be a signal that the Rich header was deliberately removed. Random data looks like the header was never there.
+
+```
+[DOS Header]  [DOS Stub]  [DanS^key ... data^key ... Rich key]  [PE sig]
+                           ^--- fill this with random bytes ---^
+```
 
 Each of these layers hid a detection underneath. I fixed them bottom-up, running ThreatCheck after every change. ThreatCheck splits the binary, tests each half against Defender, and narrows down to the exact byte offset that triggers a detection. That offset tells you what to fix next.
 
