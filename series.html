@@ -369,7 +369,7 @@
       adaptix: {
         title: 'Hardening Adaptix C2',
         kicker: 'Red Team . C2 Infrastructure . OPSEC',
-        desc: 'A multi-part series on hardening an Adaptix C2 deployment for red team operations. Covers initial setup, reducing infrastructure and agent fingerprints, and modifying beacon source code to remove static detection signatures.',
+        desc: 'A multi-part series on hardening an Adaptix C2 deployment for red team operations. Covers initial setup, reducing infrastructure and agent fingerprints, and using custom infra buildout.',
         tags: 'Adaptix C2 . Red Team . OPSEC',
         parts: [
           {
@@ -383,12 +383,6 @@
             title: 'Reducing Infrastructure and Agent Fingerprints',
             kicker: 'C2 Infrastructure . OPSEC . Red Team',
             desc: 'Replacing default signatures across the Adaptix C2 stack to reduce the fingerprint surface that threat intel and blue teams use to identify red team infrastructure.'
-          },
-          {
-            file: 'writeups/adaptix-beacon-mods.md',
-            title: 'Beacon Source Modifications',
-            kicker: 'Static Evasion . Source Modification . Red Team',
-            desc: 'Tracing ThreatCheck detections through Ghidra back to the beacon agent source code and making targeted edits to change the compiled output without breaking functionality.'
           },
           {
             file: 'writeups/adaptix-graph-c2.md',
@@ -415,6 +409,20 @@
             title: 'OWASP Kubernetes Top 10 Audit with Kube-Reaper',
             kicker: 'Kubernetes . OWASP Top 10 . RBAC Audit',
             desc: 'Using kube-reaper to detect OWASP Kubernetes Top 10 issues in a live cluster, then manually validating every finding: overly permissive RBAC, insecure workloads, missing policy enforcement, and secrets management failures.'
+          }
+        ]
+      },
+      'evasion-engineering': {
+        title: 'Evasion Engineering',
+        kicker: 'Evasion Engineering . Custom . Malware Development',
+        desc: 'Evasive techniques applied while experimenting in a homelab. Each post covers a specific evasion problem, the failed approaches, and the solution that worked.',
+        tags: 'Evasion Engineering . C2 Development . AV Bypass',
+        parts: [
+          {
+            file: 'writeups/loader-evasion.md',
+            title: 'Loader Evasion: Let the OS Do the Dirty Work',
+            kicker: 'Static Evasion . Custom . AV Bypass',
+            desc: 'How we made a custom Beacon loader invisible to static analysis by removing all decryption code and delegating cryptographic operations to Windows itself. Four cipher implementations failed and one design change solved everything.'
           }
         ]
       },
