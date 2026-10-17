@@ -104,7 +104,7 @@ VirtualProtect    (make memory executable)
 indirect call     (jump to the decrypted code)
 ```
 
-That is the textbook pattern for a shellcode loader: unpack code, make it executable, run it. The cipher is irrelevant. XOR, RC4, AES, or counter-mode arithmetic. The loop is the signature. As long as the binary contains any decryption code at all, AV can match the loader pattern.
+That is the textbook pattern for a shellcode loader: unpack code, make it executable, run it. The cipher is irrelevant. XOR, RC4, AES, or counter-mode arithmetic. The shape is the signature. As long as the binary contains any decryption code at all, AV can match the loader pattern.
 
 We could not fix this by writing a "better" cipher. We tried four different ones. Each was detected. The only way to break the pattern was to remove all decryption code from the binary entirely.
 
@@ -112,9 +112,9 @@ We could not fix this by writing a "better" cipher. We tried four different ones
 
 ## Delegate to the OS
 
-This is the design change that solved everything.
+This is the design change that solved it.
 
-We stopped writing our own decryption code. Instead, we ask Windows to decrypt the beacon for us.
+Stop writing your own decryption code. Instead, ask Windows to decrypt the beacon.
 
 Every version of Windows has cryptographic functions built into its system DLLs. Those DLLs are signed by Microsoft. AV trusts them completely because millions of legitimate programs call them every day. The actual decryption math runs inside a Microsoft-signed library, not inside our code.
 
