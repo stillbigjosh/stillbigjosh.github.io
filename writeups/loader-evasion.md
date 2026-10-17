@@ -23,6 +23,19 @@ Before tackling the encryption problem, I had to remove the low-hanging fruits t
 
 **CRT removal.** A normal C++ binary links the C Runtime Library, which drags in hundreds of function names like `malloc`, `memcpy`, and `__security_cookie`. A tiny PE with CRT strings and no real application logic is a textbook shellcode loader signature. I compiled with `-nostdlib` and a full set of `-fno-*` flags to strip all of it.
 
+```
+-Os                              Make the binary as small as possible
+-nostdlib                        Do NOT link the C Runtime Library at all
+-fno-builtin                     Do not silently replace our loops with calls to memcpy/memset
+-fno-exceptions                  No C++ try/catch support (removes exception handler code)
+-fno-rtti                        No runtime type info (removes typeinfo strings)
+-fno-ident                       No compiler version string embedded in the binary
+-fno-asynchronous-unwind-tables  No .pdata section (removes stack unwind metadata)
+-Wl,--no-seh                     No structured exception handling table
+-s                               Strip all symbol names from the binary
+-lkernel32                       Link only against kernel32.dll
+```
+
 ![CRT strings visible in the binary before removal](writeups/images/loader-evasion/crt-strings.png)
 
 **Import table cleanup.** The loader needs `VirtualAlloc` and `VirtualProtect`. If those names appear in the PE import table, AV sees a small binary that imports memory management APIs and nothing else. Strong signal. I replaced static imports with PEB walking: at runtime, the loader reads the Process Environment Block to find `kernel32.dll`, then manually parses its export table using hashed function names. No API names appear in the binary.
