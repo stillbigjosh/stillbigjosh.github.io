@@ -48,7 +48,23 @@ html {
   text-rendering: optimizeLegibility;
 }
 
-body { min-height: 100vh; line-height: 1.6; overflow-x: hidden; }
+body {
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+  /* Blend the outer gutters smoothly into the sidebar colour.
+     Each gutter spans (100vw - app max-width) / 2 and fades from the
+     page background at the viewport edge to the sidebar colour where
+     the columns begin. Collapses to nothing once the layout fills the
+     viewport (<= 1440px). */
+  background:
+    linear-gradient(to right, var(--bg), var(--bg-alt))
+      left top / max(0px, calc((100vw - 1440px) / 2)) 100% no-repeat,
+    linear-gradient(to left, var(--bg), var(--bg-alt))
+      right top / max(0px, calc((100vw - 1440px) / 2)) 100% no-repeat,
+    var(--bg);
+  background-attachment: fixed;
+}
 
 a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
 a:hover { color: var(--accent-h); }
