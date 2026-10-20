@@ -26,13 +26,8 @@ The custom C2 used for this demonstration includes a custom bytecode virtual mac
 The VM gives operators an execution layer that EDR cannot signature. Traditional post-exploitation drops shellcode or spawns tools that defenders have seen before. The VM interpreter is a single function in the agent that resolves and invokes Win32 APIs dynamically through hashed lookups. From the outside, it looks like a tight loop doing arithmetic on local variables. From the inside, it can do anything the agent can do. 
 
 ```
-  Operator                     Teamserver                    Target
-  ┌──────────────┐        ┌──────────────┐        ┌──────────────┐
-  │  VM Editor   │───WS──>│  Server      │──task──>│  Agent       │
-  │  (Web UI)    │        │  Assembler   │        │  VM Interp.  │
-  │              │<──WS───│  (Go)        │<─result─│  (C++)       │
-  └──────────────┘        └──────────────┘        └──────────────┘
-       .vms source    ──>   bytecode (code+data)  ──>  execution
+    Operator               Teamserver              Target
+  .vms source    ──>   bytecode (code+data)  ──>  execution
 ```
 
 The VM follows a RISC (Reduced Instruction Set Computer) design. Every instruction does one simple thing. Arithmetic operates only on registers. Memory access requires explicit load/store instructions. API calls go through a resolve + invoke pattern that hashes module and function names at assembly time and walks the PEB at runtime. 
