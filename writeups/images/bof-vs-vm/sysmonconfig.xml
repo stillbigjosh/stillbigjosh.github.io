@@ -1,0 +1,208 @@
+<Sysmon schemaversion="4.90">
+
+  <HashAlgorithms>SHA256</HashAlgorithms>
+
+  <EventFiltering>
+
+    <!-- Event ID 1: Process Creation -->
+    <RuleGroup name="ProcessCreate" groupRelation="or">
+      <ProcessCreate onmatch="include">
+        <!-- Catch any child process spawned by the beacon -->
+        <Image condition="is">cmd.exe</Image>
+        <Image condition="is">powershell.exe</Image>
+        <Image condition="is">pwsh.exe</Image>
+        <Image condition="is">conhost.exe</Image>
+        <Image condition="is">whoami.exe</Image>
+        <Image condition="is">net.exe</Image>
+        <Image condition="is">net1.exe</Image>
+        <Image condition="is">ipconfig.exe</Image>
+        <Image condition="is">systeminfo.exe</Image>
+        <Image condition="is">tasklist.exe</Image>
+        <Image condition="is">rundll32.exe</Image>
+        <Image condition="is">regsvr32.exe</Image>
+        <Image condition="is">mshta.exe</Image>
+        <Image condition="is">wmic.exe</Image>
+        <Image condition="is">cscript.exe</Image>
+        <Image condition="is">wscript.exe</Image>
+        <Image condition="is">certutil.exe</Image>
+        <Image condition="is">bitsadmin.exe</Image>
+        <Image condition="is">msbuild.exe</Image>
+        <Image condition="is">installutil.exe</Image>
+        <!-- Catch processes spawned from temp/user dirs -->
+        <Image condition="contains">\AppData\</Image>
+        <Image condition="contains">\Temp\</Image>
+        <Image condition="contains">\ProgramData\</Image>
+      </ProcessCreate>
+    </RuleGroup>
+
+    <!-- Event ID 3: Network Connection -->
+    <RuleGroup name="NetworkConnect" groupRelation="or">
+      <NetworkConnect onmatch="include">
+        <!-- Capture all outbound connections to see beacon callbacks -->
+        <Initiated condition="is">true</Initiated>
+      </NetworkConnect>
+      <NetworkConnect onmatch="exclude">
+        <!-- Reduce noise from system services -->
+        <Image condition="is">C:\Windows\System32\svchost.exe</Image>
+        <Image condition="is">C:\Program Files\Windows Defender\MsMpEng.exe</Image>
+        <Image condition="is">C:\Windows\SystemApps\Microsoft.Windows.Search_cxw5n1h2txywy\SearchApp.exe</Image>
+        <Image condition="is">C:\Windows\System32\RuntimeBroker.exe</Image>
+      </NetworkConnect>
+    </RuleGroup>
+
+    <!-- Event ID 5: Process Terminated -->
+    <RuleGroup name="ProcessTerminate" groupRelation="or">
+      <ProcessTerminate onmatch="include">
+        <!-- Log all process exits to correlate with creation -->
+        <Image condition="contains">\AppData\</Image>
+        <Image condition="contains">\Temp\</Image>
+        <Image condition="is">cmd.exe</Image>
+        <Image condition="is">powershell.exe</Image>
+        <Image condition="is">conhost.exe</Image>
+      </ProcessTerminate>
+    </RuleGroup>
+
+    <!-- Event ID 7: Image Loaded (DLL) -->
+    <RuleGroup name="ImageLoad" groupRelation="or">
+      <ImageLoad onmatch="include">
+        <!-- DLLs loaded from unusual paths -->
+        <ImageLoaded condition="contains">\AppData\</ImageLoaded>
+        <ImageLoaded condition="contains">\Temp\</ImageLoaded>
+        <ImageLoaded condition="contains">\ProgramData\</ImageLoaded>
+        <!-- CLR/dotnet loading (fork-and-run indicator) -->
+        <ImageLoaded condition="contains">clr.dll</ImageLoaded>
+        <ImageLoaded condition="contains">mscoree.dll</ImageLoaded>
+        <ImageLoaded condition="contains">amsi.dll</ImageLoaded>
+        <!-- Interesting DLLs that BOFs might trigger loading -->
+        <ImageLoaded condition="contains">winhttp.dll</ImageLoaded>
+        <ImageLoaded condition="contains">wininet.dll</ImageLoaded>
+        <ImageLoaded condition="contains">samlib.dll</ImageLoaded>
+        <ImageLoaded condition="contains">vaultcli.dll</ImageLoaded>
+        <ImageLoaded condition="contains">wlanapi.dll</ImageLoaded>
+      </ImageLoad>
+    </RuleGroup>
+
+    <!-- Event ID 8: CreateRemoteThread -->
+    <!-- CRITICAL for BOF vs VM comparison. BOFs that inject into other
+         processes will trigger this. Log everything. -->
+    <RuleGroup name="CreateRemoteThread" groupRelation="or">
+      <CreateRemoteThread onmatch="exclude">
+        <!-- Only exclude known OS noise -->
+        <SourceImage condition="is">C:\Windows\System32\csrss.exe</SourceImage>
+        <SourceImage condition="is">C:\Windows\System32\wininit.exe</SourceImage>
+        <SourceImage condition="is">C:\Windows\System32\lsass.exe</SourceImage>
+      </CreateRemoteThread>
+    </RuleGroup>
+
+    <!-- Event ID 10: Process Access -->
+    <!-- CRITICAL. Shows handle opens to other processes. BOFs calling
+         OpenProcess/OpenThread will appear here. -->
+    <RuleGroup name="ProcessAccess" groupRelation="or">
+      <ProcessAccess onmatch="include">
+        <!-- Access to LSASS (credential theft) -->
+        <TargetImage condition="is">C:\Windows\System32\lsass.exe</TargetImage>
+        <!-- Access to CSRSS (token manipulation) -->
+        <TargetImage condition="is">C:\Windows\System32\csrss.exe</TargetImage>
+        <!-- Process access with dangerous rights -->
+        <GrantedAccess condition="is">0x1F0FFF</GrantedAccess>
+        <GrantedAccess condition="is">0x1F1FFF</GrantedAccess>
+        <GrantedAccess condition="is">0x1F3FFF</GrantedAccess>
+        <GrantedAccess condition="is">0x1FFFFF</GrantedAccess>
+        <GrantedAccess condition="is">0x0040</GrantedAccess>
+        <GrantedAccess condition="is">0x0400</GrantedAccess>
+        <GrantedAccess condition="is">0x0010</GrantedAccess>
+        <GrantedAccess condition="is">0x0020</GrantedAccess>
+        <!-- PROCESS_VM_WRITE + PROCESS_VM_READ (DKOM, token steal) -->
+        <GrantedAccess condition="is">0x0038</GrantedAccess>
+        <GrantedAccess condition="is">0x0030</GrantedAccess>
+      </ProcessAccess>
+      <ProcessAccess onmatch="exclude">
+        <SourceImage condition="is">C:\Windows\System32\svchost.exe</SourceImage>
+        <SourceImage condition="is">C:\Windows\System32\lsass.exe</SourceImage>
+        <SourceImage condition="is">C:\Windows\System32\csrss.exe</SourceImage>
+        <SourceImage condition="is">C:\Program Files\Windows Defender\MsMpEng.exe</SourceImage>
+        <SourceImage condition="is">C:\Windows\System32\wbem\WmiPrvSE.exe</SourceImage>
+      </ProcessAccess>
+    </RuleGroup>
+
+    <!-- Event ID 11: File Create -->
+    <RuleGroup name="FileCreate" groupRelation="or">
+      <FileCreate onmatch="include">
+        <!-- Files written to temp/startup/suspicious locations -->
+        <TargetFilename condition="contains">\AppData\Local\Temp\</TargetFilename>
+        <TargetFilename condition="contains">\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\</TargetFilename>
+        <TargetFilename condition="contains">\ProgramData\</TargetFilename>
+        <TargetFilename condition="end with">.exe</TargetFilename>
+        <TargetFilename condition="end with">.dll</TargetFilename>
+        <TargetFilename condition="end with">.ps1</TargetFilename>
+        <TargetFilename condition="end with">.bat</TargetFilename>
+        <TargetFilename condition="end with">.vbs</TargetFilename>
+        <TargetFilename condition="end with">.hta</TargetFilename>
+        <TargetFilename condition="end with">.scr</TargetFilename>
+      </FileCreate>
+    </RuleGroup>
+
+    <!-- Event ID 12/13/14: Registry -->
+    <RuleGroup name="RegistryEvent" groupRelation="or">
+      <RegistryEvent onmatch="include">
+        <!-- Persistence locations -->
+        <TargetObject condition="contains">CurrentVersion\Run</TargetObject>
+        <TargetObject condition="contains">CurrentVersion\RunOnce</TargetObject>
+        <TargetObject condition="contains">\Services\</TargetObject>
+        <TargetObject condition="contains">CurrentVersion\Explorer\Shell Folders</TargetObject>
+        <TargetObject condition="contains">\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders</TargetObject>
+        <!-- COM hijack locations -->
+        <TargetObject condition="contains">\CLSID\</TargetObject>
+        <TargetObject condition="contains">\InprocServer32</TargetObject>
+      </RegistryEvent>
+    </RuleGroup>
+
+    <!-- Event ID 15: FileCreateStreamHash (ADS) -->
+    <RuleGroup name="FileCreateStreamHash" groupRelation="or">
+      <FileCreateStreamHash onmatch="include">
+        <!-- Alternate data streams -->
+        <TargetFilename condition="contains">:</TargetFilename>
+      </FileCreateStreamHash>
+      <FileCreateStreamHash onmatch="exclude">
+        <TargetFilename condition="end with">:Zone.Identifier</TargetFilename>
+      </FileCreateStreamHash>
+    </RuleGroup>
+
+    <!-- Event ID 17/18: Pipe Created/Connected -->
+    <!-- Named pipes are used by C2 frameworks for IPC. Log all. -->
+    <RuleGroup name="PipeEvent" groupRelation="or">
+      <PipeEvent onmatch="exclude">
+        <PipeName condition="is">\wkssvc</PipeName>
+        <PipeName condition="is">\srvsvc</PipeName>
+        <PipeName condition="is">\lsass</PipeName>
+        <PipeName condition="is">\winreg</PipeName>
+      </PipeEvent>
+    </RuleGroup>
+
+    <!-- Event ID 22: DNS Query -->
+    <RuleGroup name="DnsQuery" groupRelation="or">
+      <DnsQuery onmatch="exclude">
+        <!-- Reduce noise, keep beacon DNS lookups -->
+        <Image condition="is">C:\Windows\System32\svchost.exe</Image>
+        <Image condition="is">C:\Program Files\Windows Defender\MsMpEng.exe</Image>
+      </DnsQuery>
+    </RuleGroup>
+
+    <!-- Event ID 25: Process Tampering -->
+    <!-- Detects process hollowing, herpaderping, ghosting. Log all. -->
+    <RuleGroup name="ProcessTampering" groupRelation="or">
+      <ProcessTampering onmatch="include" />
+    </RuleGroup>
+
+    <!-- Event ID 26: File Delete Logged -->
+    <RuleGroup name="FileDeleteDetected" groupRelation="or">
+      <FileDeleteDetected onmatch="include">
+        <TargetFilename condition="end with">.exe</TargetFilename>
+        <TargetFilename condition="end with">.dll</TargetFilename>
+        <TargetFilename condition="contains">\Temp\</TargetFilename>
+      </FileDeleteDetected>
+    </RuleGroup>
+
+  </EventFiltering>
+
+</Sysmon>

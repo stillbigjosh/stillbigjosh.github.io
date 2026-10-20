@@ -434,6 +434,12 @@
             title: 'Loader Evasion: Let the OS Do the Dirty Work',
             kicker: 'Static Evasion . Custom . AV Bypass',
             desc: 'How I made a custom Beacon loader invisible to static analysis by removing all decryption code and delegating cryptographic operations to Windows itself. Four cipher implementations failed and one design change solved everything.'
+          },
+          {
+            file: 'writeups/bof-vs-vm.md',
+            title: 'BOF vs VM Script Execution: What Memory Scanners Actually See',
+            kicker: 'Runtime Evasion . Memory Forensics',
+            desc: 'I ran Moneta, API Monitor, and Sysmon against both BOF and VM script execution on the same beacon. Only one tool could tell the difference. The VM interpreter left zero detectable artifacts across all three tools.'
           }
         ]
       },
