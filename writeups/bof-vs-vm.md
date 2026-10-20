@@ -2,7 +2,7 @@
 title: "BOF vs VM Script Execution: What Memory Scanners Actually See"
 kicker: "Evasion Engineering . Runtime . Memory Forensics"
 tags: "Evasion Engineering . C2 Development . Memory Forensics . BOF . VM Execution"
-lead: "BOFs and VM scripts both run post-exploitation tasks inside the agent process. They solve the same problem but create different detection surfaces. I ran Moneta, API Monitor, and Sysmon against both execution methods on the same beacon. Only one tool could tell the difference."
+lead: "BOFs and VM scripts both run post-exploitation tasks inside the agent process. They solve the same problem but leave different footprints in memory. This post breaks down what each execution model actually does at the memory level and which one survives inspection."
 ---
 
 > This is the second post in the Evasion Engineering series. The first post covered static evasion for the Beacon loader. This post covers runtime evasion: what happens in memory when the beacon executes a task, and how different execution models create different detection surfaces.
