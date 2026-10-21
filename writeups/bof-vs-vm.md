@@ -13,6 +13,10 @@ lead: "BOFs and VM scripts both run post-exploitation tasks inside the agent pro
 
 ## Background: Two Execution Models
 
+Post-exploitation is moving away from native code execution. Cobalt Strike shipped a C VM for in-beacon scripting. Havoc introduced FireBeam. The C2 used in this post (Phantom) runs a custom RISC bytecode interpreter. The pattern is the same across all of them: replace executable memory allocations with a data buffer and an interpreter loop. BOFs load COFF objects into private RX memory that memory scanners are purpose-built to find. VM scripts execute the same tasks through PAGE_READWRITE heap buffers where the bytecode never becomes executable code.
+
+This post compares both execution models side by side on the same beacon with the same forensic tools to show what each one actually leaves behind in memory.
+
 ### BOF Execution (COFF Loader)
 
 A BOF as you may well know is a compiled COFF object file. The agent's COFF loader allocates executable memory, maps the `.text` and `.data` sections, applies relocations, resolves imports, and calls the entry point. The BOF runs as native x86-64 code inside the agent process. After execution, the loader frees the mapped memory.
