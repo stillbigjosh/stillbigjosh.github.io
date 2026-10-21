@@ -135,6 +135,8 @@ Open API Monitor (x64). Set API filters before attaching to the beacon process:
 
 ### Deploy Beacon
 
+![Beacon checked in](writeups/images/bof-vs-vm/beacon-checkin.png)
+
 Deployed an agent(Eclipse) with the settings above. Let it check in and I note the PID from the operator C2 console. Right-clicked the beacon process in the Running Processes pane and selected Start Monitoring.
 
 ![Beacon process in API Monitor](writeups/images/bof-vs-vm/api-monitor-attach-1.png)
@@ -146,10 +148,6 @@ Deployed an agent(Eclipse) with the settings above. Let it check in and I note t
 ## Phase 1: Baseline (No Tasking)
 
 Each tool was attached to the beacon process independently, not started at the same time. Moneta and API Monitor were pointed at the process after it checked in. Sysmon had been logging system-wide since install, so its baseline already contains prior agent activity (network callbacks, image loads from startup). The baseline for each tool is the state of that tool's output before any BOF or VM script was tasked. Differences between phases are what matter, not the absolute content of any single screenshot.
-
-Beaco checked in: 
-
-![Beacon checked in](writeups/images/bof-vs-vm/beacon-checkin.png)
 
 ### Moneta Baseline
 
