@@ -13,5 +13,6 @@
   <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/adaptix-graph-c2.md</loc></url>
   <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/red-team-workflow.md</loc></url>
   <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/kube-reaper-owasp.md</loc></url>
-  <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/Floader-evasion.md</loc></url>
+  <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/loader-evasion.md</loc></url>
+  <url><loc>https://stillbigjosh.com/writeup.html?file=writeups/bof-vs-vm.md</loc></url>  
 </urlset>
