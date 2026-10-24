@@ -531,4 +531,4 @@ A quick-reference summary of every change covered in this article. Use this as a
 
 ---
 
-**Previous:** [Part 1: Adaptix C2 Setup](writeup.html?file=writeups/adaptix-setup.md) | **Next:** [Part 3: Beacon Source Modifications](writeup.html?file=writeups/adaptix-beacon-mods.md)
+**Previous:** [Part 1: Adaptix C2 Setup](writeup.html?file=writeups/adaptix-setup.md) | **Next:** [Part 3: Cloud Dead-Drop with Azure Blob Storage](writeup.html?file=writeups/adaptix-graph-c2.md)
