@@ -369,4 +369,4 @@ To remove the plugin and reverse all source tree modifications:
 
 ---
 
-**Previous:** [Part 3: Beacon Source Modifications](writeup.html?file=writeups/adaptix-beacon-mods.md)
+**Previous:** [Part 2: Reducing Infrastructure and Agent Fingerprints](writeup.html?file=writeups/adaptix-hardening.md)
