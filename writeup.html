@@ -13,9 +13,13 @@
 <meta name="twitter:title" content="">
 <meta name="twitter:description" content="">
 <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" crossorigin="anonymous">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+(function(){var p=new URLSearchParams(window.location.search);var f=p.get('file')||'writeups/goad-writeup.md';window.__mdFetch=fetch(f).then(function(r){return r.ok?r.text():Promise.reject('not found')});})();
+</script>
 <style>
   /* ── Reset & Base (matches main site) ────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -652,6 +656,31 @@
     margin-right: 4px;
   }
 
+  /* ── Loading skeleton ─────────────────────────────────────────── */
+  .skeleton { display: flex; flex-direction: column; gap: 14px; padding: 32px 0; }
+  .sk-line {
+    height: 14px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--card) 25%, var(--card-hover) 50%, var(--card) 75%);
+    background-size: 200% 100%;
+    animation: sk-shimmer 1.4s ease-in-out infinite;
+  }
+  .sk-block {
+    height: 80px;
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, var(--card) 25%, var(--card-hover) 50%, var(--card) 75%);
+    background-size: 200% 100%;
+    animation: sk-shimmer 1.4s ease-in-out infinite;
+  }
+  .sk-w60 { width: 60%; }
+  .sk-w70 { width: 70%; }
+  .sk-w80 { width: 80%; }
+  .sk-w90 { width: 90%; }
+  @keyframes sk-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
   /* ── Responsive ──────────────────────────────────────────────── */
   @media (max-width: 1200px) {
     .layout { grid-template-columns: var(--sidebar-width) 1fr; }
@@ -742,7 +771,18 @@
         <div class="share-bar" id="share-bar"></div>
       </header>
 
-      <div class="content" id="content"></div>
+      <div class="content" id="content">
+        <div class="skeleton" id="skeleton" aria-hidden="true">
+          <div class="sk-line sk-w60"></div>
+          <div class="sk-line sk-w90"></div>
+          <div class="sk-line sk-w80"></div>
+          <div class="sk-line sk-w70"></div>
+          <div class="sk-block"></div>
+          <div class="sk-line sk-w90"></div>
+          <div class="sk-line sk-w60"></div>
+          <div class="sk-line sk-w80"></div>
+        </div>
+      </div>
 
       <footer class="footer">
         stillbigjosh &copy; 2026 &middot; built with purpose
@@ -754,7 +794,7 @@
 
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" crossorigin="anonymous"></script>
   <script>
     // ── Writeup registry ──────────────────────────────────────────
     // Groups define sidebar series folders. Ungrouped items appear at top level.
@@ -917,6 +957,12 @@
       function postProcess(html) {
         var div = document.createElement('div');
         div.innerHTML = html;
+
+        // images -> lazy load
+        div.querySelectorAll('img').forEach(function (img) {
+          img.setAttribute('loading', 'lazy');
+          img.setAttribute('decoding', 'async');
+        });
 
         // h2 -> prepend the "##" tag prefix
         div.querySelectorAll('h2').forEach(function (h) {
@@ -1169,11 +1215,10 @@
         return;
       }
 
-      fetch(file)
-        .then(function (res) {
+      (window.__mdFetch || fetch(file).then(function (res) {
           if (!res.ok) throw new Error('not found');
           return res.text();
-        })
+        }))
         .then(function (raw) {
           var parsed = parseFrontmatter(raw);
           render(parsed.meta, parsed.body);
