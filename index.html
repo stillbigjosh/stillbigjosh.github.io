@@ -14,6 +14,7 @@
 <body>
 
   <button class="sb-toggle" id="sb-toggle" aria-label="Toggle sidebar">&#9776;</button>
+  <button class="sr-toggle" id="sr-toggle" aria-label="Toggle right sidebar">&#9881;</button>
   <div class="sb-overlay" id="sb-overlay"></div>
 
   <div class="app-layout">
@@ -366,14 +367,24 @@
     // Mobile sidebar toggle
     (function () {
       const toggle = document.getElementById('sb-toggle');
+      const srToggle = document.getElementById('sr-toggle');
       const sidebar = document.getElementById('sidebar');
+      const sidebarRight = document.getElementById('sidebar-right');
       const overlay = document.getElementById('sb-overlay');
-      function open() { sidebar.classList.add('open'); overlay.classList.add('open'); }
-      function close() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+      function closeAll() {
+        sidebar.classList.remove('open');
+        sidebarRight.classList.remove('open');
+        overlay.classList.remove('open');
+      }
       toggle.addEventListener('click', function () {
-        sidebar.classList.contains('open') ? close() : open();
+        if (sidebar.classList.contains('open')) { closeAll(); }
+        else { closeAll(); sidebar.classList.add('open'); overlay.classList.add('open'); }
       });
-      overlay.addEventListener('click', close);
+      srToggle.addEventListener('click', function () {
+        if (sidebarRight.classList.contains('open')) { closeAll(); }
+        else { closeAll(); sidebarRight.classList.add('open'); overlay.classList.add('open'); }
+      });
+      overlay.addEventListener('click', closeAll);
     })();
   </script>
 
