@@ -440,6 +440,12 @@
             title: 'BOF vs VM Script Execution: What Memory Scanners Actually See',
             kicker: 'Runtime Evasion . Memory Forensics',
             desc: 'BOFs and VM scripts both run post-exploitation tasks inside the agent process. They solve the same problem but leave different footprints in memory. This post breaks down what each execution model actually does at the memory level and which one survives inspection.'
+          },
+          {
+            file: 'writeups/hazybeacon-emulation.md',
+            title: 'Emulating HazyBeacon (CL-STA-1020) with Serverless Functions',
+            kicker: 'APT Emulation . Serverless Infrastructure . AWS Lambda',
+            desc: 'Full adversary emulation of HazyBeacon (CL-STA-1020), a state-backed campaign running command-and-control on serverless cloud functions. Replicates the Trellix OneClik infection chain: ClickOnce delivery, in-memory shellcode execution, and Lambda + CloudFront relay. Every TTP grounded in published threat intelligence.'
           }
         ]
       },
