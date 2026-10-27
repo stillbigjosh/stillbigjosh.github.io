@@ -669,11 +669,7 @@ ipconfig
 whoami
 ```
 
-In Elastic, verify the outbound traffic pattern:
-
-```
-destination.domain:*cloudfront.net AND source.ip:"10.1.10.22"
-```
+You can verify the traffic pattern on WireShark:
 
 The traffic should appear as normal HTTPS to a CloudFront domain. No alerts should fire on the C2 channel itself. This is the point: the C2 channel is invisible to network-based detection.
 
@@ -773,15 +769,6 @@ ldapsearch (objectClass=computer) -a sAMAccountName,operatingSystem,dNSHostName,
 
 # Enumerate groups
 ldapsearch (objectClass=group) -a sAMAccountName,member
-
-# Find delegation targets
-ldapsearch (msDS-AllowedToDelegateTo=*) -a sAMAccountName,msDS-AllowedToDelegateTo,userAccountControl
-
-# Find AS-REP roastable accounts
-ldapsearch "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))"
-
-# Find kerberoastable accounts
-ldapsearch (servicePrincipalName=*) -a sAMAccountName,servicePrincipalName,pwdLastSet,lastLogon
 ```
 
 ### 9.3 - Network Scanning
