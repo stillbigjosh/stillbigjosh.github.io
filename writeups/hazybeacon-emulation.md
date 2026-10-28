@@ -46,7 +46,7 @@ This is the complete ATT&CK mapping for HazyBeacon, cross-referenced across all 
 
 This mapping covers the Trellix OneClik infection chain emulated in this writeup: Initial Access, Loader Execution, Shellcode Stage, and C2 Beacon.
 
-| ID | Technique | OneClik / HazyBeacon Implementation | Phantom C2 Emulation |
+| ID | Technique | OneClik / HazyBeacon Implementation | Phantom/Adaptix C2 Emulation |
 |----|-----------|--------------------------------------|----------------------|
 | **T1566.002** | Phishing: Spearphishing Link | Email with link to fake hardware analysis site on Azure, delivers ClickOnce manifest | ClickOnce deployment hosted on operator machine, delivered via URL to target |
 | **T1204.002** | User Execution: Malicious File | User clicks ClickOnce install link, dfsvc.exe deploys the .NET application | User clicks Install on ClickOnce publish page, dfsvc.exe deploys UpdateHelper.exe |
