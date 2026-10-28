@@ -1,5 +1,5 @@
 ---
-title: "Emulating HazyBeacon (CL-STA-1020) with Serverless Functions"
+title: "Adversary Emulation of a state-backed APT (CL-STA-1020) with Serverless Functions"
 kicker: "Evasion Engineering . Adversary Emulation . Serverless Infrastructure"
 tags: "Evasion Engineering . APT Emulation . Serverless . AWS Lambda . CloudFront"
 lead: "Full adversary emulation of HazyBeacon (CL-STA-1020), a state-backed campaign that runs its entire command-and-control on serverless cloud functions. Every TTP is grounded in published threat intelligence and replicated in a Windows AD lab."
