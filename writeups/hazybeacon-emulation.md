@@ -125,7 +125,7 @@ Target Host                         Phantom C2 Infrastructure
 
 ### Side-by-Side Mapping
 
-| OneClik / HazyBeacon Component | Phantom C2 Equivalent | Match Fidelity |
+| OneClik / HazyBeacon Component | Phantom / Adaptix Severless C2 Equivalent | Match Fidelity |
 |-------------------------------|----------------------|----------------|
 | ClickOnce delivery via phishing | ClickOnce .NET dropper with embedded Eclipse shellcode | Exact. Same delivery mechanism, same user interaction model. |
 | dfsvc.exe ClickOnce host process | dfsvc.exe launches UpdateHelper.exe | Exact. Same process chain. |
@@ -136,7 +136,7 @@ Target Host                         Phantom C2 Infrastructure
 | AES-128-CBC + RC4 wire encryption | AES-128-GCM wire encryption | High. Both use AES-based wire encryption for all agent-teamserver communication. |
 | Anti-debugging / sandbox detection | Eclipse guardrails (environment checks) | High. Both check execution environment before running. |
 
-**The critical insight:** Phantom C2's Lambda relay architecture IS the same C2 channel used by the Threat actor. Both use AWS Lambda Function URLs with HTTPS, CloudFront CDN fronting, and serverless compute for stateless relay. A network defender looking at Phantom traffic sees exactly what they would see from HazyBeacon.
+**The critical insight:** Phantom C2/Adaptix Severless C2's Lambda relay architecture IS the same C2 channel used by the Threat actor. Both use AWS Lambda Function URLs with HTTPS, CloudFront CDN fronting, and serverless compute for stateless relay. A network defender looking at Phantom traffic sees exactly what they would see from HazyBeacon.
 
 ---
 
