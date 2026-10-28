@@ -227,7 +227,7 @@ Block `*.elastic.co` at the DNS level on the router in order to stop Elastic fro
 
 ### Deploy Phantom C2 on AWS with CloudFront
 
-This is the foundation of the entire emulation. Phantom's Lambda relay + CloudFront CDN architecture is a 1:1 match for HazyBeacon's C2 infrastructure.
+This is the foundation of the entire emulation. Phantom C2 or Adaptix Severless C2 plugin's Lambda relay + CloudFront CDN architecture is a 1:1 match for HazyBeacon's C2 infrastructure.
 
 From the operator machine, using the `phantom-deploy` repository:
 
@@ -237,6 +237,10 @@ cd ~/Downloads/phantom-deploy
 # Deploy with CloudFront CDN enabled
 sudo ./deploy.sh --dist ~/Downloads/phantom-c2-dist -p <team-password> --cloudfront
 ```
+
+> [!NOTE]
+> **Adaptix alternative:** If you are using the [adaptix-serverless-c2](https://github.com/stillbigjosh/adaptix-serverless-c2) plugin, deploy with `./deploy.sh --dist <adaptix-dist> --cloudfront` following the plugin README. The resulting infrastructure (Lambda + CloudFront + DynamoDB) is identical.
+
 
 ![Phantom deploy with CloudFront](writeups/images/hazybeacon-emulation/phantom-deploy-cloudfront.png)
 
@@ -251,9 +255,6 @@ After deployment, we noted its outputs:
 - CloudFront domain (this is what agents connect to) e.g., d1234abcdef.cloudfront.net
 
 - Lambda Function URL (hidden behind CloudFront, for verification only) e.g., xyz123.lambda-url.us-east-1.on.aws
-
-> [!NOTE]
-> **Adaptix alternative:** If you are using the [adaptix-serverless-c2](https://github.com/stillbigjosh/adaptix-serverless-c2) plugin, deploy with `./deploy.sh --dist <adaptix-dist> --cloudfront` following the plugin README. The resulting infrastructure (Lambda + CloudFront + DynamoDB) is identical.
 
 ### Verify CloudFront Relay
 
