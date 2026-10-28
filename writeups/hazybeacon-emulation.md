@@ -413,7 +413,7 @@ namespace UpdateHelper
 
 ![Dropper code in Visual Studio](writeups/images/hazybeacon-emulation/dropper-code.png)
 
-> **Important:** In Project > Properties > Build, uncheck **"Prefer 32-bit"** (or set Platform target to **x64**). Eclipse shellcode is x64 and will crash silently in a 32-bit process. **To set as x64**: Project > Properties > Build tab, uncheck “Prefer 32-bit”. Or change Platform target to x64.
+> **Important:** In Project > Properties > Build, uncheck **"Prefer 32-bit"** (or set Platform target to **x64**). If your shellcode is x64, it will crash silently in a 32-bit process. **To set as x64**: Project > Properties > Build tab, uncheck “Prefer 32-bit”. Or change your shellcode target to x64.
 
 This dropper reads `eclipse.bin` from the embedded resource (no file drop to disk), allocates RW memory, copies the shellcode, flips to RX, and runs Eclipse in a background thread. The decoy form shows for 8 seconds then closes, but the process stays alive silently so Eclipse keeps beaconing. The shellcode never touches disk.
 
