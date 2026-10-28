@@ -749,7 +749,7 @@ When Eclipse spawns a child process for fork-and-run operations (execute-assembl
 > **Emulates:** HazyBeacon's intelligence gathering on the target network
 > **ATT&CK:** T1087.002, T1069.002, T1046, T1482, T1135
 
-### 9.1 - Host Enumeration
+### Host Enumeration
 
 ```
 systeminfo
