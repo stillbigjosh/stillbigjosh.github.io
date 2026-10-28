@@ -239,7 +239,7 @@ sudo ./deploy.sh --dist ~/Downloads/phantom-c2-dist -p <team-password> --cloudfr
 ```
 
 > [!NOTE]
-> **Adaptix alternative:** If you are using the [adaptix-serverless-c2](https://github.com/stillbigjosh/adaptix-serverless-c2) plugin, deploy with `./deploy.sh --dist <adaptix-dist> --cloudfront` following the plugin README. The resulting infrastructure (Lambda + CloudFront + DynamoDB) is identical.
+> **Adaptix alternative:** If you are using the [adaptix-serverless-c2](https://github.com/stillbigjosh/adaptix-serverless-c2) plugin, deploy with `./scripts/install.sh /path/to/AdaptixC2` following the plugin README. The resulting infrastructure (Lambda + CloudFront + DynamoDB) is identical.
 
 
 ![Phantom deploy with CloudFront](writeups/images/hazybeacon-emulation/phantom-deploy-cloudfront.png)
