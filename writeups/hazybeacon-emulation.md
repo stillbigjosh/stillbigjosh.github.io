@@ -26,7 +26,7 @@ lead: "Full adversary emulation of HazyBeacon (CL-STA-1020), a state-backed camp
 
 ![HazyBeacon Overview](writeups/images/hazybeacon-emulation/hazybeacon-overview.png)
 
-The threat actor's entire command-and-control infrastructure runs on serverless cloud functions (AWS Lambda), with traffic flowing through globally trusted cloud domains. This is just any C2 traffic that touches cloud infrastructure. The C2 server is the cloud infrastructure. Network defenders see HTTPS calls to `*.lambda-url.ap-southeast-1.on.aws` and `*.cloudfront.net`, domains that are allowlisted in virtually every enterprise environment.
+The threat actor's entire command-and-control infrastructure runs on serverless cloud functions (AWS Lambda), with traffic flowing through globally trusted cloud domains. The C2 server is the cloud infrastructure. Network defenders see HTTPS calls to `*.lambda-url.ap-southeast-1.on.aws` and `*.cloudfront.net`, domains that are allowlisted in almost every enterprise environment.
 
 The campaign uses these core techniques:
 
