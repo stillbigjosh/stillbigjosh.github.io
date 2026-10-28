@@ -98,7 +98,7 @@ Target Host                         Threat Actor Infrastructure
                                     +-------------------+
 ```
 
-### Phantom C2 Architecture
+### Phantom C2 / Adaptix Severless C2 Architecture 
 
 ```
 Target Host                         Phantom C2 Infrastructure
