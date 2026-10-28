@@ -42,7 +42,7 @@ The campaign uses these core techniques:
 
 ## 2 - MITRE ATT&CK Mapping
 
-This is the complete ATT&CK mapping for HazyBeacon, cross-referenced across all three research sources. The "Phantom Emulation" column shows how each TTP is replicated.
+This is the complete ATT&CK mapping for HazyBeacon, cross-referenced across all three research sources. The "Phantom/Adaptix Emulation" column shows how each TTP is replicated.
 
 This mapping covers the Trellix OneClik infection chain emulated in this writeup: Initial Access, Loader Execution, Shellcode Stage, and C2 Beacon.
 
@@ -67,7 +67,7 @@ This mapping covers the Trellix OneClik infection chain emulated in this writeup
 
 This is why Phantom C2 is uniquely suited for this emulation. The architectures are structurally identical.
 
-> Phantom is a custom Serverless command-and-control framework built to mirror how modern red teaming operations are conducted, separating the attack surface from the operator. 
+> [Phantom](https://github.com/phantom-framework) is a custom Serverless command-and-control framework built to mirror how modern red teaming operations are conducted, separating the attack surface from the operator. 
 > With native support for AWS, Azure, and GCP. Agents communicate exclusively with serverless cloud functions that relay encrypted data through managed databases. 
 > The teamserver polls the database from your internal network. No listening ports, no static infrastructure, no single point of failure.
 > For air-gapped, on-prem, and classified environments, a standalone Phantom Listener replaces cloud infrastructure. Which runs separate from the Teamserver.
