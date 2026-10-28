@@ -725,15 +725,15 @@ All Nt* API calls route through `ntdll.dll` instruction addresses with a spoofed
 
 When executing commands that spawn child processes, spoof both the command-line arguments and the parent PID to blend into normal process trees:
 
-First, find a legitimate svchost.exe PID to use as parent process list. Look for svchost.exe processes. Pick one running as SYSTEM.
+First, find a legitimate process e.g svchost.exe PID to use as parent process list.
 
 ```
-config ppid 808
-config spoofarg "C:\Windows\System32\RuntimeBroker.exe -ServerName:RuntimeBroker.9E3C9A38"
+config ppid <pid>
+config spoofarg <Fake command line arguments>
 ```
 
 - `ppid 808`: Any child process Eclipse spawns (via `shell`, `process create`, or fork-and-run) will appear to have `svchost.exe` (PID 808) as its parent instead of the ClickOnce host process. This breaks process-tree-based detection heuristics.
-- `spoofarg`: The child process PEB shows `RuntimeBroker.exe` as the command line, even though the actual process is different. Tools that read the PEB (like Process Explorer, Task Manager, and most EDR agents) see the spoofed arguments.
+- `spoofarg`: The child process PEB shows your spoofed arguments as the command line, even though the actual process is different. Tools that read the PEB (like Process Explorer, Task Manager, and most EDR agents) see the spoofed arguments.
 
 ### DLL Blocking in Child Processes
 
