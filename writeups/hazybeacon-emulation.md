@@ -324,9 +324,10 @@ The OneClik campaign additionally used `ZSATray.exe` (Zscaler), `umt.exe` (Citri
 
 Eclipse is the default WIndows agent of Phantom C2, this Windows agent is heavily inspired by Kharon Agent of Adaptix, but much more evasive and feature rich. 
 
-Generate Eclipse as raw PIC shellcode (`.bin`) for embedding in the ClickOnce dropper.
+We generated Eclipse as raw PIC shellcode (`.bin`) for embedding in the ClickOnce dropper.
 
-**Web UI method:**
+> Alternatively, to replicate this step, you could use Adaptix default shellcode or the Kharon Agent from my previous writeups. 
+
 1. Navigate to **Payloads > Generate**
 2. Select agent: **Eclipse**
 3. Format: **bin** (raw PIC shellcode)
@@ -353,7 +354,7 @@ In Visual Studio, create a **Windows Forms App (.NET Framework)** project. Name 
 Add the Eclipse shellcode as an embedded resource:
 1. In Solution Explorer, expand **Properties** and double-click **Resources.resx** (the green icon file)
 2. In the resource editor, click **Add Resource > Add Existing File...**
-3. Browse to and select `eclipse.bin`
+3. Browse to and select your shellcode, for our example we are using `eclipse.bin`
 4. It appears in the resource list as `eclipse`, accessible via `Properties.Resources.eclipse`
 
 ![Eclipse shellcode as embedded resource](writeups/images/hazybeacon-emulation/eclipse-resource.png)
