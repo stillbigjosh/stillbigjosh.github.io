@@ -136,7 +136,7 @@ Target Host                         Phantom C2 Infrastructure
 | AES-128-CBC + RC4 wire encryption | AES-128-GCM wire encryption | High. Both use AES-based wire encryption for all agent-teamserver communication. |
 | Anti-debugging / sandbox detection | Eclipse guardrails (environment checks) | High. Both check execution environment before running. |
 
-**The critical insight:** Phantom C2/Adaptix Severless C2's Lambda relay architecture IS the same C2 channel used by the Threat actor. Both use AWS Lambda Function URLs with HTTPS, CloudFront CDN fronting, and serverless compute for stateless relay. A network defender looking at Phantom traffic sees exactly what they would see from HazyBeacon.
+**Noteworthy:** Phantom C2/Adaptix Severless C2's Lambda relay architecture IS the same C2 channel used by the Threat actor. Both use AWS Lambda Function URLs with HTTPS, CloudFront CDN fronting, and serverless compute for stateless relay. A network defender looking at Phantom traffic sees exactly what they would see from HazyBeacon.
 
 ---
 
@@ -195,7 +195,7 @@ Before starting the emulation:
 2. Elastic stack deployed with agents on all Windows hosts
 3. Elastic Defend + Windows integration + Sysmon enabled
 4. Detection rules enabled in Kibana (relevant ATT&CK techniques)
-5. Phantom C2 or Adapix Severless C2 plugin deployed on AWS with `--cloudfront` flag
+5. Phantom C2 or Adapix Severless C2 plugin deployed on AWS 
 6. WireGuard tunnel active from operator machine to the lab network
 7. Callback rules configured to allow lab VMs to reach the internet (CloudFront)
 8. Snapshot taken before emulation (e.g. `ludus --user $LAB_USER snapshots create pre-hazybeacon-emulation`)
