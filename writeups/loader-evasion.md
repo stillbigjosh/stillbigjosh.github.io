@@ -2,18 +2,18 @@
 title: "Loader Evasion: Let the OS Do the Dirty Work"
 kicker: "Evasion Engineering . Custom . Static Evasion"
 tags: "Evasion Engineering . C2 Development . AV Bypass . Static Analysis"
-lead: "How I made a custom Beacon loader invisible to static analysis by removing all decryption code from the binary and delegating cryptographic operations to Windows itself. Four cipher implementations failed. One design change solved everything."
+lead: "How I made a Beacon loader invisible to static analysis by removing all decryption code from the binary and delegating cryptographic operations to Windows itself. Four cipher implementations failed. One design decision solved everything."
 ---
 
-> This is the first post in the Evasion Engineering series. Each post covers a specific evasion problem encountered while experimenting in a homelab, the failed approaches, and the solution that worked. This post covers static evasion for the Beacon loader component.
->
-> The Beacon loader is the wrapper binary that carries an encrypted beacon (the actual implant), decrypts it in memory, and runs it. Everything here is about making that wrapper invisible to antivirus so the beacon can reach memory and execute.
+> This is the first part of the Evasion Engineering series. Each post covers a specific evasion, problems encountered while experimenting in a homelab or in the field, the failed approaches, and solutions that worked.
+
+This post covers static evasion for the loader component of an heavily signatured open-source PIC beacon. The Beacon loader is the wrapper binary that carries the encrypted PIC beacon (the actual implant), decrypts it in memory, and runs it. Everything here is about making that wrapper invisible to antivirus so the beacon can reach memory and execute.
 
 ---
 
 ## The Build Pipeline
 
-The pipeline has three phases. The compiler turns beacon source code into a PE executable, then rips out the `.text` section as raw position-independent shellcode. A Go generator encrypts that shellcode with a random key and embeds both the ciphertext and the key into a fresh C++ loader source file. The compiler turns the loader into the final payload (exe, dll, or service binary), then a post-build step strips metadata from the output.
+The existing pipeline of the beacon build process has three phases. The compiler turns beacon source code into a PE executable, then rips out the `.text` section as raw position-independent shellcode. A Go generator encrypts that shellcode with a random key and embeds both the ciphertext and the key into a fresh C++ loader source file. The compiler turns the loader into the final payload (exe, dll, or service binary), then a post-build step strips metadata from the output.
 
 The beacon never exists in plaintext on disk. The loader carries it encrypted, decrypts it at runtime, and jumps to it.
 
