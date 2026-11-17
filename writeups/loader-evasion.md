@@ -1,7 +1,7 @@
 ---
 title: "Loader Evasion: Let the OS Do the Dirty Work"
 kicker: "Evasion Engineering . Custom . Static Evasion"
-tags: "Evasion Engineering . C2 Development . AV Bypass . Static Analysis"
+tags: "Evasion Engineering . Development . AV Bypass . Static Analysis"
 lead: "How I made a Beacon loader invisible to static analysis by removing all decryption code from the binary and delegating cryptographic operations to Windows itself."
 ---
 
