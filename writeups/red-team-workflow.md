@@ -1375,7 +1375,11 @@ invoke scshell <target> <service_name> <command>
 
 **Elastic Queries - Detect SCShell:**
 
-No prebuilt rule specifically detects SCShell. The detection relies on registry modification of service ImagePath:
+```
+rule.name:"Potential Privilege Escalation via Service ImagePath Modification"
+```
+
+The detection relies on registry modification of service ImagePath:
 
 ```
 event.code:"13" AND winlog.event_data.TargetObject:*Services* AND winlog.event_data.TargetObject:*ImagePath* AND NOT winlog.event_data.Image:(*svchost.exe* OR *services.exe* OR *TrustedInstaller.exe*)
