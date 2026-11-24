@@ -290,9 +290,11 @@ tls:
     - "TLS_RSA_WITH_AES_128_GCM_SHA256"
 ```
 
-IIS defaults to `prefer_server_cipher_suites: true` (Windows calls this "server cipher suite order" in Group Policy), prefers ECDSA over RSA variants, and still includes the non-ECDHE RSA suites for backward compatibility. The key difference from the Adaptix default is the cipher ordering and the server-side preference enforcement.
+IIS defaults to `prefer_server_cipher_suites: true`
 
 The workflow: change the TLS block in your profile, restart the Adaptix service, JARM scan yourself, compare the hash against known signatures, and iterate until the result is clean. This is a profile-level change that takes effect on the next restart with no rebuilding required.
+
+The Go TLS JARM while scanning Adaptix on its default port `4321` was found to be `29d29d00000000000043d43d00043dc3b2afa8a5ec09b510a8559aff7899fb` 
 
 > Note that an exact IIS JARM match is not guaranteed through profile changes alone, because the underlying Go TLS library (crypto/tls) may handle certain probe edge cases differently than Windows SChannel. If the hash is still identifiable after tuning the profile, use one of the approaches below.
 
@@ -302,7 +304,7 @@ If profile-level tuning does not produce a clean hash, an actual IIS instance ru
 
 ### Use a CDN or Cloud Load Balancer
 
-If your C2 server sits behind Cloudflare, AWS ALB, or a similar service, the JARM scan fingerprints the CDN's TLS stack. This is the strongest mitigation because CDN JARM hashes are shared by millions of legitimate domains.
+If your C2 server sits behind Cloudflare, or a similar service, the JARM scan fingerprints the CDN's TLS stack. This is the strongest mitigation because CDN JARM hashes are shared by millions of legitimate domains.
 
 The principle is the same as every other section in this article: your infrastructure should look like everything else on the internet, not like a C2 framework.
 
